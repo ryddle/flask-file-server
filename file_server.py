@@ -1,7 +1,9 @@
-from flask import Flask, make_response, request, session, render_template, send_file, Response
+from flask import Flask, make_response, request, redirect, session, render_template, send_file, Response, url_for
 from flask.views import MethodView
-from werkzeug import secure_filename
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
 from datetime import datetime
+import shutil
 import humanize
 import os
 import re
@@ -12,7 +14,8 @@ import sys
 from pathlib2 import Path
 
 app = Flask(__name__, static_url_path='/assets', static_folder='assets')
-root = os.path.normpath("/tmp")
+root = os.path.normpath("D:/Desarrollo/projects/python/flask-file-server/filestore")
+ytad_url = "http://localhost:3001"
 key = ""
 
 ignored = ['.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
@@ -88,7 +91,7 @@ def partial_response(path, start, end=None):
 
 def get_range(request):
     range = request.headers.get('Range')
-    m = re.match('bytes=(?P<start>\d+)-(?P<end>\d+)?', range)
+    m = re.match(r'bytes=(?P<start>\d+)-(?P<end>\d+)?', range)
     if m:
         start = m.group('start')
         end = m.group('end')
@@ -104,7 +107,7 @@ class PathView(MethodView):
         hide_dotfile = request.args.get('hide-dotfile', request.cookies.get('hide-dotfile', 'no'))
 
         path = os.path.join(root, p)
-
+        path = os.path.normpath(path)
         if os.path.isdir(path):
             contents = []
             total = {'size': 0, 'dir': 0, 'file': 0}
@@ -125,7 +128,7 @@ class PathView(MethodView):
                 info['size'] = sz
                 total['size'] += sz
                 contents.append(info)
-            page = render_template('index.html', path=p, contents=contents, total=total, hide_dotfile=hide_dotfile)
+            page = render_template('index.html', path=p, dir_path=path, contents=contents, total=total, ytad_url=ytad_url, hide_dotfile=hide_dotfile)
             res = make_response(page, 200)
             res.set_cookie('hide-dotfile', hide_dotfile, max_age=16070400)
         elif os.path.isfile(path):
@@ -171,28 +174,44 @@ class PathView(MethodView):
         return res
 
     def post(self, p=''):
+        res = None
         if request.cookies.get('auth_cookie') == key:
             path = os.path.join(root, p)
             Path(path).mkdir(parents=True, exist_ok=True)
 
             info = {}
-            if os.path.isdir(path):
-                files = request.files.getlist('files[]')
-                for file in files:
+            if request.path == '/newfolder':
+                path = os.path.join(path, request.form['path'])
+                path = os.path.normpath(path)
+                if os.path.isdir(path):
                     try:
-                        filename = secure_filename(file.filename)
-                        file.save(os.path.join(path, filename))
+                        newpath = os.path.join(path, request.form['foldername'].strip())
+                        newpath = os.path.normpath(newpath)
+                        os.mkdir(newpath)
+                        dir_path = newpath[len(root)+1:]
+                        dir_path = dir_path.replace('\\', '/')
                     except Exception as e:
                         info['status'] = 'error'
                         info['msg'] = str(e)
-                    else:
-                        info['status'] = 'success'
-                        info['msg'] = 'File Saved'
+                    return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
             else:
-                info['status'] = 'error'
-                info['msg'] = 'Invalid Operation'
-            res = make_response(json.JSONEncoder().encode(info), 200)
-            res.headers.add('Content-type', 'application/json')
+                if os.path.isdir(path):
+                    files = request.files.getlist('files[]')
+                    for file in files:
+                        try:
+                            filename = secure_filename(file.filename)
+                            file.save(os.path.join(path, filename))
+                        except Exception as e:
+                            info['status'] = 'error'
+                            info['msg'] = str(e)
+                        else:
+                            info['status'] = 'success'
+                            info['msg'] = 'File Saved'
+                else:
+                    info['status'] = 'error'
+                    info['msg'] = 'Invalid Operation'
+                res = make_response(json.JSONEncoder().encode(info), 200)
+                res.headers.add('Content-type', 'application/json')
         else:
             info = {} 
             info['status'] = 'error'
@@ -211,11 +230,18 @@ class PathView(MethodView):
             if os.path.isdir(dir_path):
                 try:
                     filename = secure_filename(os.path.basename(path))
-                    os.remove(os.path.join(dir_path, filename))
-                    os.rmdir(dir_path)
+                    full_path = os.path.join(dir_path, filename)
+                    """ if not os.listdir(full_path):
+                        full_path = os.path.join(full_path, "d.txt")
+                        f = open(os.path.join(full_path, "w")) """
+                    if(filename != ''):
+                        os.remove(full_path)
+                    else:
+                        shutil.rmtree(dir_path)
                 except Exception as e:
                     info['status'] = 'error'
                     info['msg'] = str(e)
+                    print(e)
                 else:
                     info['status'] = 'success'
                     info['msg'] = 'File Deleted'
@@ -235,10 +261,11 @@ class PathView(MethodView):
 path_view = PathView.as_view('path_view')
 app.add_url_rule('/', view_func=path_view)
 app.add_url_rule('/<path:p>', view_func=path_view)
+app.add_url_rule('/newfolder', view_func=path_view)
 
 if __name__ == '__main__':
     bind = os.getenv('FS_BIND', '0.0.0.0')
     port = os.getenv('FS_PORT', '8000')
-    root = os.path.normpath(os.getenv('FS_PATH', '/tmp'))
+    root = os.path.normpath(os.getenv('FS_PATH', 'D:/Desarrollo/projects/python/flask-file-server/filestore'))
     key = os.getenv('FS_KEY')
     app.run(bind, port, threaded=True, debug=False)
