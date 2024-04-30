@@ -17,6 +17,7 @@ A flask file server with an elegant frontend for browsing, uploading and streami
 
 ![screenshot2](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot2.jpg)
 ![screenshot3](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot3.jpg)
+![screenshot4](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot4.jpg)
 
 ## Build
 ```docker build --rm -t maaydin/flask-file-server:latest .```
