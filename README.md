@@ -2,18 +2,21 @@
 #       This repository is for personal use.
 #       If you're looking for the original repository, visit: https://github.com/Wildog/flask-file-server
 
-#flask-file-server
+# flask-file-server
 
 A flask file server with an elegant frontend for browsing, uploading and streaming files
 
-![screenshot](https://raw.githubusercontent.com/Wildog/flask-file-server/master/screenshot.jpg)
+![screenshot](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot.jpg)
 
 ## Changes in this version
 
-* Eliminated login,
-* Added button for deleting files and directories,
-* Added possibility to create directories, including nested ones,
-* Added button for connection with personal Youtube Audio Downloader application to download audios from YouTube videos or playlists to the selected directory,
+* Eliminated login
+* Added button for deleting files and directories
+* Added possibility to create directories, including nested ones
+* Added button for connection with personal Youtube Audio Downloader application to download audios from YouTube videos or playlists to the selected directory
+
+![screenshot2](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot2.jpg)
+![screenshot3](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot3.jpg)
 
 ## Build
 ```docker build --rm -t maaydin/flask-file-server:latest .```
