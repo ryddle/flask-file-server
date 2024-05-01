@@ -1,3 +1,4 @@
+///https://github.com/idleberg/Bootstrap-Listr
 function getCookie(cname) {
     var name = cname + "=";
     var decodedCookie = decodeURIComponent(document.cookie);
@@ -92,6 +93,14 @@ $(document).ready(function () {
     $('#close-uploader').click(function () {
         $('#filer_input').prop("jFiler").reset()
     });
+
+    $('#viewer-modal').on('show.bs.modal', function (event) {
+        var video_players = document.getElementsByTagName('video');
+        for (var i = 1; i < video_players.length; i++) {
+            video_players[i].remove();
+        }
+    });
+
     $('#delete-modal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget)
         var name = button.data('name') // Extract info from data-* attributes
@@ -195,5 +204,10 @@ $(document).ready(function () {
     });
     $("#close-ytad-playlist").on("click", function () {
         location.reload();
+    });
+
+
+    $('#download-file').click(function () {
+        this.href+='?download=true';
     });
 });

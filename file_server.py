@@ -50,7 +50,7 @@ def icon_fmt(filename):
 
 @app.template_filter('humanize')
 def time_humanize(timestamp):
-    mdate = datetime.utcfromtimestamp(timestamp)
+    mdate = datetime.fromtimestamp(timestamp)
     return humanize.naturaltime(mdate)
 
 def get_type(mode):
@@ -62,11 +62,19 @@ def get_type(mode):
 
 def partial_response(path, start, end=None):
     file_size = os.path.getsize(path)
+    
+    if end is not None:
+        if start>end:
+            start, end = 0, file_size-1
 
     if end is None:
         end = file_size - start - 1
     end = min(end, file_size - 1)
+    if end < start:
+        end = file_size - 1
     length = end - start + 1
+    if length < 0:
+        print('invalid range')
 
     with open(path, 'rb') as fd:
         fd.seek(start)
@@ -114,8 +122,8 @@ class PathView(MethodView):
             for filename in os.listdir(path):
                 if filename in ignored:
                     continue
-                if hide_dotfile == 'yes' and filename[0] == '.':
-                    continue
+                """ if hide_dotfile == 'yes' and filename[0] == '.':
+                    continue """
                 filepath = os.path.join(path, filename)
                 stat_res = os.stat(filepath)
                 info = {}
@@ -136,8 +144,10 @@ class PathView(MethodView):
                 start, end = get_range(request)
                 res = partial_response(path, start, end)
             else:
-                res = send_file(path)
-                res.headers.add('Content-Disposition', 'attachment')
+                if len(request.values)==0 or not request.values['download']:
+                    res = send_file(path)
+                else:
+                    res = send_file(path, as_attachment=True)
         else:
             res = make_response('Not found', 404)
         return res
