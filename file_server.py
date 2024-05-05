@@ -3,6 +3,7 @@ from flask.views import MethodView
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from config import (root, ytad_url, GENIUS_ACCESS_TOKEN)
 import shutil
 import humanize
 import os
@@ -12,15 +13,15 @@ import json
 import mimetypes
 import sys
 from pathlib2 import Path
+import lyricsgenius
 
 app = Flask(__name__, static_url_path='/assets', static_folder='assets')
-root = os.path.normpath("D:/Desarrollo/projects/python/flask-file-server/filestore")
-ytad_url = "http://localhost:3001"
+CORS(app)
 key = ""
 
 ignored = ['.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
-datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml'}
-icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml'}
+datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
+icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'fa-file-text': 'doc'}
 
 @app.template_filter('size_fmt')
 def size_fmt(size):
@@ -38,6 +39,14 @@ def data_fmt(filename):
     for type, exts in datatypes.items():
         if filename.split('.')[-1] in exts:
             t = type
+    return t
+
+@app.template_filter('has_audio')
+def has_audio(filename):
+    t = False
+    for exts in datatypes.items():
+        if filename.split('.')[-1] in exts:
+            t = True
     return t
 
 @app.template_filter('icon_fmt')
@@ -113,11 +122,54 @@ def get_range(request):
 class PathView(MethodView):
     def get(self, p=''):
         hide_dotfile = request.args.get('hide-dotfile', request.cookies.get('hide-dotfile', 'no'))
+        
+        if p == 'viewerJSODF/index.html':
+            url_hash = request.url.split('#')
+            if len(url_hash) == 2:
+                hash = url_hash[1]
+            return render_template('viewerJSODF/index.html')
+        
+        if p == 'audioplayer/index.html':
+            dir_path = request.args.get('path')
+            path = os.path.join(root, dir_path)
+            path = os.path.normpath(path)
+            if os.path.isdir(path):
+                audio_files = []
+                has_audio = False
+                for filename in os.listdir(path):
+                    if filename in ignored:
+                        continue
+                    exts = datatypes.get('audio')
+                    if filename.split('.')[-1] in exts:
+                        audio_files.append(filename)
+                        has_audio = True
+                try:
+                    audio_files = sorted(audio_files, key=lambda s: int(re.search(r'\d+', s).group()))
+                except:
+                    audio_files = sorted(audio_files)
+                return render_template('/audioplayer/index.html', path=p, dir_path=path, audio_files=json.dumps(audio_files), has_audio=has_audio)
+        
+        if p == 'api/getLyrics':
+            title = request.args.get('title')
+            title = title.replace('_', ' ').replace('.mp3', '')
+            title = re.sub(r'\d+\.', '', title)
+            genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
+            song = genius.search_song(title=title, artist=title)
+            if song != None and song.lyrics:
+                result = {}
+                result['lyrics']= song.lyrics,
+                result['body'] = song._body
+                return json.dumps(result)
+            else:
+                return {"status": 500, "error": "No lyrics found"}
+            
 
         path = os.path.join(root, p)
         path = os.path.normpath(path)
         if os.path.isdir(path):
             contents = []
+            audio_files = []
+            has_audio = False
             total = {'size': 0, 'dir': 0, 'file': 0}
             for filename in os.listdir(path):
                 if filename in ignored:
@@ -135,19 +187,36 @@ class PathView(MethodView):
                 sz = stat_res.st_size
                 info['size'] = sz
                 total['size'] += sz
+                exts = datatypes.get('audio')
+                if filename.split('.')[-1] in exts:
+                    audio_files.append(filename)
+                    has_audio = True
                 contents.append(info)
-            page = render_template('index.html', path=p, dir_path=path, contents=contents, total=total, ytad_url=ytad_url, hide_dotfile=hide_dotfile)
+            try:
+                audio_files = sorted(audio_files, key=lambda s: int(re.search(r'\d+', s).group()))
+            except:
+                audio_files = sorted(audio_files)
+            page = render_template('index.html', path=p, dir_path=path, contents=contents, total=total, audio_files=json.dumps(audio_files), has_audio=has_audio, ytad_url=ytad_url, hide_dotfile=hide_dotfile)
             res = make_response(page, 200)
             res.set_cookie('hide-dotfile', hide_dotfile, max_age=16070400)
         elif os.path.isfile(path):
-            if 'Range' in request.headers:
-                start, end = get_range(request)
-                res = partial_response(path, start, end)
+            if 'stream' in request.args:
+                def generate():
+                    with open(path, "rb") as fwav:
+                        data = fwav.read(1024)
+                        while data:
+                            yield data
+                            data = fwav.read(1024)
+                return Response(generate(), mimetype="audio/mpeg")
             else:
-                if len(request.values)==0 or not request.values['download']:
-                    res = send_file(path)
+                if 'Range' in request.headers:
+                    start, end = get_range(request)
+                    res = partial_response(path, start, end)
                 else:
-                    res = send_file(path, as_attachment=True)
+                    if len(request.values)==0 or not request.values['download']:
+                        res = send_file(path)
+                    else:
+                        res = send_file(path, as_attachment=True)
         else:
             res = make_response('Not found', 404)
         return res
@@ -275,7 +344,7 @@ app.add_url_rule('/newfolder', view_func=path_view)
 
 if __name__ == '__main__':
     bind = os.getenv('FS_BIND', '0.0.0.0')
-    port = os.getenv('FS_PORT', '8000')
+    port = os.getenv('FS_PORT', '8008')
     root = os.path.normpath(os.getenv('FS_PATH', 'D:/Desarrollo/projects/python/flask-file-server/filestore'))
     key = os.getenv('FS_KEY')
     app.run(bind, port, threaded=True, debug=False)

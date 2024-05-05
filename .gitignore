@@ -1,1 +1,5 @@
 filestore
+private_docs
+private_docs/genius.txt
+config.py
+__pycache__

@@ -6,7 +6,7 @@
 
 A flask file server with an elegant frontend for browsing, uploading and streaming files
 
-![screenshot](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot.jpg)
+![screenshot](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot.jpg)
 
 ## Changes in this version
 
@@ -14,10 +14,18 @@ A flask file server with an elegant frontend for browsing, uploading and streami
 * Added button for deleting files and directories
 * Added possibility to create directories, including nested ones
 * Added button for connection with personal Youtube Audio Downloader application to download audios from YouTube videos or playlists to the selected directory
+### Changes 20240505
+* Eliminated listr.pack.js from templates and replaced for other libraries
+* Added new libraries for visualization dialogs
+* Added new audio player dialog for play all audios in folder with lyrics
+* Added new independent page audio player linked from integrated audio player dialog
 
-![screenshot2](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot2.jpg)
-![screenshot3](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot3.jpg)
-![screenshot4](https://raw.githubusercontent.com/ryddle/flask-file-server/master/screenshot4.jpg)
+![screenshot2](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot2.jpg)
+![screenshot3](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot3.jpg)
+![screenshot4](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot4.jpg)
+
+<img src="https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/integrated_audio_player_01.png" width="300" />
+<img src="https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/audio_player_01.png.png" width="300" />
 
 ## Build
 ```docker build --rm -t maaydin/flask-file-server:latest .```

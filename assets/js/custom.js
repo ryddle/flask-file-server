@@ -95,10 +95,30 @@ $(document).ready(function () {
     });
 
     $('#viewer-modal').on('show.bs.modal', function (event) {
-        var video_players = document.getElementsByTagName('video');
-        for (var i = 1; i < video_players.length; i++) {
-            video_players[i].remove();
-        }
+        invokeViewer();
+    });
+
+    $('#viewer-modal').on('shown.bs.modal', function (e) {
+        var data_type = $('#viewer-modal').data('bs.modal')._config.type;
+        invokeViewerShown(e);
+    })
+
+    $("#viewer-modal").on('hidden.bs.modal', function (e) {
+        $(this).data('bs.modal', null);
+        invokeViewerClose(e);
+    });
+
+    $('#player-modal').on('show.bs.modal', function (event) {
+        playerViewer();
+    });
+
+    $('#player-modal').on('shown.bs.modal', function (e) {
+        playerViewerShown(e);
+    })
+
+    $("#player-modal").on('hidden.bs.modal', function (e) {
+        $(this).data('bs.modal', null);
+        playerViewerClose(e);
     });
 
     $('#delete-modal').on('show.bs.modal', function (event) {
@@ -198,7 +218,7 @@ $(document).ready(function () {
         });
     });
 
-    
+
     $("#close-ytad-videos").on("click", function () {
         location.reload();
     });
@@ -208,6 +228,6 @@ $(document).ready(function () {
 
 
     $('#download-file').click(function () {
-        this.href+='?download=true';
+        this.href += '?download=true';
     });
 });

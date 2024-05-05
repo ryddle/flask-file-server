@@ -8,11 +8,20 @@
   <meta name="generator" content="Bootstrap Listr">
   <title>File System</title>
   <link rel="stylesheet" href="{{url_for('static', filename='css/custom.css')}}">
-  <link rel="stylesheet" href="{{url_for('static', filename='css/listr.pack.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/listr.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='css/jquery.filer.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/viewer.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/video-js.min.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/highlight.default.min.css')}}">
   <script>
     var ytad_url = "{{ ytad_url }}";
+    
+    // @ts-ignore
+    var audio_files_string = {{ audio_files | tojson }};
+
+    var audio_files = eval(audio_files_string);//JSON.parse('{{ audio_files }}');
   </script>
+  
 </head>
 
 <body dir="ltr">
@@ -50,14 +59,6 @@
             <th class="text-xs-right "></th>
           </tr>
         </thead>
-        <tfoot>
-          <tr>
-            <td colspan="3">
-              <input id="dir_path" type="hidden" value="{{dir_path}}">
-              <small class="pull-xs-left text-muted" dir="ltr">{{total.dir}} folders and {{total.file}} files, {{total.size | size_fmt}} in total</small>
-            </td>
-          </tr>
-        </tfoot>
         <tbody>
           {% for entry in contents if entry.type == 'dir' %}
           <tr>
@@ -72,7 +73,7 @@
           {% for entry in contents if entry.type == 'file' %}
           <tr>
             <td class="text-xs-left " data-sort-value="file-{{entry.name | lower}}"><i class="fa fa-fw {{entry.name | icon_fmt}} " aria-hidden="true"></i>&nbsp;
-              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-type="{{entry.name | data_fmt}}" {%
+              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}" data-type="{{entry.name | data_fmt}}" {%
                  endif %} href="{{entry.name}}" data-size="{{entry.size | size_fmt}}">{{entry.name}}</a>
             </td>
             <td class="text-xs-right " data-sort-value="{{entry.size}}" title="{{entry.size}} bytes">{{entry.size | size_fmt}}</td>
@@ -81,10 +82,25 @@
           </tr>
           {% endfor %}
         </tbody>
+        <tfoot>
+          {% if has_audio %}
+          <tr>
+            <td colspan="3">
+              <a data-toggle="modal" data-target="#player-modal" id="play-all" class="btn btn-primary"><i class="fa fa-fw fa-play"></i>Play All</a>
+            </td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td colspan="3">
+              <input id="dir_path" type="hidden" value="{{dir_path}}">
+              <small class="pull-xs-left text-muted" dir="ltr">{{total.dir}} folders and {{total.file}} files, {{total.size | size_fmt}} in total</small>
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
     <div class="modal fade" id="viewer-modal" tabindex="-1" role="dialog" aria-labelledby="file-name" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-xxl">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -108,6 +124,27 @@
       </div>
     </div>
   </div>
+  <div class="modal fade" id="player-modal" tabindex="-1" role="dialog" aria-labelledby="file-name" aria-hidden="true">
+    <div class="modal-dialog modal-xxl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title text-left" id="file-name">&nbsp;</h4>
+          <small class="text-muted" id="file-meta"></small>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <div class="pull-xs-left">
+            <button type="button" class="btn btn-link highlight hidden-xs-up">Apply syntax highlighting</button>
+          </div>
+          <div class="pull-xs-right">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
   <div class="modal fade" id="uploader-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -209,10 +246,16 @@
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/tether.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
-  <script type="text/javascript" src="{{url_for('static', filename='js/listr.pack.js')}}"></script>
+  <!-- <script type="text/javascript" src="{{url_for('static', filename='js/listr.pack.js')}}"></script> -->
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.filer.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.base64.min.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/highlight.min.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/viewer.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/video.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/videojs-playlist.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/customviewers.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/custom.js')}}"></script>
+
 </body>
 
 </html>

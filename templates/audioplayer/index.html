@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Player</title>
+  <!-- <link rel="stylesheet" href="../assets/css/audioplayer.css"> -->
+  <link rel="stylesheet" href="{{url_for('static', filename='css/audioplayer.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/fontawesome.css')}}">
+  <script>
+    // @ts-ignore
+    var audio_files_string = {{ audio_files | tojson }};
+    var audio_files = eval(audio_files_string);
+    // creating audio list
+    var audioList = [];
+    var path = new URLSearchParams(location.search).get('path');
+    for (let index = 0; index < audio_files.length; index++) {
+      const file = audio_files[index];
+
+      var track = {};
+      var sources = [{ src: location.origin + "/" + path + "/" + file, type: 'audio/mpeg', filename: file }];
+      var poster = location.origin + '/assets/images/default_poster.png';
+      track.sources = sources;
+      track.poster = poster;
+      audioList.push(track);
+    }
+
+    document.title += " - " + path;
+  </script>
+</head>
+
+<!--
+
+  Azul slider #0075ff
+
+-->
+
+<body>
+  <div style="position: absolute;top: 5px;left: 5px; width: 24px; height: 24px; z-index: 100;">
+    <button style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;">
+      <i class="fa fa-cog" style="font-size: 18px;color: white;"></i>
+    </button>
+  </div>
+  <div class="row">
+    <div class="column left">
+      <!-- partial:index.partial.html -->
+      <div id="analyzer">
+      </div>
+      <!-- <audio id="audio" src="{{ audio_files[0] }}" crossorigin="anonymous"></audio> -->
+      <div id="audio-container"></div>
+
+      <div id="controls" class="controls">
+        <!-- <div>
+          <button id="play">Play</button>
+          <button id="stop">Stop</button>
+        </div> -->
+        <!-- <div class="eqband">
+          <label>32Hz</label>
+          <input type="range" min="0" max="50" value="0" id="range2" class="range-input" /> 
+          <output id="gain63">0 dB</output>
+        </div> -->
+        <!-- <div class="eqband">
+          <label>32Hz</label>
+          <vertical-slider></vertical-slider>
+          <output id="gain63">0 dB</output>
+        </div> -->
+        <!-- <input type=range style="writing-mode: vertical-lr; direction: rtl"> -->
+        <!-- <div class="gradientSelect" style="width: 150px;height: 150px;overflow: hidden;margin-top: 10px;">
+          <ul id="gradientList" style="width: 100%;color: white;">
+            <li style="list-style: none; padding-left: 2px;">classic</li>
+            <li style="list-style: none; padding-left: 2px;">prism</li>
+            <li style="list-style: none; padding-left: 2px;">rainbow</li>
+            <li style="list-style: none; background-color: chocolate; padding-left: 2px;">chocolate</li>
+            <li style="list-style: none; padding-left: 2px;">orangered</li>
+            <li style="list-style: none; padding-left: 2px;">chocolate</li>
+            <li style="list-style: none; padding-left: 2px;">steelBlue</li>
+          </ul>
+        </div> -->
+      </div>
+
+
+      <datalist id="tickmarks">
+        <option value="-12" label="-12"></option>
+        <option value="-8"></option>
+        <option value="-4"></option>
+        <option value="0" label="0"></option>
+        <option value="4"></option>
+        <option value="8"></option>
+        <option value="12" label="12"></option>
+      </datalist>
+      <!-- partial -->
+    </div>
+    <div class="column middle">
+      <div id="playlist_cont" style="background-color: #111; border:2px solid chocolate; height: calc( 100vh - 206px );">
+      </div>
+      <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands" style="display: flex;justify-content: space-between;align-items: center;">
+        <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 70%;">
+        <span id="player_timer" style="color: chocolate;">0:00/0:00</span>
+        <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px;">
+          <i class="fa fa-volume-off" style="font-size: large;"></i>
+        </button>
+      </div>
+      <div id="playlist_controls" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands">
+        <button type="button" id="prev-track-btn" class="btn btn-secondary controls">
+          <i class="fa fa-solid fa-backward"></i>
+        </button>
+        <button type="button" id="play-track-btn" class="btn btn-secondary controls">
+          <i class="fa fa-solid fa-play"></i>
+        </button>
+        <button type="button" id="next-track-btn" class="btn btn-secondary controls">
+          <i class="fa fa-solid fa-forward"></i>
+        </button>
+        <button type="button" id="shuffle-btn" class="btn btn-secondary controls">
+          <i class="fa fa-random"></i>
+        </button>
+        <button type="button" id="repeat-btn" class="btn btn-secondary controls">
+          <i class="fa fa-repeat"></i>
+        </button>
+      </div>
+    </div>
+    <div id="lyrics" class="column right">
+    </div>
+  </div>
+
+
+  <!-- <script type="module" src="../assets/js/vertical-slider.js"></script> -->
+  <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/xvertical-slider.js')}}"></script>
+  <script type="module" src="../assets/js/audioplayer.js"></script>
+
+</body>
+
+</html>
