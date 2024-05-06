@@ -8,6 +8,24 @@
   <link rel="stylesheet" href="{{url_for('static', filename='css/audioplayer.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='css/fontawesome.css')}}">
   <script>
+    // Get the root element
+    var r = document.querySelector(':root');
+    // Create a function for getting a variable value
+
+    var rs = getComputedStyle(r);
+    // Alert the value of the --blue variable
+    // alert("The value of --blue is: " + rs.getPropertyValue('--blue'));
+
+    var primary_color = rs.getPropertyValue('--primary-color');
+
+    // Create a function for setting a variable value
+    function setCssVar(variable, value) {
+      // Set the value of variable --blue to another value (in this case "lightblue")
+      // r.style.setProperty('--blue', 'lightblue');
+      r.style.setProperty(variable, value);
+    }
+  </script>
+  <script>
     // @ts-ignore
     var audio_files_string = {{ audio_files | tojson }};
     var audio_files = eval(audio_files_string);
@@ -91,11 +109,11 @@
       <!-- partial -->
     </div>
     <div class="column middle">
-      <div id="playlist_cont" style="background-color: #111; border:2px solid chocolate; height: calc( 100vh - 206px );">
+      <div id="playlist_cont" style="background-color: #111; border:2px solid var(--primary-color); height: calc( 100vh - 206px );">
       </div>
       <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands" style="display: flex;justify-content: space-between;align-items: center;">
         <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 70%;">
-        <span id="player_timer" style="color: chocolate;">0:00/0:00</span>
+        <span id="player_timer" style="color: var(--primary-color);">0:00/0:00</span>
         <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px;">
           <i class="fa fa-volume-off" style="font-size: large;"></i>
         </button>

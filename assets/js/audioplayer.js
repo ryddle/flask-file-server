@@ -11,14 +11,14 @@ const URLJoin = (...args) =>
 // Example: URLJoin('http://www.google.com', 'a', '/b/cd', '?foo=123', '?bar=foo');
 
 const secondsToHHMMSS = function (sec_num) {
-  var hours   = Math.floor(sec_num / 3600);
+  var hours = Math.floor(sec_num / 3600);
   var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
   var seconds = Math.round(sec_num - (hours * 3600) - (minutes * 60));
 
-  if (hours   < 10) {hours   = "0"+hours;}
-  if (minutes < 10) {minutes = "0"+minutes;}
-  if (seconds < 10) {seconds = "0"+seconds;}
-  return minutes+':'+seconds;
+  if (hours < 10) { hours = "0" + hours; }
+  if (minutes < 10) { minutes = "0" + minutes; }
+  if (seconds < 10) { seconds = "0" + seconds; }
+  return minutes + ':' + seconds;
 }
 
 /**
@@ -87,11 +87,11 @@ const filters = [];
     list: 'tickmarks',
     color: {
       trackColorBack: '#ffffff',
-      trackColorOver: 'chocolate',
+      trackColorOver: primary_color,
       trackBorderColor: '#dddddd',
-      thumbColor: 'chocolate',
-      thumbBorderColor: 'chocolate',
-      ticksColor: 'chocolate'
+      thumbColor: primary_color,
+      thumbBorderColor: primary_color,
+      ticksColor: primary_color
     },
     callback: changeGain
   }
@@ -145,17 +145,36 @@ let analyzerConfs = [
   },
   {
     source: filters[filters.length - 1],
-    gradient: "chocolate",
+    gradient: 'chocolate',
   }
 ]
+
+function createGradient() {
+  let _name = primary_color.replace('(', '_').replace(')', '_').replaceAll(',', '_').replaceAll(' ', '');
+  let cap_name = _name.charAt(0).toUpperCase() + _name.slice(1);
+  return [_name, {
+    bgColor: '#000000',
+    colorStops: [primary_color]
+  }];
+}
+
+function setGradient(){
+  let _new_gradient_ = createGradient();
+  let _gradient_name = _new_gradient_[0];
+  let _gradient_options = _new_gradient_[1];
+  audioMotion.registerGradient(_gradient_name, _gradient_options);
+  audioMotion.gradient=_gradient_name;
+}
 
 const audioMotion = new AudioMotionAnalyzer(
   document.getElementById('analyzer'),
   {
     source: filters[filters.length - 1],
-    gradient: "chocolate",
+    gradient: 'chocolate',
   }
 );
+
+setGradient();
 
 // add event listeners for playback and equalizer control
 
@@ -189,7 +208,7 @@ play_list.id = "playlist_ul";
 Object.assign(play_list.style, {
   height: "400px",
   overflowY: "auto",
-  color: "chocolate",
+  color: primary_color,
   marginBottom: "12px",
   padding: "5px"
 });
@@ -213,7 +232,7 @@ for (let index = 0; index < playlist.items_.length; index++) {
   aObj.href = "javascript:void(0)";
   aObj.innerText = file;
   aObj.index = index;
-  aObj.style.color = "chocolate";
+  aObj.style.color = primary_color;
   aObj.style.fontWeight = '700';
   aObj.style.textDecoration = 'none';
   aObj.style.cursor = "pointer";
@@ -226,7 +245,7 @@ for (let index = 0; index < playlist.items_.length; index++) {
     liObjs.forEach(element => {
       element.style.backgroundColor = 'transparent';
       element.style.fontWeight = 'normal';
-      element.style.color = "chocolate";
+      element.style.color = primary_color;
     });
 
     this.parentElement.style.backgroundColor = 'white';
@@ -265,7 +284,7 @@ Object.assign(pl_info.style, {
   position: 'relative',
   height: 'calc(100vh - 30px)',
   overflow: 'auto',
-  border: '2px solid chocolate',
+  border: '2px solid ' + primary_color,
   marginLeft: '10px',
   color: 'chocolate',
   padding: '10px',
@@ -278,7 +297,7 @@ var pl_lyriscontainer = document.createElement("div");
 pl_lyriscontainer.id = "pl_lyriscontainer";
 Object.assign(pl_lyriscontainer.style, {
   width: "100%",
-  color: 'chocolate',
+  color: primary_color,
   fontSize: "14px"
 });
 
@@ -310,7 +329,7 @@ playlist.addEventListener('playlistitemload', () => {
     if (index == playlist.getCurrentIndex()) {
       li.style.backgroundColor = 'white';
       li.style.fontWeight = '700';
-      li.style.fontWeight =  'bold';
+      li.style.fontWeight = 'bold';
     } else {
       li.style.backgroundColor = 'transparent';
       li.style.fontWeight = 'normal';
@@ -328,8 +347,8 @@ playlist.addEventListener('playlistitemload', () => {
       var pl_lyriscontainer = document.getElementById('pl_lyriscontainer');
       var body = data.body;
       var lyrics = data.lyrics[0];
-      lyrics = lyrics.replace(/\d+\s\w+butors/gm,` `);
-      lyrics = lyrics.replace(/Lyrics/gm,`\n\n`);
+      lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
+      lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
       pl_lyriscontainer.innerText = lyrics;
       //document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url
     }

@@ -1,3 +1,8 @@
+:root {
+  --primary-color: rgb(184, 22, 97);
+  --white: #ffffff; 
+}
+
 body {
   font-family: monospace;
   margin: 0;
@@ -7,6 +12,11 @@ button {
   display: block;
   margin: 20px 10px 20px 17px;
   padding: 10px 40px;
+}
+button:focus {
+  outline-color: transparent;
+  outline-style:solid;
+  box-shadow: 0 0 0 1px var(--primary-color);
 }
 #analyzer {
  height: calc( 100vh - 170px ); 
@@ -88,7 +98,7 @@ button {
 
 
 .playlist-controls button i {
-  color: chocolate;
+  color: var(--primary-color);
 }
 
 /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
@@ -129,7 +139,7 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   margin-top: -4px;
-  background-color: chocolate;
+  background-color: var(--primary-color);
   height: 1rem;
   width: 1rem;
   border-radius: 0.5rem;
@@ -177,13 +187,13 @@ input[type="range"] {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  background-color: #D2691E;
+  background-color: var(--primary-color);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #D2691E;
+  background-color: var(--primary-color);
 }
 
 *::-webkit-scrollbar-thumb:active {
-  background-color: #D2691E;
+  background-color: var(--primary-color);
 }
