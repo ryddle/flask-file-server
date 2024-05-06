@@ -1,3 +1,15 @@
+const URLJoin = (...args) =>
+  args
+    .join('/')
+    .replace(/[\/]+/g, '/')
+    .replace(/^(.+):\//, '$1://')
+    .replace(/^file:/, 'file:/')
+    .replace(/\/(\?|&|#[^!])/g, '$1')
+    .replace(/\?/g, '&')
+    .replace('&', '?');
+
+// Example: URLJoin('http://www.google.com', 'a', '/b/cd', '?foo=123', '?bar=foo');
+
 const secondsToHHMMSS = function (sec_num) {
   var hours   = Math.floor(sec_num / 3600);
   var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
@@ -307,7 +319,7 @@ playlist.addEventListener('playlistitemload', () => {
 
   // Show the loader
   pl_lyrics_loader.style.display = 'block';
-  $.get(location.origin + '/api/getLyrics?title=' + playlist.items_[playlist.getCurrentIndex()].sources[0].filename, function (data) {
+  $.get(URLJoin(location.origin, '/api/getLyrics?title=', playlist.items_[playlist.getCurrentIndex()].sources[0].filename), function (data) {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
     if (data.error) {

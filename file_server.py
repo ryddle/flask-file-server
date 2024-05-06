@@ -256,7 +256,7 @@ class PathView(MethodView):
         res = None
         if request.cookies.get('auth_cookie') == key:
             path = os.path.join(root, p)
-            Path(path).mkdir(parents=True, exist_ok=True)
+            Path(path).mkdir(mode=0o777, parents=True, exist_ok=True)
 
             info = {}
             if request.path == '/newfolder':
@@ -266,7 +266,7 @@ class PathView(MethodView):
                     try:
                         newpath = os.path.join(path, request.form['foldername'].strip())
                         newpath = os.path.normpath(newpath)
-                        os.mkdir(newpath)
+                        os.mkdir(newpath, mode=0o777)
                         dir_path = newpath[len(root)+1:]
                         dir_path = dir_path.replace('\\', '/')
                     except Exception as e:

@@ -1,3 +1,15 @@
+const URLJoin = (...args) =>
+    args
+      .join('/')
+      .replace(/[\/]+/g, '/')
+      .replace(/^(.+):\//, '$1://')
+      .replace(/^file:/, 'file:/')
+      .replace(/\/(\?|&|#[^!])/g, '$1')
+      .replace(/\?/g, '&')
+      .replace('&', '?');
+  
+// Example: URLJoin('http://www.google.com', 'a', '/b/cd', '?foo=123', '?bar=foo');
+
 //[image,video,audio,source]
 
 function invokeViewer() {
@@ -131,7 +143,7 @@ function defaultViewer(modal) {
 function sourceViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     if (file_name.indexOf(".js") != -1) {
         defaultViewer(modal);
@@ -164,7 +176,7 @@ function sourceViewer(modal) {
 function sourceViewerShown(e, modal) {
     /* var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     if (file_name.indexOf(".js") != -1) {
         $.get(url, function (data) {
@@ -178,7 +190,7 @@ function sourceViewerShown(e, modal) {
 function docViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     setModalHeader(modal, file_name, file_size);
 
@@ -203,7 +215,7 @@ function docViewer(modal) {
 function audioViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     setModalHeader(modal, file_name, file_size);
 
@@ -257,7 +269,7 @@ function audioViewerShown(e, modal) {
 function videoViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     setModalHeader(modal, file_name, file_size);
 
@@ -288,7 +300,7 @@ function videoViewerShown(e, modal) {
 function imageViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     setModalHeader(modal, file_name, file_size);
 
@@ -329,7 +341,7 @@ function playerViewer() {
     var modal = $('#player-modal');
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
-    var url = location.href + file_name;
+    var url = URLJoin(location.href, file_name);
 
     var htmlHeader = '<button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true" style="color: #fff; text-shadow: unset; opacity: 1;">×</button>\
         <h4 class="modal-title text-left" id="file-name">' + location.pathname.replaceAll('/', '') + '</h4>\
@@ -350,7 +362,7 @@ function playerViewer() {
     modal_body.innerHTML = htmlBody;
 
     var htmlFooter = '<div class="pull-xs-left">\
-            <a type="button" class="btn btn-primary" style="background-color: chocolate; border-color: chocolate;" href="' + (location.origin+'/audioplayer/index.html?path=' + location.pathname.replaceAll('/', '')) + '" target="_blank"><i class="fa fa-external-link"></i> Open audio player</a>\
+            <a type="button" class="btn btn-primary" style="background-color: chocolate; border-color: chocolate;" href="' + URLJoin((location.origin, '/audioplayer/index.html?path=', location.pathname.replaceAll('/', ''))) + '" target="_blank"><i class="fa fa-external-link"></i> Open audio player</a>\
         </div>\
         <div class="pull-xs-right">\
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\
@@ -405,7 +417,7 @@ function playerViewerShown(e) {
 
             // Show the loader
             pl_lyrics_loader.style.display = 'block';
-            $.get(location.origin + '/api/getLyrics?title=' + playlist.items_[currentIndex].sources[0].filename, function (data) {
+            $.get(URLJoin(location.origin, '/api/getLyrics?title=', playlist.items_[currentIndex].sources[0].filename), function (data) {
                 pl_lyrics_loader.style.display = 'none';
                 data = JSON.parse(data);
                 if (data.error) {
@@ -445,8 +457,8 @@ function playerViewerShown(e) {
         const file = audio_files[index];
 
         var track = {};
-        var sources = [{ src: location.href + file, type: 'video/mp4', filename: file }];
-        var poster = location.origin + '/assets/images/default_poster.png';
+        var sources = [{ src: URLJoin(location.href, file), type: 'video/mp4', filename: file }];
+        var poster = URLJoin(location.origin, '/assets/images/default_poster.png');
         track.sources = sources;
         track.poster = poster;
         audioList.push(track);
