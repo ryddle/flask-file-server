@@ -24,6 +24,31 @@
       // r.style.setProperty('--blue', 'lightblue');
       r.style.setProperty(variable, value);
     }
+
+    function createGradient() {
+      let _name = primary_color.replace('(', '_').replace(')', '_').replaceAll(',', '_').replaceAll(' ', '');
+      let cap_name = _name.charAt(0).toUpperCase() + _name.slice(1);
+      return [_name, {
+        bgColor: '#000000',
+        colorStops: [primary_color]
+      }];
+    }
+
+    function setGradient() {
+      let _new_gradient_ = createGradient();
+      let _gradient_name = _new_gradient_[0];
+      let _gradient_options = _new_gradient_[1];
+      if (undefined !== audioMotion) {
+        audioMotion.registerGradient(_gradient_name, _gradient_options);
+        audioMotion.gradient = _gradient_name;
+      }
+    }
+
+    function applyColor(color) {
+      primary_color = color;
+      setCssVar('--primary-color', primary_color);
+      //setGradient();
+    }
   </script>
   <script>
     // @ts-ignore
@@ -55,7 +80,8 @@
 
 <body>
   <div style="position: absolute;top: 5px;left: 5px; width: 24px; height: 24px; z-index: 100;">
-    <button style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;">
+    <button id="show-color-picker" style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;"
+            onclick="document.getElementById('color-picker').style.display = 'block';">
       <i class="fa fa-cog" style="font-size: 18px;color: white;"></i>
     </button>
   </div>
@@ -109,9 +135,10 @@
       <!-- partial -->
     </div>
     <div class="column middle">
-      <div id="playlist_cont" style="background-color: #111; border:2px solid var(--primary-color); height: calc( 100vh - 206px );">
+      <div id="playlist_cont">
       </div>
-      <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands" style="display: flex;justify-content: space-between;align-items: center;">
+      <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands"
+           style="display: flex;justify-content: space-between;align-items: center;">
         <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 70%;">
         <span id="player_timer" style="color: var(--primary-color);">0:00/0:00</span>
         <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px;">
@@ -140,6 +167,16 @@
     </div>
   </div>
 
+  <div id="color-picker" style="display: none;position: absolute; top: 50px; left: 50px;">
+    <div style="background-color: #111; padding: 10px; border: 1px solid var(--primary-color); border-radius: 5px;">
+      <h4 style="color: var(--primary-color); margin: 0; padding: 0; margin-bottom: 5px;">Selecciona un color</h4>
+      <div style="display: flex;">
+        <input type="color" id="color-input" value="#007bff" style="width: 25px; height: 25px; margin-right: 10px;">
+        <button id="color-apply" style="background-color: #111; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px; border-radius: 5px;"
+                onclick="applyColor(document.getElementById('color-input').value); document.getElementById('color-picker').style.display = 'none';">Aplicar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- <script type="module" src="../assets/js/vertical-slider.js"></script> -->
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>

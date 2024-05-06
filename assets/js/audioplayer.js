@@ -87,11 +87,11 @@ const filters = [];
     list: 'tickmarks',
     color: {
       trackColorBack: '#ffffff',
-      trackColorOver: primary_color,
+      trackColorOver:  "var(--primary-color)",
       trackBorderColor: '#dddddd',
-      thumbColor: primary_color,
-      thumbBorderColor: primary_color,
-      ticksColor: primary_color
+      thumbColor:  "var(--primary-color)",
+      thumbBorderColor:  "var(--primary-color)",
+      ticksColor:  "var(--primary-color)"
     },
     callback: changeGain
   }
@@ -149,6 +149,14 @@ let analyzerConfs = [
   }
 ]
 
+const audioMotion = new AudioMotionAnalyzer(
+  document.getElementById('analyzer'),
+  {
+    source: filters[filters.length - 1],
+    gradient: 'chocolate',
+  }
+);
+
 function createGradient() {
   let _name = primary_color.replace('(', '_').replace(')', '_').replaceAll(',', '_').replaceAll(' ', '');
   let cap_name = _name.charAt(0).toUpperCase() + _name.slice(1);
@@ -158,21 +166,21 @@ function createGradient() {
   }];
 }
 
-function setGradient(){
+function setGradient() {
   let _new_gradient_ = createGradient();
   let _gradient_name = _new_gradient_[0];
   let _gradient_options = _new_gradient_[1];
-  audioMotion.registerGradient(_gradient_name, _gradient_options);
-  audioMotion.gradient=_gradient_name;
+  if (undefined !== audioMotion) {
+    audioMotion.registerGradient(_gradient_name, _gradient_options);
+    audioMotion.gradient = _gradient_name;
+  }
 }
 
-const audioMotion = new AudioMotionAnalyzer(
-  document.getElementById('analyzer'),
-  {
-    source: filters[filters.length - 1],
-    gradient: 'chocolate',
-  }
-);
+function applyColor(color) {
+  primary_color = color;
+  setCssVar('--primary-color', primary_color);
+  setGradient();
+}
 
 setGradient();
 
@@ -208,7 +216,7 @@ play_list.id = "playlist_ul";
 Object.assign(play_list.style, {
   height: "400px",
   overflowY: "auto",
-  color: primary_color,
+  color:  "var(--primary-color)",
   marginBottom: "12px",
   padding: "5px"
 });
@@ -232,7 +240,7 @@ for (let index = 0; index < playlist.items_.length; index++) {
   aObj.href = "javascript:void(0)";
   aObj.innerText = file;
   aObj.index = index;
-  aObj.style.color = primary_color;
+  aObj.style.color = "var(--primary-color)";
   aObj.style.fontWeight = '700';
   aObj.style.textDecoration = 'none';
   aObj.style.cursor = "pointer";
@@ -245,7 +253,7 @@ for (let index = 0; index < playlist.items_.length; index++) {
     liObjs.forEach(element => {
       element.style.backgroundColor = 'transparent';
       element.style.fontWeight = 'normal';
-      element.style.color = primary_color;
+      element.style.color =  "var(--primary-color)";
     });
 
     this.parentElement.style.backgroundColor = 'white';
@@ -284,9 +292,9 @@ Object.assign(pl_info.style, {
   position: 'relative',
   height: 'calc(100vh - 30px)',
   overflow: 'auto',
-  border: '2px solid ' + primary_color,
+  border: '2px solid ' +  "var(--primary-color)",
   marginLeft: '10px',
-  color: 'chocolate',
+  color:  "var(--primary-color)",
   padding: '10px',
   fontSize: '12px',
   fontWeight: 'bold',
@@ -297,7 +305,7 @@ var pl_lyriscontainer = document.createElement("div");
 pl_lyriscontainer.id = "pl_lyriscontainer";
 Object.assign(pl_lyriscontainer.style, {
   width: "100%",
-  color: primary_color,
+  color:  "var(--primary-color)",
   fontSize: "14px"
 });
 
@@ -355,10 +363,15 @@ playlist.addEventListener('playlistitemload', () => {
   });
 });
 
+let current_primary_color = primary_color;
 
 mediaElement.addEventListener("timeupdate", (event) => {
   document.getElementById('player_progress').value = mediaElement.currentTime;
   document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
+  if(current_primary_color!=primary_color){
+    current_primary_color = primary_color;
+    setGradient();
+  }
 });
 
 document.getElementById('player_progress').addEventListener('change', (event) => {

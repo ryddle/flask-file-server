@@ -1,6 +1,6 @@
 :root {
   --primary-color: rgb(184, 22, 97);
-  --white: #ffffff; 
+  --white: #ffffff;
 }
 
 body {
@@ -8,25 +8,30 @@ body {
   margin: 0;
   background-color: #000;
 }
+
 button {
   display: block;
   margin: 20px 10px 20px 17px;
   padding: 10px 40px;
 }
+
 button:focus {
   outline-color: transparent;
-  outline-style:solid;
+  outline-style: solid;
   box-shadow: 0 0 0 1px var(--primary-color);
 }
+
 #analyzer {
- height: calc( 100vh - 170px ); 
+  height: calc(100vh - 170px);
 }
+
 .controls {
   display: flex;
   background-color: #111;
   justify-content: space-around;
   padding-left: 35px;
 }
+
 .eqband {
   margin: 10px;
   text-align: center;
@@ -35,6 +40,7 @@ button:focus {
   margin-bottom: 5px;
   color: #fff;
 }
+
 .equalizer {
   display: block;
   height: 100px;
@@ -46,7 +52,7 @@ button:focus {
 .range-input {
   -webkit-appearance: none;
   rotate: -90deg;
-  appearance: none; 
+  appearance: none;
   width: 100px;
   cursor: pointer;
   outline: none;
@@ -57,7 +63,7 @@ button:focus {
 
 .range-input::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none; 
+  appearance: none;
   height: 15px;
   width: 15px;
   background-color: #f50;
@@ -76,23 +82,27 @@ button:focus {
 }
 
 .range-input::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 10px rgba(255,85,0, .1)
+  box-shadow: 0 0 0 10px rgba(255, 85, 0, .1)
 }
+
 .range-input:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 13px rgba(255,85,0, .2)
+  box-shadow: 0 0 0 13px rgba(255, 85, 0, .2)
 }
+
 .range-input:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 13px rgba(255,85,0, .2)
+  box-shadow: 0 0 0 13px rgba(255, 85, 0, .2)
 }
 
 .range-input::-moz-range-thumb:hover {
-  box-shadow: 0 0 0 10px rgba(255,85,0, .1)
+  box-shadow: 0 0 0 10px rgba(255, 85, 0, .1)
 }
+
 .range-input:active::-moz-range-thumb {
-  box-shadow: 0 0 0 13px rgba(255,85,0, .2)
+  box-shadow: 0 0 0 13px rgba(255, 85, 0, .2)
 }
+
 .range-input:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 13px rgba(255,85,0, .2)    
+  box-shadow: 0 0 0 13px rgba(255, 85, 0, .2)
 }
 
 
@@ -110,7 +120,7 @@ button:focus {
 .column {
   float: left;
   padding: 10px;
-  height: calc( 100vh - 10px );
+  height: calc(100vh - 10px);
   background-color: #000;
 }
 
@@ -150,6 +160,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   height: 0.5rem;
   border-radius: 0.5rem;
 }
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -172,6 +183,7 @@ input[type="range"] {
   height: 10px;
   width: 10px;
 }
+
 *::-webkit-scrollbar-track {
   border-radius: 5px;
   background-color: #333333;
@@ -197,3 +209,15 @@ input[type="range"] {
 *::-webkit-scrollbar-thumb:active {
   background-color: var(--primary-color);
 }
+
+
+/*******************************************/
+
+
+
+#playlist_cont {
+  background-color: #111;
+  border: 2px solid var(--primary-color);
+  height: calc(100vh - 206px);
+}
+
