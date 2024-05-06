@@ -25,29 +25,44 @@
       r.style.setProperty(variable, value);
     }
 
-    function createGradient() {
-      let _name = primary_color.replace('(', '_').replace(')', '_').replaceAll(',', '_').replaceAll(' ', '');
-      let cap_name = _name.charAt(0).toUpperCase() + _name.slice(1);
-      return [_name, {
-        bgColor: '#000000',
-        colorStops: [primary_color]
-      }];
+    ///// Settings panel /////
+
+    const audioMotionConfigs = {
+      default:{alphaBars:false,ansiBands:false,barSpace:0.1,bgAlpha:0.7,channelLayout:"single",colorMode:"gradient",fftSize:8192,fillAlpha:1,frequencyScale:"log",gradient:primary_color,ledBars:false,linearAmplitude:false,linearBoost:1,lineWidth:0,loRes:false,lumiBars:false,maxDecibels:-25,maxFPS:0,maxFreq:22000,minDecibels:-85,minFreq:20,mirror:0,mode:0,noteLabels:false,utlineBars:false,overlay:false,peakLine:false,radial:false,radialInvert:false,radius:0.3,reflexAlpha:0.15,reflexBright:1,reflexFit:true,reflexRatio:0,roundBars:false,showBgColor:true,showFPS:false,showPeaks:true,showScaleX:true,showScaleY:false,smoothing:0.5,spinSpeed:0,splitGradient:false,trueLeds:false,useCanvas:true,volume:1,weightingFilter:""},
+      bars:{mode: 6,barSpace: .4,frequencyScale: 'bark',gradient:'rainbow', lumiBars: false, ledBars: true,linearAmplitude: true,linearBoost: 1.6,maxFreq: 20000,minFreq: 30,reflexRatio: .1,reflexAlpha: .25,weightingFilter: 'D'},
+      dual:{mode: 10,channelLayout: 'dual-combined',fillAlpha: .3,gradientLeft: 'steelblue',gradientRight: 'orangered',linearAmplitude: true,linearBoost: 1.2,lineWidth: 0,maxFreq: 16000,minFreq: 30,peakLine: true,showScaleX: false,showPeaks: true,weightingFilter: 'D'},
+      wall:{mode: 2,barSpace: .1,gradient: 'prism',lumiBars: true,minDecibels: -60,maxDecibels: -30,maxFreq: 16000,minFreq: 30,showBgColor: false,showPeaks: false,showScaleX: false,weightingFilter: 'D'}
     }
 
-    function setGradient() {
-      let _new_gradient_ = createGradient();
-      let _gradient_name = _new_gradient_[0];
-      let _gradient_options = _new_gradient_[1];
-      if (undefined !== audioMotion) {
-        audioMotion.registerGradient(_gradient_name, _gradient_options);
-        audioMotion.gradient = _gradient_name;
+    var audio_motion_preset = "default";
+
+    function applySettings() {
+      document.getElementById('settings-panel').style.display = 'none';
+
+      var color = document.getElementById('color-input').value;
+      if(color!=primary_color){
+        applyColor(color);
+      }
+
+      var audioMotionPreset = document.getElementById('audio-motion-preset').value;
+      if(audioMotionPreset!=audio_motion_preset){
+        applyAudioMotionPreset(audioMotionPreset);
       }
     }
 
     function applyColor(color) {
       primary_color = color;
       setCssVar('--primary-color', primary_color);
-      //setGradient();
+      //document.getElementById('color-picker').style.display = 'none';
+      //document.getElementById('settings-panel').style.display = 'none';
+      var primaryColorChangeEvent = new Event('primaryColorChange');
+      document.dispatchEvent(primaryColorChangeEvent);
+    }
+
+    function applyAudioMotionPreset(audioMotionPreset) {
+      audio_motion_preset = audioMotionPreset;
+      var audioMotionPresetChangeEvent = new Event('audioMotionPresetChange');
+      document.dispatchEvent(audioMotionPresetChangeEvent);
     }
   </script>
   <script>
@@ -81,47 +96,18 @@
 <body>
   <div style="position: absolute;top: 5px;left: 5px; width: 24px; height: 24px; z-index: 100;">
     <button id="show-color-picker" style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;"
-            onclick="document.getElementById('color-picker').style.display = 'block';">
-      <i class="fa fa-cog" style="font-size: 18px;color: white;"></i>
+            onclick="document.getElementById('color-input').value = primary_color; document.getElementById('settings-panel').style.display = 'block';">
+      <i class="fa fa-cog" style="font-size: 18px;color: var(--primary-color);"></i>
     </button>
   </div>
   <div class="row">
     <div class="column left">
-      <!-- partial:index.partial.html -->
       <div id="analyzer">
       </div>
-      <!-- <audio id="audio" src="{{ audio_files[0] }}" crossorigin="anonymous"></audio> -->
       <div id="audio-container"></div>
 
       <div id="controls" class="controls">
-        <!-- <div>
-          <button id="play">Play</button>
-          <button id="stop">Stop</button>
-        </div> -->
-        <!-- <div class="eqband">
-          <label>32Hz</label>
-          <input type="range" min="0" max="50" value="0" id="range2" class="range-input" /> 
-          <output id="gain63">0 dB</output>
-        </div> -->
-        <!-- <div class="eqband">
-          <label>32Hz</label>
-          <vertical-slider></vertical-slider>
-          <output id="gain63">0 dB</output>
-        </div> -->
-        <!-- <input type=range style="writing-mode: vertical-lr; direction: rtl"> -->
-        <!-- <div class="gradientSelect" style="width: 150px;height: 150px;overflow: hidden;margin-top: 10px;">
-          <ul id="gradientList" style="width: 100%;color: white;">
-            <li style="list-style: none; padding-left: 2px;">classic</li>
-            <li style="list-style: none; padding-left: 2px;">prism</li>
-            <li style="list-style: none; padding-left: 2px;">rainbow</li>
-            <li style="list-style: none; background-color: chocolate; padding-left: 2px;">chocolate</li>
-            <li style="list-style: none; padding-left: 2px;">orangered</li>
-            <li style="list-style: none; padding-left: 2px;">chocolate</li>
-            <li style="list-style: none; padding-left: 2px;">steelBlue</li>
-          </ul>
-        </div> -->
       </div>
-
 
       <datalist id="tickmarks">
         <option value="-12" label="-12"></option>
@@ -167,13 +153,57 @@
     </div>
   </div>
 
-  <div id="color-picker" style="display: none;position: absolute; top: 50px; left: 50px;">
-    <div style="background-color: #111; padding: 10px; border: 1px solid var(--primary-color); border-radius: 5px;">
-      <h4 style="color: var(--primary-color); margin: 0; padding: 0; margin-bottom: 5px;">Selecciona un color</h4>
-      <div style="display: flex;">
-        <input type="color" id="color-input" value="#007bff" style="width: 25px; height: 25px; margin-right: 10px;">
-        <button id="color-apply" style="background-color: #111; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px; border-radius: 5px;"
-                onclick="applyColor(document.getElementById('color-input').value); document.getElementById('color-picker').style.display = 'none';">Aplicar</button>
+  <!-- <div id="color-picker" style="display: none; position: absolute; top: 50px; left: 50px;">
+    <div style="background-color: #111;padding: 15px;border: 1px solid var(--primary-color);border-radius: 5px;display: grid;">
+
+      <div style="display: flex;align-items: center;">
+        <span style="color: var(--primary-color); margin: 0; padding: 0; margin-bottom: 5px;">Selecciona un color</span>
+        <input type="color" id="color-input" value="#007bff" style="width: 25px;height: 25px;margin-left: 20px;">
+      </div>
+      <button id="color-apply" style="background-color: #111; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px; border-radius: 5px;"
+              onclick="applyColor(document.getElementById('color-input').value);">Aplicar</button>
+    </div>
+  </div> -->
+
+  <div id="settings-panel" class="settings-panel">
+    <div class="wrapper">
+      <div class="form">
+        <div style="display: flex; align-items: start; justify-content: space-between; height: 50px;">
+          <span style="font-size: 22px; font-weight: bold;">Settings</span>
+          <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px;" onclick="document.getElementById('settings-panel').style.display = 'none';">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <form>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Primary Color</label>
+            <input type="color" id="color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Analyzer presets</label>
+            <select name="audio-motion-preset" id="audio-motion-preset">
+              <option value="default">default</option>
+              <option value="bars">bars</option>
+              <option value="dual">dual</option>
+              <option value="wall">wall</option>
+            </select>
+          </p>
+<!--           <p>
+            <label for="">Email Address</label>
+            <input type="text">
+          </p>
+          <p>
+            <label for="">Topic</label>
+            <input type="text">
+          </p>
+          <p class="full-width">
+            <label for="">Write your message</label>
+            <textarea name="" id="" cols="30" rows="7"></textarea>
+          </p> -->
+          <p class="full-width">
+            <button type="button" class="btn btn-secondary controls" style="float: right;" onclick="applySettings();">Ok</button>
+          </p>
+        </form>
       </div>
     </div>
   </div>

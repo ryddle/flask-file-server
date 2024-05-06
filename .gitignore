@@ -4,3 +4,5 @@ private_docs/genius.txt
 config.py
 __pycache__
 config_raspberry.py
+.vscode/launch.json
+foldertree2json.py

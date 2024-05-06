@@ -148,7 +148,7 @@ $(document).ready(function () {
 
     });
 
-    $('#send-ytad-videos').on('click', function (event) {
+    /* $('#send-ytad-videos').on('click', function (event) {
         var parent = event.target.parentElement;
         var videos_urls = $('#video_urls').val()
         if (videos_urls == '') {
@@ -216,7 +216,7 @@ $(document).ready(function () {
                 $("<div class=\"jFiler-item-others text-success\"><i class=\"icon-jfi-check-circle\"></i> Error: " + data.msg + "</div>").hide().appendTo(parent).fadeIn("slow");
             }
         });
-    });
+    }); */
 
 
     $("#close-ytad-videos").on("click", function () {

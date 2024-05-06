@@ -265,13 +265,13 @@ for (let index = 0; index < playlist.items_.length; index++) {
 }
 playlist_cont.appendChild(play_list);
 
-playlist.addEventListener('playlisttoggleplay', () => {
+/* playlist.addEventListener('playlisttoggleplay', () => {
   if (mediaElement.paused) {
     document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
   } else {
     document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
   }
-});
+}); */
 
 // Playlist controls
 var prevtrackbtn = document.getElementById("prev-track-btn");
@@ -283,7 +283,16 @@ prevtrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.
 nexttrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getNextIndex()));
 playtrackbtn.addEventListener('click', () => playlist.togglePlay());
 shufflebtn.addEventListener('click', () => playlist.toggleShuffle());
-repeatbtn.addEventListener('click', () => playlist.enableRepeat());
+repeatbtn.addEventListener('click', function(){
+  playlist.toggleRepeat();
+  if(playlist.getRepeatStatus()==='off'){
+    repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat"></i>';
+  }else if(playlist.getRepeatStatus()==='one'){
+    repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;">1</i>';
+  }else{
+    repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;"></i>';
+  }
+});
 
 // Add a playlist info element to your HTML
 var pl_info = document.createElement("div");
@@ -363,14 +372,35 @@ playlist.addEventListener('playlistitemload', () => {
   });
 });
 
-let current_primary_color = primary_color;
 
 mediaElement.addEventListener("timeupdate", (event) => {
   document.getElementById('player_progress').value = mediaElement.currentTime;
   document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
-  if(current_primary_color!=primary_color){
+});
+
+mediaElement.addEventListener("playing", (event) => {
+  document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
+});
+
+mediaElement.addEventListener("pause", (event) => {
+  document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
+});
+
+let current_primary_color = primary_color;
+document.addEventListener("primaryColorChange", (event) => {
+  if(current_primary_color!=primary_color && current_audiomotion_preset=="default"){
     current_primary_color = primary_color;
     setGradient();
+  }
+});
+let current_audiomotion_preset = audio_motion_preset;
+document.addEventListener("audioMotionPresetChange", (event) => {
+  if(current_audiomotion_preset!=audio_motion_preset){
+    current_audiomotion_preset = audio_motion_preset;
+    audioMotion.setOptions(audioMotionConfigs[audio_motion_preset]);
+    if(current_audiomotion_preset=="default"){
+      setGradient();
+    }
   }
 });
 

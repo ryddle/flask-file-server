@@ -4,6 +4,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from config import (root, ytad_url, GENIUS_ACCESS_TOKEN)
+from pytube import YouTube, Playlist
 import shutil
 import humanize
 import os
@@ -118,6 +119,59 @@ def get_range(request):
         return start, end
     else:
         return 0, None
+    
+
+def downloadUrls(yturls, dir_path = "download"):
+    filesObj = {}
+    errors = []
+    for yturl in yturls:
+        if yturl == '':
+            continue
+        try:
+            yt = YouTube(yturl)
+            audio = yt.streams.filter(only_audio=True).first()
+            file_name = secure_filename(yt._title) + ".mp3"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)            
+            out_file = dir_path +"/" + file_name
+            audio.download(output_path=".", filename=out_file, skip_existing=False)
+            file_name = yt._title + ".mp3"
+            filesObj[file_name] = out_file
+        except Exception as e:
+            errors.append(yturl)
+            continue
+    return filesObj, errors
+
+def sorted_alphanumeric(data):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(data, key=alphanum_key)
+
+def create_folder_structure_json(path): 
+    # Initialize the result dictionary with folder 
+    # name, type, and an empty list for children 
+    result = {'name': os.path.basename(path), 
+              'type': 'folder', 'children': []} 
+  
+    # Check if the path is a directory 
+    if not os.path.isdir(path): 
+        return result 
+  
+    # Iterate over the entries in the directory 
+    for entry in sorted_alphanumeric(os.listdir(path)): 
+       # Create the full path for the current entry 
+        entry_path = os.path.join(path, entry) 
+  
+        # If the entry is a directory, recursively call the function 
+        if os.path.isdir(entry_path): 
+            if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
+                result['children'].append(create_folder_structure_json(entry_path)) 
+        # If the entry is a file, create a dictionary with name and type 
+        else:
+            if entry.endswith('.mp3'):
+                result['children'].append({'name': entry, 'type': 'file'}) 
+  
+    return result 
 
 class PathView(MethodView):
     def get(self, p=''):
@@ -273,6 +327,64 @@ class PathView(MethodView):
                         info['status'] = 'error'
                         info['msg'] = str(e)
                     return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
+            elif request.path == '/api/':
+                res_obj = {}
+                yturls = list(map(str.strip, request.form["videos_urls"].split(',')))
+                dir_path = os.path.join(root, request.form.get("path"))
+                filesObj, errors = downloadUrls(yturls, dir_path)
+                res_obj['status'] = 'success'
+                res_obj['data'] = filesObj
+                res_obj['errors'] = errors
+                """ res = make_response(json.JSONEncoder().encode(res_obj), 200)
+                res.headers.add('Content-type', 'application/json')
+                return res """
+                return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
+            elif request.path == '/api/playlist/':
+                res_obj = {}
+                playlist_url = request.form.get("playlist_url")
+                dir_path = os.path.join(root, request.form.get("path"))
+                print(playlist_url)
+                if not playlist_url:
+                    res_obj['status'] = 'error'
+                    res_obj['msg'] = "Empty playlist URL"
+                    """ res = make_response(json.JSONEncoder().encode(res_obj), 400)
+                    res.headers.add('Content-type', 'application/json')
+                    return res """
+                    return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
+                try:
+                    playlist = Playlist(playlist_url)
+                    videos = []
+                    for url in playlist.video_urls:
+                        print(url)
+                        videos.append(url)
+                    if not videos:
+                        res_obj['status'] = 'error'
+                        res_obj['msg'] = "Playlist is empty"
+                        """ res = make_response(json.JSONEncoder().encode(res_obj), 400)
+                        res.headers.add('Content-type', 'application/json')
+                        return res """
+                        return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
+                    yturls = ",".join(videos)
+                    print(yturls)
+                    filesObj, errors = downloadUrls(videos, dir_path) 
+                    print(filesObj)
+                    print(errors)
+                    res_obj['status'] = 'success'
+                    res_obj['data'] = filesObj
+                    res_obj['errors'] = errors
+                    """ res = make_response(json.JSONEncoder().encode(res_obj), 200)
+                    res.headers.add('Content-type', 'application/json')
+                    return res """
+                    return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    res_obj['status'] = 'error'
+                    res_obj['msg'] = traceback.format_exc()
+                    """ res = make_response(json.JSONEncoder().encode(res_obj), 500)
+                    res.headers.add('Content-type', 'application/json')
+                    return res """
+                    return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
             else:
                 if os.path.isdir(path):
                     files = request.files.getlist('files[]')

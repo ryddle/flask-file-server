@@ -47,6 +47,7 @@ function _extends() {
   };
 
 export default class Playlist extends PlaylistEventTarget {
+    #repeat_states = {off: 'off', all: 'all', one: 'one'};
     /**
      * Creates a new Playlist instance from a given array of items.
      *
@@ -92,24 +93,33 @@ export default class Playlist extends PlaylistEventTarget {
         this.mediaElement_ = mediaElement;
         this.items_ = [];
         this.currentIndex_ = 0;
-        this.repeat_ = false;
+        this.repeat_ = this.#repeat_states.off;//false;
         this.onError_ = options.onError || (() => { });
         this.onWarn_ = options.onWarn || (() => { });
         let playlist = this;
         this.mediaElement_.onended = function() {
-            if (playlist.repeat_) {
-                playlist.currentIndex_ = 0;
+            if (playlist.repeat_==playlist.#repeat_states.all) {
+                if(playlist.currentIndex_ < playlist.items_.length-1) {
+                    playlist.currentIndex_++;
+                }else{
+                    playlist.currentIndex_ = 0;
+                }
                 playlist.mediaElement_.src = playlist.items_[playlist.currentIndex_].sources[0].src;
                 playlist.mediaElement_.load();
                 playlist.mediaElement_.play();
                 playlist.trigger('playlistitemload');
-            } else if (playlist.currentIndex_ < playlist.items_.length - 1) {
-                playlist.currentIndex_++;
-                if (playlist.currentIndex_ < playlist.items_.length) {
-                    playlist.mediaElement_.src = playlist.items_[playlist.currentIndex_].sources[0].src;
-                    playlist.mediaElement_.load();
-                    playlist.mediaElement_.play();
-                    playlist.trigger('playlistitemload');
+            } else if (playlist.repeat_==playlist.#repeat_states.one) {
+                playlist.mediaElement_.play();
+                playlist.trigger('playlistitemload');
+            } else {
+                if (playlist.currentIndex_ < playlist.items_.length - 1) {
+                    playlist.currentIndex_++;
+                    if (playlist.currentIndex_ < playlist.items_.length) {
+                        playlist.mediaElement_.src = playlist.items_[playlist.currentIndex_].sources[0].src;
+                        playlist.mediaElement_.load();
+                        playlist.mediaElement_.play();
+                        playlist.trigger('playlistitemload');
+                    }
                 }
             }
         };
@@ -162,14 +172,24 @@ export default class Playlist extends PlaylistEventTarget {
      * Enables repeat mode. When enabled, the playlist will loop back to the first item after the last item.
      */
     enableRepeat() {
-        this.repeat_ = true;
+        this.repeat_ = this.#repeat_states.all;
     }
 
     /**
      * Disables repeat mode. When disabled, the playlist will not loop back to the first item after the last item.
      */
     disableRepeat() {
-        this.repeat_ = false;
+        this.repeat_ = this.#repeat_states.off;
+    }
+
+    toggleRepeat() {
+       if(this.repeat_ == this.#repeat_states.off) {
+           this.enableRepeat();
+       }else if(this.repeat_ == this.#repeat_states.all) {
+           this.repeat_ = this.#repeat_states.one;
+       }else{
+           this.repeat_ = this.#repeat_states.off;
+       }
     }
 
     /**
@@ -178,6 +198,10 @@ export default class Playlist extends PlaylistEventTarget {
      * @return {boolean} - True if repeat mode is enabled, false otherwise.
      */
     isRepeatEnabled() {
+        return this.repeat_!==this.#repeat_states.off;
+    }
+
+    getRepeatStatus() {
         return this.repeat_;
     }
 
@@ -235,7 +259,7 @@ export default class Playlist extends PlaylistEventTarget {
             return -1;
         }
         const nextIndex = (this.currentIndex_ + 1) % this.items_.length;
-        return this.repeat_ || nextIndex !== 0 ? nextIndex : -1;
+        return this.repeat_===this.#repeat_states.all || nextIndex !== 0 ? nextIndex : -1;
     }
 
     /**
@@ -249,7 +273,7 @@ export default class Playlist extends PlaylistEventTarget {
             return -1;
         }
         const previousIndex = (this.currentIndex_ - 1 + this.items_.length) % this.items_.length;
-        return this.repeat_ || previousIndex !== this.items_.length - 1 ? previousIndex : -1;
+        return this.repeat_===this.#repeat_states.all || previousIndex !== this.items_.length - 1 ? previousIndex : -1;
     }
 
     /**

@@ -15,13 +15,13 @@
   <link rel="stylesheet" href="{{url_for('static', filename='css/highlight.default.min.css')}}">
   <script>
     var ytad_url = "{{ ytad_url }}";
-    
+
     // @ts-ignore
     var audio_files_string = {{ audio_files | tojson }};
 
     var audio_files = eval(audio_files_string);//JSON.parse('{{ audio_files }}');
   </script>
-  
+
 </head>
 
 <body dir="ltr">
@@ -45,7 +45,8 @@
         <div class="btn-group">
           <a data-toggle="modal" data-target="#newfolder-modal" class="btn btn-secondary text-muted">New Folder</a>
           <a data-toggle="modal" data-target="#uploader-modal" class="btn btn-secondary text-muted">Upload</a>
-          <a data-toggle="modal" data-target="#ytad-modal" class="btn btn-secondary text-muted" style="background-color: red; color: white !important;"><i class="fa fa-fw fa-play"></i><strong id="ytad">YTAD</strong></a>
+          <a data-toggle="modal" data-target="#ytad-modal" class="btn btn-secondary text-muted" style="background-color: red; color: white !important;"><i
+               class="fa fa-fw fa-play"></i><strong id="ytad">YTAD</strong></a>
         </div>
       </div>
     </div>
@@ -73,12 +74,14 @@
           {% for entry in contents if entry.type == 'file' %}
           <tr>
             <td class="text-xs-left " data-sort-value="file-{{entry.name | lower}}"><i class="fa fa-fw {{entry.name | icon_fmt}} " aria-hidden="true"></i>&nbsp;
-              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}" data-type="{{entry.name | data_fmt}}" {%
+              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}"
+                 data-type="{{entry.name | data_fmt}}" {%
                  endif %} href="{{entry.name}}" data-size="{{entry.size | size_fmt}}">{{entry.name}}</a>
             </td>
             <td class="text-xs-right " data-sort-value="{{entry.size}}" title="{{entry.size}} bytes">{{entry.size | size_fmt}}</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
-            <td class="text-xs-right "><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right "><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash"
+                   style="font-size: 18px;"></i></a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -123,7 +126,7 @@
         </div>
       </div>
     </div>
-  </div>
+
   <div class="modal fade" id="player-modal" tabindex="-1" role="dialog" aria-labelledby="file-name" aria-hidden="true">
     <div class="modal-dialog modal-xxl">
       <div class="modal-content">
@@ -144,7 +147,6 @@
       </div>
     </div>
   </div>
-</div>
   <div class="modal fade" id="uploader-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -207,7 +209,7 @@
       </div>
     </div>
   </div>
-  <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <!-- <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -241,8 +243,51 @@
         </div>
       </div>
     </div>
+  </div> -->
+
+  <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title text-left" id="ytad-modal-title">Youtube Audio Downloader</h4>
+          <small class="text-muted" id="file-meta"></small>
+        </div>
+        <form id="video_urls_form" method="post" action="/api/">
+        <div class="modal-body">
+          <div class="md-form">
+            <label>Videos urls</label>
+            <textarea id="video_urls" name="videos_urls" class="form-control"></textarea>
+            <input type="hidden" id="path" name="path" value="{{path}}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="pull-xs-right">
+            <button type="button" id="close-ytad-videos" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" id="send-ytad-videos" class="btn btn-secondary">Download</button>
+          </div>
+        </div>
+        </form>
+        <form id="playlist_url_form" method="post" action="/api/playlist/">
+        <div class="modal-body">
+          <div class="md-form">
+            <label>Playlist url</label>
+            <input type="text" id="playlist_url" name="playlist_url" class="form-control">
+            <input type="hidden" id="path" name="path" value="{{path}}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="pull-xs-right">
+            <button type="button" id="close-ytad-playlist" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" id="send-ytad-playlist" class="btn btn-secondary">Download</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
   </div>
   </div>
+
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/tether.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
