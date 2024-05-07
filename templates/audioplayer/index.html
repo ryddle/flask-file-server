@@ -252,7 +252,7 @@
         li.appendChild(span);
         if (item.type == 'folder') {
           newpath = path.charAt(0) == '/' ? path + item.name + '/' : path + item.name;
-          newpath = newpath.replace('/filestore/', '/');
+          newpath = newpath.replace('//', '/');
           li.path = newpath;
           li.title = newpath;
           span.textContent = newpath;

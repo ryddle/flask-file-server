@@ -150,7 +150,7 @@ def sorted_alphanumeric(data):
 def create_folder_structure_json(path): 
     # Initialize the result dictionary with folder 
     # name, type, and an empty list for children 
-    result = {'name': os.path.basename(path), 
+    result = {'name': (os.path.basename(path), '')[path==root], 
               'type': 'folder', 'children': []} 
   
     # Check if the path is a directory 
