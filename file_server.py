@@ -185,7 +185,7 @@ class PathView(MethodView):
         
         if p == 'audioplayer/index.html':
             dir_path = request.args.get('path')
-            path = os.path.join(root, dir_path)
+            path = os.path.join(root, dir_path or '')
             path = os.path.normpath(path)
             if os.path.isdir(path):
                 audio_files = []
@@ -217,7 +217,12 @@ class PathView(MethodView):
             else:
                 return {"status": 500, "error": "No lyrics found"}
             
-
+        if p == 'api/getMusicFolderTree':
+            jsonTree =create_folder_structure_json(root)
+            """ res = make_response(jsonTree, 200)
+            res.headers.add('Content-type', 'application/json') """
+            return jsonTree
+            
         path = os.path.join(root, p)
         path = os.path.normpath(path)
         if os.path.isdir(path):

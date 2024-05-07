@@ -1,5 +1,6 @@
 :root {
   --primary-color: #d2691e; /* chocolate=#d2691e   rgb(184, 22, 97);*/
+  --secondary-color: #d28d5a;
   --white: #ffffff;
 }
 
@@ -310,4 +311,49 @@ input[type="range"] {
   textarea {
     padding: 1em;
   }
+}
+
+/***************************************/
+/******* tree dialog ********/
+#treedialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 9999;
+  visibility: hidden;
+  background-color: black;
+  border: 2px solid var(--primary-color);
+  width: 520px;
+  height: 750px;
+  padding: 10px;
+}
+
+#treedialog #tree {
+  width: 100%;
+  height: calc(100% - 50px);
+  overflow: auto;
+}
+
+#treedialog ul {
+  list-style-type: none;
+  margin-left: 20px;
+  padding: 0;
+}
+
+#treedialog li {
+  margin-top: 5px;
+}
+
+#treedialog #btn {
+  float: right;
+  margin-right: 20px;
+}
+
+#treedialog .folder {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+#treedialog .file {
+  color: var(--secondary-color);
 }

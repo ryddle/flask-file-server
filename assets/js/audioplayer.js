@@ -87,11 +87,11 @@ const filters = [];
     list: 'tickmarks',
     color: {
       trackColorBack: '#ffffff',
-      trackColorOver:  "var(--primary-color)",
+      trackColorOver: "var(--primary-color)",
       trackBorderColor: '#dddddd',
-      thumbColor:  "var(--primary-color)",
-      thumbBorderColor:  "var(--primary-color)",
-      ticksColor:  "var(--primary-color)"
+      thumbColor: "var(--primary-color)",
+      thumbBorderColor: "var(--primary-color)",
+      ticksColor: "var(--primary-color)"
     },
     callback: changeGain
   }
@@ -204,7 +204,6 @@ function changeGain(target) {
   output.value = (value > 0 ? '+' : '') + value + ' dB';
 }
 
-
 // instantiate the playlist
 var playlist = Playlist.from(audioList, mediaElement);
 
@@ -216,7 +215,7 @@ play_list.id = "playlist_ul";
 Object.assign(play_list.style, {
   height: "400px",
   overflowY: "auto",
-  color:  "var(--primary-color)",
+  color: "var(--primary-color)",
   marginBottom: "12px",
   padding: "5px"
 });
@@ -253,7 +252,7 @@ for (let index = 0; index < playlist.items_.length; index++) {
     liObjs.forEach(element => {
       element.style.backgroundColor = 'transparent';
       element.style.fontWeight = 'normal';
-      element.style.color =  "var(--primary-color)";
+      element.style.color = "var(--primary-color)";
     });
 
     this.parentElement.style.backgroundColor = 'white';
@@ -283,13 +282,13 @@ prevtrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.
 nexttrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getNextIndex()));
 playtrackbtn.addEventListener('click', () => playlist.togglePlay());
 shufflebtn.addEventListener('click', () => playlist.toggleShuffle());
-repeatbtn.addEventListener('click', function(){
+repeatbtn.addEventListener('click', function () {
   playlist.toggleRepeat();
-  if(playlist.getRepeatStatus()==='off'){
+  if (playlist.getRepeatStatus() === 'off') {
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat"></i>';
-  }else if(playlist.getRepeatStatus()==='one'){
+  } else if (playlist.getRepeatStatus() === 'one') {
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;">1</i>';
-  }else{
+  } else {
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;"></i>';
   }
 });
@@ -301,9 +300,9 @@ Object.assign(pl_info.style, {
   position: 'relative',
   height: 'calc(100vh - 30px)',
   overflow: 'auto',
-  border: '2px solid ' +  "var(--primary-color)",
+  border: '2px solid ' + "var(--primary-color)",
   marginLeft: '10px',
-  color:  "var(--primary-color)",
+  color: "var(--primary-color)",
   padding: '10px',
   fontSize: '12px',
   fontWeight: 'bold',
@@ -314,7 +313,7 @@ var pl_lyriscontainer = document.createElement("div");
 pl_lyriscontainer.id = "pl_lyriscontainer";
 Object.assign(pl_lyriscontainer.style, {
   width: "100%",
-  color:  "var(--primary-color)",
+  color: "var(--primary-color)",
   fontSize: "14px"
 });
 
@@ -388,20 +387,80 @@ mediaElement.addEventListener("pause", (event) => {
 
 let current_primary_color = primary_color;
 document.addEventListener("primaryColorChange", (event) => {
-  if(current_primary_color!=primary_color && current_audiomotion_preset=="default"){
+  if (current_primary_color != primary_color && current_audiomotion_preset == "default") {
     current_primary_color = primary_color;
     setGradient();
   }
 });
 let current_audiomotion_preset = audio_motion_preset;
 document.addEventListener("audioMotionPresetChange", (event) => {
-  if(current_audiomotion_preset!=audio_motion_preset){
+  if (current_audiomotion_preset != audio_motion_preset) {
     current_audiomotion_preset = audio_motion_preset;
     audioMotion.setOptions(audioMotionConfigs[audio_motion_preset]);
-    if(current_audiomotion_preset=="default"){
+    if (current_audiomotion_preset == "default") {
       setGradient();
     }
   }
+});
+
+document.addEventListener("playlistChangeEvent", (event) => {
+  playlist.setItems(event.detail);
+  playlist.loadPlaylistItem(0);
+  
+  play_list.remove();
+  play_list = document.createElement("ul");
+  play_list.id = "playlist_ul";
+  Object.assign(play_list.style, {
+    /*height: "400px",*/
+    overflowY: "auto",
+    color: "var(--primary-color)",
+    marginBottom: "12px",
+    padding: "5px"
+  });
+
+  for (let index = 0; index < playlist.items_.length; index++) {
+    const file = playlist.items_[index].sources[0].filename;
+
+    var liObj = document.createElement("li");
+    liObj.style.listStyle = "decimal";
+    liObj.style.listStylePosition = 'inside';
+    liObj.style.cursor = "pointer";
+    liObj.style.padding = "3px";
+    liObj.style.fontSize = "14px";
+    liObj.style.marginBottom = "3px";
+    if (index == 0) {
+      liObj.style.backgroundColor = 'white';
+      liObj.style.fontWeight = '700';
+    }
+
+    var aObj = document.createElement("a");
+    aObj.href = "javascript:void(0)";
+    aObj.innerText = file;
+    aObj.index = index;
+    aObj.style.color = "var(--primary-color)";
+    aObj.style.fontWeight = '700';
+    aObj.style.textDecoration = 'none';
+    aObj.style.cursor = "pointer";
+    aObj.style.fontSize = "14px";
+    aObj.addEventListener('click', function () {
+      playlist.loadPlaylistItem(this.index);
+      //playlist.togglePlay();
+      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
+      var liObjs = Array.from(this.parentElement.parentElement.getElementsByTagName('li'));
+      liObjs.forEach(element => {
+        element.style.backgroundColor = 'transparent';
+        element.style.fontWeight = 'normal';
+        element.style.color = "var(--primary-color)";
+      });
+
+      this.parentElement.style.backgroundColor = 'white';
+      this.parentElement.style.fontWeight = '700';
+    });
+    liObj.appendChild(aObj);
+
+    play_list.appendChild(liObj);
+  }
+  playlist_cont.appendChild(play_list);
 });
 
 document.getElementById('player_progress').addEventListener('change', (event) => {
@@ -416,3 +475,104 @@ document.getElementById('player_mute').addEventListener('click', () => {
     document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-up"></i>';
   }
 });
+
+
+
+/* ======== CONTROLS (dat-gui) ======== */
+import * as dat from './dat.gui.module.js';
+
+const gui = new dat.GUI({ autoPlace: false, closed: true });
+
+gui.add(audioMotion, 'gradient', ['classic', 'prism', 'orangered', 'rainbow', 'steelblue']);
+
+gui.add(audioMotion, 'mode', {
+  'Discrete frequencies': 0,
+  '1/24th octave / 240 bands': 1,
+  '1/12th octave / 120 bands': 2,
+  '1/8th octave / 80 bands': 3,
+  '1/6th octave / 60 bands': 4,
+  '1/4th octave / 40 bands': 5,
+  '1/3rd octave / 30 bands': 6,
+  'Half octave / 20 bands': 7,
+  'Full octave / 10 bands': 8,
+  'Line / Area graph': 10
+});
+
+const newFeaturesFolder = gui.addFolder('📢 New in version 4');
+
+newFeaturesFolder.add(audioMotion, 'ansiBands');
+newFeaturesFolder.add(audioMotion, 'colorMode', ['bar-index', 'bar-level', 'gradient']);
+newFeaturesFolder.add(audioMotion, 'channelLayout', ['single', 'dual-combined', 'dual-horizontal', 'dual-vertical']);
+
+newFeaturesFolder.add(audioMotion, 'gradientLeft', ['classic', 'prism', 'orangered', 'rainbow', 'steelblue']);
+newFeaturesFolder.add(audioMotion, 'gradientRight', ['classic', 'prism', 'orangered', 'rainbow', 'steelblue']);
+
+newFeaturesFolder.add(audioMotion, 'frequencyScale', {
+  'Bark': 'bark',
+  'Linear': 'linear',
+  'Logarithmic': 'log',
+  'Mel': 'mel'
+});
+newFeaturesFolder.add(audioMotion, 'linearAmplitude');
+newFeaturesFolder.add(audioMotion, 'linearBoost', 1, 5, .2);
+newFeaturesFolder.add(audioMotion, 'noteLabels');
+newFeaturesFolder.add(audioMotion, 'peakLine');
+newFeaturesFolder.add(audioMotion, 'radius', 0, 1, .05);
+newFeaturesFolder.add(audioMotion, 'radialInvert');
+newFeaturesFolder.add(audioMotion, 'roundBars');
+newFeaturesFolder.add(audioMotion, 'trueLeds');
+newFeaturesFolder.add(audioMotion, 'weightingFilter', {
+  'none': '',
+  'A-weighting': 'A',
+  'B-weighting': 'B',
+  'C-weighting': 'C',
+  'D-weighting': 'D',
+  'ITU-R 468': '468'
+});
+
+const bandsFolder = gui.addFolder('Bands / Graph settings');
+
+bandsFolder.add(audioMotion, 'barSpace', 0, 1, .1);
+
+bandsFolder.add(audioMotion, 'alphaBars');
+bandsFolder.add(audioMotion, 'ledBars');
+bandsFolder.add(audioMotion, 'lumiBars');
+bandsFolder.add(audioMotion, 'outlineBars');
+bandsFolder.add(audioMotion, 'fillAlpha', 0, 1, .1);
+bandsFolder.add(audioMotion, 'lineWidth', 0, 5, .5);
+
+const radialFolder = gui.addFolder('Radial settings');
+
+radialFolder.add(audioMotion, 'radial');
+radialFolder.add(audioMotion, 'spinSpeed', -5, 5, 1);
+
+const reflexFolder = gui.addFolder('Reflex & Mirror settings');
+
+reflexFolder.add(audioMotion, 'mirror', -1, 1, 1);
+reflexFolder.add(audioMotion, 'reflexRatio', 0, .9, .1);
+reflexFolder.add(audioMotion, 'reflexAlpha', 0, 1, .1);
+reflexFolder.add(audioMotion, 'reflexBright', 0, 2, .1);
+reflexFolder.add(audioMotion, 'reflexFit');
+
+const switchesFolder = gui.addFolder('Switches');
+
+const switches = ['showBgColor', 'showPeaks', 'showScaleX', 'showScaleY', 'splitGradient', 'loRes', 'showFPS'];
+
+for (let prop of switches)
+  switchesFolder.add(audioMotion, prop);
+
+const buttons = {
+  //  link: () => window.parent.location = 'https://audiomotion.dev',
+  link: () => window.parent.location = 'https://github.com/hvianna/audioMotion-analyzer/tree/develop#readme',
+  fullscreen: () => audioMotion.toggleFullscreen(),
+}
+gui.add(buttons, 'link').name(`v${AudioMotionAnalyzer.version}`);
+
+let guidomElement = gui.domElement;
+Object.assign(guidomElement.style, {
+  width: '245px',
+  position: 'absolute',
+  left: 'calc(50% - 255px)',
+  top: '10px'
+})
+document.getElementById('analyzer').appendChild(guidomElement);
