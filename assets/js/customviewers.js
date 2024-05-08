@@ -309,7 +309,7 @@ function imageViewer(modal) {
 
         var modal_body = modal[0].getElementsByClassName('modal-body')[0];
         modal_body.style = {};
-        modal_body.style.height = "900px";
+        //modal_body.style.height = "900px";
         modal_body.style.minHeight = "900px";
         modal_body.style.backgroundColor = "#000";
         modal_body.innerHTML = html;

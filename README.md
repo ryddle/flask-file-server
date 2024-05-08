@@ -2,13 +2,14 @@
 #       This repository is for personal use.
 #       If you're looking for the original repository, visit: https://github.com/Wildog/flask-file-server
 
+
 # flask-file-server
 
 A flask file server with an elegant frontend for browsing, uploading and streaming files
 
 ![screenshot](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot.jpg)
 
-## Changes in this version
+## Changes in this repo
 
 * Eliminated login
 * Added button for deleting files and directories
@@ -19,6 +20,12 @@ A flask file server with an elegant frontend for browsing, uploading and streami
 * Added new libraries for visualization dialogs
 * Added new audio player dialog for play all audios in folder with lyrics
 * Added new independent page audio player linked from integrated audio player dialog
+### Changes 20240508
+* Now Audio Player is fully independent
+* Now you can select all the folder with music for playing from Audio Player
+* New menu for Analyzer customization grabbed from [Henrique Avila Vianna](https://henriquevianna.com) [CodePen](https://codepen.io/collection/ABbbKr)
+* Youtube Audio Downloader services are now integrated
+* Fixes and improvements
 
 ![screenshot2](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot2.jpg)
 ![screenshot3](https://raw.githubusercontent.com/ryddle/flask-file-server/master/resources/screenshot3.jpg)

@@ -19,7 +19,7 @@
     // @ts-ignore
     var audio_files_string = {{ audio_files | tojson }};
 
-    var audio_files = eval(audio_files_string);//JSON.parse('{{ audio_files }}');
+    var audio_files = eval(audio_files_string);
   </script>
 
 </head>
@@ -291,7 +291,6 @@
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/tether.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
-  <!-- <script type="text/javascript" src="{{url_for('static', filename='js/listr.pack.js')}}"></script> -->
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.filer.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.base64.min.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/highlight.min.js')}}"></script>
