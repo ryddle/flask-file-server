@@ -320,7 +320,7 @@ Object.assign(pl_lyriscontainer.style, {
 pl_info.appendChild(pl_lyriscontainer);
 
 // Add a loader element to your HTML
-var pl_lyrics_loader = document.createElement('div');
+/* var pl_lyrics_loader = document.createElement('div');
 pl_lyrics_loader.innerText = 'Loading...';
 pl_lyrics_loader.style.position = 'absolute';
 pl_lyrics_loader.style.top = '50%';
@@ -329,7 +329,27 @@ pl_lyrics_loader.style.transform = 'translate(-50%, -50%)';
 pl_lyrics_loader.style.backgroundColor = 'rgba(50, 50, 50, 0.5)';
 pl_lyrics_loader.style.color = 'white';
 pl_lyrics_loader.style.padding = '10px';
-pl_lyrics_loader.style.borderRadius = '5px';
+pl_lyrics_loader.style.borderRadius = '5px'; */
+
+//<!-- https://cssloaders.github.io/ -->
+var sheet = window.document.styleSheets[0];
+sheet.insertRule('@keyframes rotation {\
+  0% {transform: rotate(0deg);}\
+  100% {transform: rotate(360deg);}\
+}', sheet.cssRules.length);
+
+var pl_lyrics_loader = document.createElement('span');
+pl_lyrics_loader.style.position = 'absolute';
+pl_lyrics_loader.style.top = '50%';
+pl_lyrics_loader.style.left = '50%';
+pl_lyrics_loader.style.width= '48px';
+pl_lyrics_loader.style.height= '48px';
+pl_lyrics_loader.style.border= '5px solid';
+pl_lyrics_loader.style.borderColor= 'var(--primary-color) transparent';
+pl_lyrics_loader.style.borderRadius= '50%';
+pl_lyrics_loader.style.display= 'inline-block';
+pl_lyrics_loader.style.boxSizing= 'border-box';
+pl_lyrics_loader.style.animation= 'rotation 1s linear infinite';
 
 // Append the loader to the modal body
 pl_info.appendChild(pl_lyrics_loader);
