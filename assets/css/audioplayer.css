@@ -30,7 +30,7 @@ button:focus {
   display: flex;
   background-color: #161616;
   justify-content: space-around;
-  padding-left: 35px;
+  padding: 5px 25px;
 }
 
 .eqband {
@@ -38,7 +38,7 @@ button:focus {
   text-align: center;
   /*margin-left: 40px;
   margin-right: 1px;*/
-  margin-bottom: 5px;
+  margin-bottom: -5px;
   color: #fff;
 }
 
@@ -106,7 +106,19 @@ button:focus {
   box-shadow: 0 0 0 13px rgba(255, 85, 0, .2)
 }
 
+.eq_container {
+    display: flex;
+    background-color: #161616;
+    justify-content: space-between;
+    padding-left: 70px;
+    padding-right: 20px;
+}
 
+
+.playlist-controls {
+  display: flex;
+  justify-content: center;
+}
 
 .playlist-controls button i {
   color: var(--primary-color);
@@ -317,8 +329,8 @@ input[type="range"] {
 /******* tree dialog ********/
 #treedialog {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 0px;
+  left: 0px;
   z-index: 9999;
   visibility: hidden;
   background-color: black;

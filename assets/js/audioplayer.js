@@ -149,13 +149,27 @@ let analyzerConfs = [
   }
 ]
 
+
+let audioMotionConfig = {
+  source: filters[filters.length - 1],
+  gradient: 'chocolate',
+};
+
 const audioMotion = new AudioMotionAnalyzer(
-  document.getElementById('analyzer'),
-  {
-    source: filters[filters.length - 1],
-    gradient: 'chocolate',
-  }
+  document.getElementById('analyzer'),audioMotionConfig
 );
+
+Object.assign(audioMotionConfig, audioMotionConfigs[audio_motion_preset]);
+if(!AudioMotionAnalyzer.GRADIENTS.includes(audioMotionConfig.gradient)) {
+  let _new_gradient_ = createGradient();
+  let _gradient_name = _new_gradient_[0];
+  let _gradient_options = _new_gradient_[1];
+  audioMotionConfig.gradient = _gradient_name;
+  if (undefined !== audioMotion) {
+    audioMotion.registerGradient(_gradient_name, _gradient_options);
+    audioMotion.gradient = _gradient_name;
+  }
+}
 
 function createGradient() {
   let _name = primary_color.replace('(', '_').replace(')', '_').replaceAll(',', '_').replaceAll(' ', '');
@@ -273,15 +287,20 @@ playlist_cont.appendChild(play_list);
 }); */
 
 // Playlist controls
-var prevtrackbtn = document.getElementById("prev-track-btn");
-var nexttrackbtn = document.getElementById("next-track-btn");
-var playtrackbtn = document.getElementById("play-track-btn");
 var shufflebtn = document.getElementById("shuffle-btn");
+var prevtrackbtn = document.getElementById("prev-track-btn");
+var backwardbtn = document.getElementById("backward-btn");
+var playtrackbtn = document.getElementById("play-track-btn");
+var forwardbtn = document.getElementById("forward-btn");
+var nexttrackbtn = document.getElementById("next-track-btn");
 var repeatbtn = document.getElementById("repeat-btn");
-prevtrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getPreviousIndex()));
-nexttrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getNextIndex()));
-playtrackbtn.addEventListener('click', () => playlist.togglePlay());
+
 shufflebtn.addEventListener('click', () => playlist.toggleShuffle());
+prevtrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getPreviousIndex()));
+backwardbtn.addEventListener('click', () => mediaElement.currentTime = Math.max(0, mediaElement.currentTime - 5));
+playtrackbtn.addEventListener('click', () => playlist.togglePlay());
+forwardbtn.addEventListener('click', () => mediaElement.currentTime = Math.min(mediaElement.duration, mediaElement.currentTime + 5));
+nexttrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getNextIndex()));
 repeatbtn.addEventListener('click', function () {
   playlist.toggleRepeat();
   if (playlist.getRepeatStatus() === 'off') {
@@ -407,7 +426,7 @@ mediaElement.addEventListener("pause", (event) => {
 
 let current_primary_color = primary_color;
 document.addEventListener("primaryColorChange", (event) => {
-  if (current_primary_color != primary_color && current_audiomotion_preset == "default") {
+  if (current_primary_color != primary_color && (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror")) {
     current_primary_color = primary_color;
     setGradient();
   }
@@ -417,7 +436,7 @@ document.addEventListener("audioMotionPresetChange", (event) => {
   if (current_audiomotion_preset != audio_motion_preset) {
     current_audiomotion_preset = audio_motion_preset;
     audioMotion.setOptions(audioMotionConfigs[audio_motion_preset]);
-    if (current_audiomotion_preset == "default") {
+    if (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror") {
       setGradient();
     }
   }

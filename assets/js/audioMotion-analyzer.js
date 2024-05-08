@@ -394,6 +394,14 @@ export default class AudioMotionAnalyzer {
 	}
 
 	/**
+	 * Static properties and methods
+	 */
+
+	static get GRADIENTS() {
+		return GRADIENTS;
+	}
+
+	/**
 	 * ==========================================================================
 	 *
 	 * PUBLIC PROPERTIES GETTERS AND SETTERS

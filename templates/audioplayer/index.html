@@ -19,6 +19,14 @@
     var primary_color = rs.getPropertyValue('--primary-color');
     var secondary_color = rs.getPropertyValue('--secondary-color');
 
+    if(localStorage.getItem('primary_color') != null){
+      primary_color = localStorage.getItem("primary_color");
+      secondary_color = localStorage.getItem("secondary_color");
+
+      setCssVar('--primary-color', primary_color);
+      setCssVar('--secondary-color', secondary_color);
+    }
+
     // Create a function for setting a variable value
     function setCssVar(variable, value) {
       // Set the value of variable --blue to another value (in this case "lightblue")
@@ -33,10 +41,15 @@
       bars: { mode: 6, barSpace: .4, frequencyScale: 'bark', gradient: 'rainbow', lumiBars: false, ledBars: true, linearAmplitude: true, linearBoost: 1.6, maxFreq: 20000, minFreq: 30, reflexRatio: .1, reflexAlpha: .25, weightingFilter: 'D' },
       dual: { mode: 10, channelLayout: 'dual-combined', fillAlpha: .3, gradientLeft: 'steelblue', gradientRight: 'orangered', linearAmplitude: true, linearBoost: 1.2, lineWidth: 0, maxFreq: 16000, minFreq: 30, peakLine: true, showScaleX: false, showPeaks: true, weightingFilter: 'D' },
       wall: { mode: 2, barSpace: .1, gradient: 'prism', lumiBars: true, minDecibels: -60, maxDecibels: -30, maxFreq: 16000, minFreq: 30, showBgColor: false, showPeaks: false, showScaleX: false, weightingFilter: 'D' },
-      mirror: {alphaBars:false,ansiBands:false,barSpace:0.1,bgAlpha:0.7,channelLayout:"single",colorMode:"gradient",fftSize:8192,fillAlpha:1,frequencyScale:"log",gradient:"#E60039",ledBars:false,linearAmplitude:false,linearBoost:1,lineWidth:0,loRes:false,lumiBars:false,maxDecibels:-25,maxFPS:0,maxFreq:22000,minDecibels:-85,minFreq:20,mirror:0,mode:0,noteLabels:false,outlineBars:false,overlay:false,peakLine:false,radial:false,radialInvert:false,radius:0.3,reflexAlpha:1,reflexBright:1,reflexFit:true,reflexRatio:0.5,roundBars:false,showBgColor:true,showFPS:false,showPeaks:true,showScaleX:true,showScaleY:false,smoothing:0.5,spinSpeed:0,splitGradient:false,trueLeds:false,useCanvas:true,volume:1,weightingFilter:""}
+      mirror: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, outlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 1, reflexBright: 1, reflexFit: true, reflexRatio: 0.5, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: true, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" }
     }
 
     var audio_motion_preset = "default";
+    /* if (localStorage.getItem('audio_motion_preset')) {
+      audio_motion_preset = localStorage.getItem('audio_motion_preset');
+      var audioMotionPresetChangeEvent = new Event('audioMotionPresetChange');
+      document.dispatchEvent(audioMotionPresetChangeEvent);
+    } */
 
     function applySettings() {
       document.getElementById('settings-panel').style.display = 'none';
@@ -56,12 +69,15 @@
       var newcolor = xcolor.getXcolor(color);
       primary_color = newcolor.getHexString();
       setCssVar('--primary-color', primary_color);
-      var newsecondary_color = xcolor.getHsl(newcolor.hsl.h, Math.max(0, newcolor.hsl.s-12), Math.min(100, newcolor.hsl.l+12));
+      var newsecondary_color = xcolor.getHsl(newcolor.hsl.h, Math.max(0, newcolor.hsl.s - 12), Math.min(100, newcolor.hsl.l + 12));
       secondary_color = newsecondary_color.getHexString();
       setCssVar('--secondary-color', secondary_color);
 
+      localStorage.setItem("primary_color",primary_color);
+      localStorage.setItem("secondary_color",secondary_color);
+
       // Trigger a primaryColorChange event
-      var primaryColorChangeEvent = new Event('primaryColorChange');
+      var primaryColorChangeEvent = new CustomEvent('primaryColorChange');
       document.dispatchEvent(primaryColorChangeEvent);
     }
 
@@ -69,6 +85,7 @@
       audio_motion_preset = audioMotionPreset;
       var audioMotionPresetChangeEvent = new Event('audioMotionPresetChange');
       document.dispatchEvent(audioMotionPresetChangeEvent);
+      localStorage.setItem('audio_motion_preset', audio_motion_preset);
     }
   </script>
   <script>
@@ -82,7 +99,7 @@
       const file = audio_files[index];
 
       var track = {};
-      var sources = [{ src: location.origin + "/" + ((path!=null)?path + "/":"") + file, type: 'audio/mpeg', filename: file }];
+      var sources = [{ src: location.origin + "/" + ((path != null) ? path + "/" : "") + file, type: 'audio/mpeg', filename: file }];
       var poster = location.origin + '/assets/images/default_poster.png';
       track.sources = sources;
       track.poster = poster;
@@ -112,7 +129,7 @@
       </div>
       <div id="audio-container"></div>
 
-      <div id="controls" class="controls">
+      <div id="controls" class="eq_container">
       </div>
 
       <datalist id="tickmarks">
@@ -136,22 +153,28 @@
            style="display: flex;justify-content: space-between;align-items: center;">
         <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 70%;">
         <span id="player_timer" style="color: var(--primary-color);">0:00/0:00</span>
-        <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px;">
+        <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px; margin-right: 0px;">
           <i class="fa fa-volume-off" style="font-size: large;"></i>
         </button>
       </div>
       <div id="playlist_controls" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands">
+        <button type="button" id="shuffle-btn" class="btn btn-secondary controls">
+          <i class="fa fa-random"></i>
+        </button>
         <button type="button" id="prev-track-btn" class="btn btn-secondary controls">
+          <i class="fa fa-solid fa-step-backward"></i>
+        </button>
+        <button type="button" id="backward-btn" class="btn btn-secondary controls">
           <i class="fa fa-solid fa-backward"></i>
         </button>
         <button type="button" id="play-track-btn" class="btn btn-secondary controls">
           <i class="fa fa-solid fa-play"></i>
         </button>
-        <button type="button" id="next-track-btn" class="btn btn-secondary controls">
+        <button type="button" id="forward-btn" class="btn btn-secondary controls">
           <i class="fa fa-solid fa-forward"></i>
         </button>
-        <button type="button" id="shuffle-btn" class="btn btn-secondary controls">
-          <i class="fa fa-random"></i>
+        <button type="button" id="next-track-btn" class="btn btn-secondary controls">
+          <i class="fa fa-solid fa-step-forward"></i>
         </button>
         <button type="button" id="repeat-btn" class="btn btn-secondary controls">
           <i class="fa fa-repeat"></i>
@@ -198,6 +221,7 @@
               <option value="bars">bars</option>
               <option value="dual">dual</option>
               <option value="wall">wall</option>
+              <option value="mirror">mirror</option>
             </select>
           </p>
           <!--           <p>
@@ -252,6 +276,7 @@
         span.className = item.type;
         li.appendChild(span);
         if (item.type == 'folder') {
+          children = [];
           newpath = path.charAt(0) == '/' ? path + item.name + '/' : path + item.name;
           newpath = newpath.replace('//', '/');
           li.path = newpath;
@@ -259,17 +284,36 @@
           span.textContent = newpath;
           const btn = document.createElement('input');
           btn.type = 'checkbox';
+          btn.onchange = function () {
+            if (this.checked) {
+              this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                cb.checked = true;
+                cb.folderChecked = true;
+              });
+            } else {
+              this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                cb.checked = false;
+                cb.folderChecked = false;
+              });
+            }
+          };
           li.appendChild(btn);
+
         } else {
           children.push(item.name);
+          const btn = document.createElement('input');
+          btn.type = 'checkbox';
+          btn.folderChecked = false;
+          btn.dataset.path = path + item.name;
+          li.appendChild(btn);
+
+          if (parentElement.tagName == 'LI') {
+            let cb = parentElement.querySelectorAll('input[type="checkbox"]')[0];
+            cb.dataset.path = path;
+            cb.dataset.children = children;
+          }
         }
         ul.appendChild(li);
-
-        if (parentElement.tagName == 'LI') {
-          let cb = parentElement.querySelectorAll('input[type="checkbox"]')[0];
-          cb.dataset.path = path;
-          cb.dataset.children = children;
-        }
 
         if (item.children && item.children.length > 0) {
           renderTree(item.children, li, newpath);
@@ -286,9 +330,16 @@
       const selected = [];
       const checkboxes = treeContainer.querySelectorAll('input[type="checkbox"]:checked');
       checkboxes.forEach((checkbox) => {
-        checkbox.dataset.children.split(',').forEach(child => {
-          selected.push(checkbox.dataset.path.replace('/', '') + child);
-        });
+        if (checkbox.dataset.children !== undefined) {
+
+          checkbox.dataset.children.split(',').forEach(child => {
+            selected.push(checkbox.dataset.path.replace('/', '') + child);
+          });
+        } else {
+          if (checkbox.folderChecked == false) {
+            selected.push(checkbox.dataset.path.replace('/', ''));
+          }
+        }
       });
       //alert(selected.join('\n'));
       treedialog.style.visibility = 'hidden';
