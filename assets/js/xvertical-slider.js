@@ -113,11 +113,29 @@ class XverticalSlider extends XverticalSliderEventTarget {
         return ((this.value - this.min) / this.range)*100;
     }
 
+    setValue(value) {
+        if (value < this.min) {
+            value = this.min;
+        } else if (value > this.max) {
+            value = this.max;
+        }
+        if (value != this.value) {
+            this.value = value;
+            if(this._circle!==undefined){
+                this._circle.style.top = this.#getPosForValue(value) + "px";
+                this._sliderTrack.style.background= 'linear-gradient(180deg, ' + this.colorConfig.trackColorBack + ' ' + (100-this.#getValuePercent()) + '%, ' + this.colorConfig.trackColorBack + ' 0%, ' + this.colorConfig.trackColorOver + ' 0%)';
+                this.trigger('change');
+                this.#invokeCallback();
+            }
+        }
+    }
+
     #createxVerticalSlider(){
         let _self = this;
         let _slider = this.#createSlider();
         this._sliderTrack = _slider.sliderTack;
         this._sliderContainer = _slider.sliderCont;
+        this._sliderContainer.self = this;
         this._circle = this.#createCircle(0, this.#getPosByValue());
         this._sliderContainer.appendChild(this._sliderTrack);
         this._sliderContainer.appendChild(this._circle);

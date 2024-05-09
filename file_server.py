@@ -20,7 +20,7 @@ app = Flask(__name__, static_url_path='/assets', static_folder='assets')
 CORS(app)
 key = ""
 
-ignored = ['.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
+ignored = ['.lyr','.sbo','.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
 datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
 icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'fa-file-text': 'doc'}
 
@@ -191,7 +191,8 @@ class PathView(MethodView):
                 audio_files = []
                 has_audio = False
                 for filename in os.listdir(path):
-                    if filename in ignored:
+                    filename_noext, ext = os.path.splitext(filename)
+                    if ext in ignored:
                         continue
                     exts = datatypes.get('audio')
                     if filename.split('.')[-1] in exts:
@@ -204,18 +205,39 @@ class PathView(MethodView):
                 return render_template('/audioplayer/index.html', path=p, dir_path=path, audio_files=json.dumps(audio_files), has_audio=has_audio)
         
         if p == 'api/getLyrics':
-            title = request.args.get('title')
-            title = title.replace('_', ' ').replace('.mp3', '')
-            title = re.sub(r'\d+\.', '', title)
-            genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
-            song = genius.search_song(title=title, artist=title)
-            if song != None and song.lyrics:
+            orig_title = request.args.get('title')
+            full_path = request.args.get('path')
+            if full_path:
+                if not full_path.startswith(root):
+                    full_path = full_path.replace(request.host_url, '')
+                    full_path = os.path.join(root, full_path)
+                    full_path = os.path.normpath(full_path)
+                full_path_no_ext, ext = os.path.splitext(full_path)
+                full_path = full_path_no_ext + '.lyr'
+            if os.path.exists(full_path):
+                with open(full_path, 'r') as f:
+                    song = json.load(f)                
                 result = {}
-                result['lyrics']= song.lyrics,
-                result['body'] = song._body
+                result['lyrics']= song['lyrics'],
+                result['body'] = song['_body']
                 return json.dumps(result)
             else:
-                return {"status": 500, "error": "No lyrics found"}
+                title = orig_title.replace('_', ' ').replace('.mp3', '')
+                title = re.sub(r'\d+\.', '', title)
+                genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
+                song = genius.search_song(title=title, artist=title)
+                if song != None and song.lyrics:
+                    _song = {}
+                    _song['lyrics'] = song.lyrics
+                    _song['_body'] = song._body
+                    with open(full_path, 'w') as f:
+                        json.dump(_song, f, indent=4)                    
+                    result = {}
+                    result['lyrics']= song.lyrics,
+                    result['body'] = song._body
+                    return json.dumps(result)
+                else:
+                    return {"status": 500, "error": "No lyrics found"}
             
         if p == 'api/getMusicFolderTree':
             jsonTree =create_folder_structure_json(root)
@@ -231,7 +253,8 @@ class PathView(MethodView):
             has_audio = False
             total = {'size': 0, 'dir': 0, 'file': 0}
             for filename in os.listdir(path):
-                if filename in ignored:
+                filename_noext, ext = os.path.splitext(filename)
+                if ext in ignored:
                     continue
                 """ if hide_dotfile == 'yes' and filename[0] == '.':
                     continue """

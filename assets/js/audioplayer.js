@@ -91,7 +91,8 @@ const filters = [];
       trackBorderColor: '#dddddd',
       thumbColor: "var(--primary-color)",
       thumbBorderColor: "var(--primary-color)",
-      ticksColor: "var(--primary-color)"
+      ticksColor: "var(--primary-color)",
+      labelColor: "var(--primary-color)"
     },
     callback: changeGain
   }
@@ -393,7 +394,7 @@ playlist.addEventListener('playlistitemload', () => {
 
   // Show the loader
   pl_lyrics_loader.style.display = 'block';
-  $.get(URLJoin(location.origin, '/api/getLyrics?title=', playlist.items_[playlist.getCurrentIndex()].sources[0].filename), function (data) {
+  $.get(URLJoin(location.origin, '/api/getLyrics?title=')+ playlist.items_[playlist.getCurrentIndex()].sources[0].filename +'&path='+ playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
     if (data.error) {

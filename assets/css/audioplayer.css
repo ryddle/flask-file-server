@@ -33,12 +33,17 @@ button:focus {
   padding: 5px 25px;
 }
 
+button.controls:hover {
+  text-shadow: 0px 0px 15px white;
+}
+
 .eqband {
   margin: 10px;
   text-align: center;
   /*margin-left: 40px;
   margin-right: 1px;*/
   margin-bottom: -5px;
+  margin-top: 5px;
   color: #fff;
 }
 
@@ -272,6 +277,12 @@ input[type="range"] {
     color: var(--primary-color);
   }
 
+  select:focus > option:checked {
+    box-shadow: 0 0 10px 100px var(--primary-color) inset;
+    /*background-color: beige !important;*/
+    color: #111 !important;
+}
+
   button {
     color: var(--primary-color);
   }
@@ -324,6 +335,9 @@ input[type="range"] {
     padding: 1em;
   }
 }
+
+
+
 
 /***************************************/
 /******* tree dialog ********/
