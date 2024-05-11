@@ -250,25 +250,8 @@
       </div>
     </div>
     <div id="lyrics" class="column right">
-      <!--       <div style="height: 18px;">
-        <button id="set-playlist" class="btn btn-secondary controls" style="width: 20px; height: 20px; padding: 0px; margin: 4px; float: right; color: var(--primary-color);" onclick="showSearchSongDialog(event)">
-          <i class="fa fa-search"></i>
-        </button>
-      </div> -->
     </div>
   </div>
-
-  <!-- <div id="color-picker" style="display: none; position: absolute; top: 50px; left: 50px;">
-    <div style="background-color: #111;padding: 15px;border: 1px solid var(--primary-color);border-radius: 5px;display: grid;">
-
-      <div style="display: flex;align-items: center;">
-        <span style="color: var(--primary-color); margin: 0; padding: 0; margin-bottom: 5px;">Selecciona un color</span>
-        <input type="color" id="color-input" value="#007bff" style="width: 25px;height: 25px;margin-left: 20px;">
-      </div>
-      <button id="color-apply" style="background-color: #111; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px; border-radius: 5px;"
-              onclick="applyColor(document.getElementById('color-input').value);">Aplicar</button>
-    </div>
-  </div> -->
 
   <div id="settings-panel" class="settings-panel">
     <div class="wrapper">
@@ -376,17 +359,6 @@
       </div>
     </div>
   </div>
-
-  <!--   <div class="song-info-panel">
-    <div class="song-image">
-      <img src="https://images.genius.com/ecffb33ce23eca61be4d78119c1c3f18.300x300x1.jpg">
-    </div>
-    <div class="song-info">
-      <p><b>Artist</b>: <a href="https://genius.com/artists/Nightwish">Nightwish</a></p>
-      <p><b>Song</b>: <a href="https://genius.com/Nightwish-dark-chest-of-wonders-lyrics">Dark Chest of Wonders</a></p>
-      <p><b>Release Date</b>: June 7, 2004</p>
-    </div>
-  </div> -->
 
   <script>
     function getMusicFoldersTree() {
@@ -505,7 +477,6 @@
         track.poster = poster;
         audioList.push(track);
       }
-      //var playlist = Playlist.from(audioList, mediaElement);
       var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: audioList });
       document.dispatchEvent(playlistChangeEvent);
     }

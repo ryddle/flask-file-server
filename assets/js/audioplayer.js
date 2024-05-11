@@ -108,20 +108,6 @@ const filters = [];
   eqbandDiv.appendChild(eqbandOutput);
 
   controls.appendChild(eqbandDiv);
-  // add HTML elements for this band
-  /* controls.innerHTML += `
-  <div class="eqband">
-    <label>${freq < 1000 ? freq : freq / 1000 + 'k'}Hz</label>
-    <input class="equalizer" type="range" value="0" step="1" min="-12" max="12" list="tickmarks" orient="vertical" data-filter="${i}">
-    <output id="gain${i}">0 dB</output>
-  </div>`; */
-
-  /*   controls.innerHTML += `
-    <div class="eqband">
-      <label>${freq < 1000 ? freq : freq / 1000 + 'k'}Hz</label>
-      <vertical-slider class="equalizer" value="0" step="1" min="-12" max="12" list="tickmarks" orient="vertical" data-filter="${i}"></vertical-slider>
-      <output id="gain${i}">0 dB</output>
-    </div>`; */
 });
 
 
@@ -201,15 +187,6 @@ function applyColor(color) {
 
 setGradient();
 
-// add event listeners for playback and equalizer control
-
-/* document.getElementById('play').addEventListener('click', () => mediaElement.play());
-document.getElementById('stop').addEventListener('click', () => mediaElement.pause()); */
-
-/* document.querySelectorAll('.equalizer').forEach(el => {
-  el.addEventListener('input', changeGain);
-}); */
-
 function changeGain(target) {
   //console.log(event);
   //const target = event.target,
@@ -265,11 +242,6 @@ for (let index = 0; index < playlist.items_.length; index++) {
   aObj.innerText = file;
   aObj.index = index;
   aObj.style.color = "inherit";
-  /*   if (index == 0) {
-      aObj.style.color = "#111111";
-    }else {
-      aObj.style.color = "var(--primary-color)";    
-    } */
   aObj.style.fontWeight = '700';
   aObj.style.textDecoration = 'none';
   aObj.style.cursor = "pointer";
@@ -294,14 +266,6 @@ for (let index = 0; index < playlist.items_.length; index++) {
   play_list.appendChild(liObj);
 }
 playlist_cont.appendChild(play_list);
-
-/* playlist.addEventListener('playlisttoggleplay', () => {
-  if (mediaElement.paused) {
-    document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
-  } else {
-    document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
-  }
-}); */
 
 // Playlist controls
 var shufflebtn = document.getElementById("shuffle-btn");
@@ -368,13 +332,7 @@ Object.assign(ledDisplayFront.style, {
 ledDisplayFront.id = "ledDisplayFront";
 ledDisplayFront.innerText = "00:00/00:00-" + playlist.items_[playlist.currentIndex_].sources[0].filename.substring(0, 12);
 ledDisplayFront.time_mode = "playing";
-ledDisplayFront.onclick = chageTimeMode();/* function () {
-  if (time_mode == "playing") {
-    time_mode = "remaining";
-  } else if (time_mode == "remaining") {
-    time_mode = "playing";
-  }
-} */
+ledDisplayFront.onclick = chageTimeMode();
 ledDisplayBack.appendChild(ledDisplayFront);
 
 playlist_cont.parentElement.appendChild(ledDisplayBack);
@@ -641,16 +599,15 @@ pl_info.appendChild(pl_info_infocontainer);
 
 function updateInfoPanel(data){
   if (data.error) {
-    pl_info.innerText = data.error;
+    pl_lyriscontainer.innerText = data.error;
+    pl_lyrics_loader.style.display = 'none';
   } else {
-    //var pl_lyriscontainer = document.getElementById('pl_lyriscontainer');
     var body = data.body;
     var lyrics = data.lyrics[0];
     lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
     lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
     pl_lyriscontainer.innerText = lyrics;
     song_title = body['artist_names'] + ' - ' + body['title'];
-    //document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url
     updateLedDisplay2();
 
     pl_infocont_image.src = body.header_image_thumbnail_url;
@@ -724,20 +681,6 @@ playlist.addEventListener('playlistitemload', () => {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
     updateInfoPanel(data);
-    /* if (data.error) {
-      pl_info.innerText = data.error;
-    } else {
-      var pl_lyriscontainer = document.getElementById('pl_lyriscontainer');
-      var body = data.body;
-      var lyrics = data.lyrics[0];
-      lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
-      lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
-      pl_lyriscontainer.innerText = lyrics;
-      song_title = body['artist_names'] + ' - ' + body['title'];
-      //document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url
-
-      updateLedDisplay2();
-    } */
   });
 
 });
