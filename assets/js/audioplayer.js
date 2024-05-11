@@ -682,6 +682,7 @@ sheet.insertRule('@keyframes rotation {\
 }', sheet.cssRules.length);
 
 var pl_lyrics_loader = document.createElement('span');
+window['pl_lyrics_loader'] = pl_lyrics_loader;
 pl_lyrics_loader.style.position = 'absolute';
 pl_lyrics_loader.style.top = '50%';
 pl_lyrics_loader.style.left = '50%';
