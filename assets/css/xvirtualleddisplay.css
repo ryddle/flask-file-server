@@ -1,0 +1,45 @@
+:root {
+    --xvld-primary-color: 255, 0, 0;
+}
+
+.base {
+    display: inline-block;
+    border: 5px solid black;
+    padding: 10px;
+    background-color: #BBBBBB;
+    position: absolute;
+    text-align: center;
+}
+
+.matrix {
+    width: 635px;
+    height: 70px;
+    background-color: black;
+    border: 5px solid black;
+    line-height: 5px;
+    clip-path: inset(0px 5px 0px 0px);
+    cursor: pointer;
+}
+
+.led {
+    z-index: 6;
+    cursor: pointer;
+    display: inline-block;
+    margin: 1px;
+    margin-bottom: 0px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: rgb(var(--primary-color-rgb, var(--xvld-primary-color, rgb(255, 0, 0))));
+    -webkit-box-shadow: 0px 0px 8px 3px rgba(var(--primary-color-rgb, var(--xvld-primary-color, rgb(255, 0, 0))), .75);
+    -moz-box-shadow: 0px 0px 8px 3px rgba(var(--primary-color-rgb, var(--xvld-primary-color, rgb(255, 0, 0))), .75);
+    box-shadow: 0px 0px 8px 3px rgba(var(--primary-color-rgb, var(--xvld-primary-color, rgb(255, 0, 0))), .75);
+}
+
+.off {
+    z-index: 5;
+    background-color: #222222;
+    -webkit-box-shadow: 0px 0px 0px 0px rgba(255, 255, 190, .75);
+    -moz-box-shadow: 0px 0px 0px 0px rgba(255, 255, 190, .75);
+    box-shadow: 0px 0px 0px 0px rgba(255, 255, 190, .75);
+}

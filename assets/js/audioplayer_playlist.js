@@ -48,6 +48,7 @@ function _extends() {
 
 export default class Playlist extends PlaylistEventTarget {
     #repeat_states = {off: 'off', all: 'all', one: 'one'};
+    #shuffle_states = {off: 'off', on: 'on'};
     /**
      * Creates a new Playlist instance from a given array of items.
      *
@@ -94,6 +95,7 @@ export default class Playlist extends PlaylistEventTarget {
         this.items_ = [];
         this.currentIndex_ = 0;
         this.repeat_ = this.#repeat_states.off;//false;
+        this.shuffle_ = this.#shuffle_states.off;//false;
         this.onError_ = options.onError || (() => { });
         this.onWarn_ = options.onWarn || (() => { });
         let playlist = this;

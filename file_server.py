@@ -223,10 +223,12 @@ class PathView(MethodView):
                 return json.dumps(result)
             else:
                 title = orig_title.replace('_', ' ').replace('.mp3', '')
-                title = re.sub(r'\d+\.', '', title)
+                title = re.sub(r'\d+\.', '', title).replace('/', ' ')
                 genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
                 song = genius.search_song(title=title, artist=title)
                 if song != None and song.lyrics:
+                    if song.title.lower() == "Band Names".lower():
+                        return {"status": 400, "error": "No lyrics found"}
                     _song = {}
                     _song['lyrics'] = song.lyrics
                     _song['_body'] = song._body
@@ -237,7 +239,10 @@ class PathView(MethodView):
                     result['body'] = song._body
                     return json.dumps(result)
                 else:
-                    return {"status": 500, "error": "No lyrics found"}
+                    result = {}
+                    result['status'] = 400
+                    result['error'] = "No lyrics found"
+                    return json.dumps(result)
             
         if p == 'api/getMusicFolderTree':
             jsonTree =create_folder_structure_json(root)
@@ -413,6 +418,32 @@ class PathView(MethodView):
                     res.headers.add('Content-type', 'application/json')
                     return res """
                     return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
+            elif request.path == '/api/searchSong':
+                title = request.form['title']
+                artist = request.form['artist']
+                full_path = os.path.join(root, request.form['full_path'])
+                full_path = os.path.normpath(full_path)
+                full_path_no_ext, ext = os.path.splitext(full_path)
+                full_path = full_path_no_ext + '.lyr'
+                genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
+                song = genius.search_song(title=title, artist=artist)
+                if song != None and song.lyrics:
+                    if song.title.lower() == "Band Names".lower():
+                        return {"status": 400, "error": "No lyrics found"}
+                    _song = {}
+                    _song['lyrics'] = song.lyrics
+                    _song['_body'] = song._body
+                    with open(full_path, 'w') as f:
+                        json.dump(_song, f, indent=4)                    
+                    result = {}
+                    result['lyrics']= song.lyrics,
+                    result['body'] = song._body
+                    return json.dumps(result)
+                else:
+                    result = {}
+                    result['status'] = 400
+                    result['error'] = "No lyrics found"
+                    return json.dumps(result)
             else:
                 if os.path.isdir(path):
                     files = request.files.getlist('files[]')

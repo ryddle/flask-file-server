@@ -1,5 +1,5 @@
 class XverticalSliderEventTarget extends EventTarget {
-    constructor(){
+    constructor() {
         super()
     }
 
@@ -26,9 +26,9 @@ class XverticalSlider extends XverticalSliderEventTarget {
      * @param {string} config.color.trackColor2 - The second color of the track.
      * @param {function} config.callback - The callback function for the slider.
      */
-    constructor(config){
+    constructor(config) {
         super();
-        if(config == null) {config={}; Object.assign(config, this.#config_default);}
+        if (config == null) { config = {}; Object.assign(config, this.#config_default); }
         this.container = config.container;
         this.value = config.value || this.#config_default.value;
         this.min = config.min || this.#config_default.min;
@@ -36,7 +36,7 @@ class XverticalSlider extends XverticalSliderEventTarget {
         this.step = config.step || this.#config_default.step;
         this.width = config.width || this.#config_default.width;
         this.height = config.height || this.#config_default.height;
-        if(this.width>this.height){
+        if (this.width > this.height) {
             this.width, this.height = this.height, this.width;
         }
         this.width = Math.max(this.width, 10);
@@ -45,19 +45,22 @@ class XverticalSlider extends XverticalSliderEventTarget {
         this.showLabel = config.showLabel || this.#config_default.showLabel;
 
         this.list = config.list;
+        this.dual_ticks = config.dual_ticks || false;
+
+        this.tick_mark_thumb = config.tick_mark_thumb || false;
 
         this.margin = this.#config_default.margin;
 
         this.colorConfig = this.#config_default.color;
         Object.assign(this.colorConfig, config.color);
-        
+
         this.callback = config.callback;
 
         this.#createxVerticalSlider();
 
-        if(this.container==null){
+        if (this.container == null) {
             return this._sliderContainer;
-        }else{
+        } else {
             this.container.appendChild(this._sliderContainer);
         }
     }
@@ -92,17 +95,17 @@ class XverticalSlider extends XverticalSliderEventTarget {
 
     #invokeCallback = function () {
         if (this.callback) {
-            this._sliderContainer["value"]=this.value;
+            this._sliderContainer["value"] = this.value;
             this.callback(this._sliderContainer);
         }
     }
 
     #getPosForValue = function (value) {
-        return this.#map(value, this.min, this.max, this.height-(this.width+3), 0);
+        return this.#map(value, this.min, this.max, this.height - (this.width + 3), 0);
     }
 
     #getPosByValue = function () {
-        return this.#map(this.value, this.min, this.max, this.height-(this.width+3), 0);
+        return this.#map(this.value, this.min, this.max, this.height - (this.width + 3), 0);
     }
 
     #getValueByPos = function (pos) {
@@ -110,66 +113,49 @@ class XverticalSlider extends XverticalSliderEventTarget {
     }
 
     #getValuePercent = function () {
-        return ((this.value - this.min) / this.range)*100;
+        return ((this.value - this.min) / this.range) * 100;
     }
 
-    setValue(value) {
-        if (value < this.min) {
-            value = this.min;
-        } else if (value > this.max) {
-            value = this.max;
-        }
-        if (value != this.value) {
-            this.value = value;
-            if(this._circle!==undefined){
-                this._circle.style.top = this.#getPosForValue(value) + "px";
-                this._sliderTrack.style.background= 'linear-gradient(180deg, ' + this.colorConfig.trackColorBack + ' ' + (100-this.#getValuePercent()) + '%, ' + this.colorConfig.trackColorBack + ' 0%, ' + this.colorConfig.trackColorOver + ' 0%)';
-                this.trigger('change');
-                this.#invokeCallback();
-            }
-        }
-    }
-
-    #createxVerticalSlider(){
+    #createxVerticalSlider() {
         let _self = this;
         let _slider = this.#createSlider();
         this._sliderTrack = _slider.sliderTack;
         this._sliderContainer = _slider.sliderCont;
         this._sliderContainer.self = this;
-        this._circle = this.#createCircle(0, this.#getPosByValue());
+        this._thumb = this.#createThumb(0, this.#getPosByValue());
         this._sliderContainer.appendChild(this._sliderTrack);
-        this._sliderContainer.appendChild(this._circle);
+        this._sliderContainer.appendChild(this._thumb);
 
         this._sliderTrack.onclick = function (e) {
             let newtop = e.layerY - 13;
-            _self._circle.style.top = newtop + "px";
+            _self._thumb.style.top = newtop + "px";
             _self.value = _self.#getValueByPos(newtop);
-            _self._sliderTrack.style.background= 'linear-gradient(180deg, ' + _self.colorConfig.trackColorBack + ' ' + (100-_self.#getValuePercent()) + '%, ' + _self.colorConfig.trackColorBack + ' 0%, ' + _self.colorConfig.trackColorOver + ' 0%)';
+            _self._sliderTrack.style.background = 'linear-gradient(180deg, ' + _self.colorConfig.trackColorBack + ' ' + (100 - _self.#getValuePercent()) + '%, ' + _self.colorConfig.trackColorBack + ' 0%, ' + _self.colorConfig.trackColorOver + ' 0%)';
             _self.trigger('change');
             _self.#invokeCallback();
         }
 
-        this._circle.onmousedown = function (e) {
+        this._thumb.onmousedown = function (e) {
             this.isDragging = true;
             this.initialPosition = { x: parseInt(this.style.left), y: parseInt(this.style.top) };
             this.initDragPosition = { x: e.clientX, y: e.clientY };
 
-            if(_self.showLabel==true){
+            if (_self.showLabel == true) {
                 _self._label.style.top = parseInt(this.style.top) + "px";
                 _self._label.style.left = this.clientWidth + 10 + "px";
                 _self._label.style.visibility = 'visible';
                 _self._label.innerHTML = _self.value;
             }
         };
-        this._circle.onmousemove = function (e) {
+        this._thumb.onmousemove = function (e) {
             if (this.isDragging) {
                 let newtop = (e.clientY > this.initDragPosition.y) ? this.initialPosition.y + (e.clientY - this.initDragPosition.y) : this.initialPosition.y - (this.initDragPosition.y - e.clientY);
-                newtop = Math.max(0, Math.min(_self.height-(this.clientHeight/2)- 2, newtop));
+                newtop = Math.max((_self.tick_mark_thumb ? 2 : 0), Math.min(_self.height - (this.clientHeight / 2) - ((parseInt(this.style.height)) / 4) + (_self.tick_mark_thumb ? 2 : 0), newtop));
                 this.style.top = newtop + "px";
 
                 _self.value = _self.#getValueByPos(newtop);
-                _self._sliderTrack.style.background= 'linear-gradient(180deg, ' + _self.colorConfig.trackColorBack + ' ' + (100-_self.#getValuePercent()) + '%, ' + _self.colorConfig.trackColorBack + ' 0%, ' + _self.colorConfig.trackColorOver + ' 0%)';
-                if(_self.showLabel==true){
+                _self._sliderTrack.style.background = 'linear-gradient(180deg, ' + _self.colorConfig.trackColorBack + ' ' + (100 - _self.#getValuePercent()) + '%, ' + _self.colorConfig.trackColorBack + ' 0%, ' + _self.colorConfig.trackColorOver + ' 0%)';
+                if (_self.showLabel == true) {
                     _self._label.style.top = newtop + "px";
                     _self._label.style.left = this.clientWidth + 10 + "px";
                     _self._label.innerHTML = _self.value;
@@ -178,22 +164,22 @@ class XverticalSlider extends XverticalSliderEventTarget {
                 _self.trigger('change');
             }
         }
-        this._circle.onmouseup = function (e) {
+        this._thumb.onmouseup = function (e) {
             this.isDragging = false;
             this.initialPosition = { x: parseInt(this.style.left), y: parseInt(this.style.top) };
-            _self._sliderTrack.style.background= 'linear-gradient(180deg, ' + _self.colorConfig.trackColorBack + ' ' + (100-_self.#getValuePercent()) + '%, ' + _self.colorConfig.trackColorBack + ' 0%, ' + _self.colorConfig.trackColorOver + ' 0%)';
+            _self._sliderTrack.style.background = 'linear-gradient(180deg, ' + _self.colorConfig.trackColorBack + ' ' + (100 - _self.#getValuePercent()) + '%, ' + _self.colorConfig.trackColorBack + ' 0%, ' + _self.colorConfig.trackColorOver + ' 0%)';
             _self._label.style.visibility = 'hidden';
             _self.#invokeCallback();
         };
 
-        if(this.showLabel){ 
+        if (this.showLabel) {
             this._label = this.#createLabel();
             this._sliderContainer.appendChild(this._label);
         }
 
-        if(this.list!=null){
+        if (this.list != null) {
             let datalist = document.getElementById(this.list);
-            if(datalist!=null){
+            if (datalist != null) {
                 this._sliderContainer.appendChild(this.#createTicks(datalist));
             }
         }
@@ -216,8 +202,8 @@ class XverticalSlider extends XverticalSliderEventTarget {
         sliderTack.className = "xsliderTrack";
         Object.assign(sliderTack.style, {
             position: "absolute",
-            top: (this.margin/2) + "px",
-            left: (this.margin/2) + "px",
+            top: (this.margin / 2) + "px",
+            left: (this.margin / 2) + "px",
             width: this.width + "px",
             height: this.height + "px",
             border: '1px solid ' + this.colorConfig.trackBorderColor,
@@ -227,45 +213,46 @@ class XverticalSlider extends XverticalSliderEventTarget {
             borderTopRightRadius: this.width + 'px',
             boxSizing: "border-box",
             background: this.colorConfig.trackColorBack,
-            background: 'linear-gradient(180deg, ' + this.colorConfig.trackColorBack + ' ' + (100-this.#getValuePercent()) + '%, ' + this.colorConfig.trackColorBack + ' 0%, ' + this.colorConfig.trackColorOver + ' 0%)'
-            //backgroundColor: 'linear-gradient(90deg, ' + this.colorConfig.trackColor1 + ' ' + this.#getPosByValue() + '%, ' + this.colorConfig.trackColor2 + ' 100%)',
+            background: 'linear-gradient(180deg, ' + this.colorConfig.trackColorBack + ' ' + (100 - this.#getValuePercent()) + '%, ' + this.colorConfig.trackColorBack + ' 0%, ' + this.colorConfig.trackColorOver + ' 0%)'
         })
 
         return { sliderCont: sliderCont, sliderTack: sliderTack };
     }
 
-    #createCircle(left, top) {
-        let _circleOut = document.createElement("div");
-        Object.assign(_circleOut.style, {
-            top: top + 'px',
-            left: left + 'px',
-            width: this.width + 3 + 'px',
-            height: this.width + 3 + 'px',
+    #createThumb(left, top) {
+        let _thumb = document.createElement("div");
+        Object.assign(_thumb.style, {
+            top: top + (this.tick_mark_thumb ? 2 : 0) + 'px',
+            left: left + (this.tick_mark_thumb ? 0 : 0) + 'px',
+            width: this.width + (this.tick_mark_thumb ? 8 : 3) + 'px',
+            height: this.width + (this.tick_mark_thumb ? 8 : 3) + 'px',
             position: 'absolute',
             overflow: 'visible',
             zIndex: '100',
             cursor: "pointer",
             backgroundColor: this.colorConfig.thumbColor,
-            border: '2px solid ' + this.colorConfig.thumbBorderColor,
-            borderRadius: '50%',
+            border: (this.tick_mark_thumb ? 0 : 2) + 'px solid ' + this.colorConfig.thumbBorderColor,
+            borderRadius: (this.tick_mark_thumb ? '0px' : '50%'),
             willChange: 'transform',
             boxSizing: 'unset'
         });
 
-        /* let _circleIn = document.createElement("div");
-        Object.assign(_circleIn.style, {
-            border: '2px solid rgb(255, 255, 255)',
-            borderRadius: '12px',
-            top: '0px',
-            left: '0px',
-            width: '18px',
-            height: '18px',
-            position: 'absolute',
-            overflow: 'visible'
-        });
+        if (this.tick_mark_thumb) {
+            let _thumbMark = document.createElement("div");
+            Object.assign(_thumbMark.style, {
+                position: 'absolute',
+                top: (this.width + 8) / 2 - 2  + 'px',
+                left: '1px',
+                width: this.width + (this.tick_mark_thumb ? 1 : 4) + 'px',
+                height: '2px',
+                backgroundColor: this.colorConfig.thumbBorderColor,
+                marginLeft: (this.tick_mark_thumb ? 2 : 0) + 'px'
+            });
 
-        _circleOut.appendChild(_circleIn); */
-        return _circleOut;
+            _thumb.appendChild(_thumbMark);
+        }
+
+        return _thumb;
     }
 
     #createLabel() {
@@ -291,26 +278,27 @@ class XverticalSlider extends XverticalSliderEventTarget {
         return _label;
     }
 
-    #createTicks(datalist){
+    #createTicks(datalist) {
         let ticks = document.createElement("div");
         ticks.style.position = 'absolute';
         ticks.style.top = '0px';
-        ticks.style.left = this.width + 'px';
-        for(let i = 0; i < datalist.options.length; i++){
+        ticks.style.left = ((this.dual_ticks) ? this.width - 1 : this.width) + 'px';
+        ticks.style.zIndex = '-10';
+        for (let i = 0; i < datalist.options.length; i++) {
             let option = datalist.options[i];
             let tick = document.createElement("div");
             Object.assign(tick.style, {
                 position: 'absolute',
                 top: this.#getPosForValue(option.value) + (this.margin) + 2 + 'px',
-                left: '0px',
-                width: '5px',
+                left: ((this.dual_ticks) ? this.width * 3 * -1 : 0) + 'px',
+                width: (((option.label != "") ? 10 : 5) + ((this.dual_ticks) ? this.width * 3 : 0)) + 'px',
                 height: '2px',
                 overflow: 'visible',
                 display: 'block',
-                borderTop: '2px solid ' + this.colorConfig.ticksColor,
+                borderTop: ((option.label != "") ? 2 : 1) + 'px solid ' + this.colorConfig.ticksColor,
                 borderRadius: '10px',
-                marginLeft: '5px',
-                marginRight: '5px',
+                marginLeft: ((option.label != "") ? ((this.dual_ticks) ? this.width * 3/2 : this.width) / 2 +2: (((this.dual_ticks) ? this.width * 3/2 : this.width) + 5) / 2) + 'px',
+                marginRight: ((option.label != "") ? ((this.dual_ticks) ? this.width * 3/2 : this.width) / 2 +2 : (((this.dual_ticks) ? this.width * 3/2 : this.width)  + 5) / 2) + 'px',
             });
             ticks.appendChild(tick);
         }
@@ -322,7 +310,24 @@ class XverticalSlider extends XverticalSliderEventTarget {
         return this.value;
     }
 
-    setAttribute(name, value){
+    setValue(value) {
+        if (value < this.min) {
+            value = this.min;
+        } else if (value > this.max) {
+            value = this.max;
+        }
+        if (value != this.value) {
+            this.value = value;
+            if(this._thumb!==undefined){
+                this._thumb.style.top = this.#getPosForValue(value) + "px";
+                this._sliderTrack.style.background= 'linear-gradient(180deg, ' + this.colorConfig.trackColorBack + ' ' + (100-this.#getValuePercent()) + '%, ' + this.colorConfig.trackColorBack + ' 0%, ' + this.colorConfig.trackColorOver + ' 0%)';
+                this.trigger('change');
+                this.#invokeCallback();
+            }
+        }
+    }
+
+    setAttribute(name, value) {
         this._sliderContainer.setAttribute(name, value);
     }
 }

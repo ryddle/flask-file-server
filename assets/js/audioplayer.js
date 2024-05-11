@@ -85,12 +85,14 @@ const filters = [];
     invert: false,
     showLabel: false,
     list: 'tickmarks',
+    /*dual_ticks: true,*/
+    tick_mark_thumb: true,
     color: {
       trackColorBack: '#ffffff',
       trackColorOver: "var(--primary-color)",
       trackBorderColor: '#dddddd',
       thumbColor: "var(--primary-color)",
-      thumbBorderColor: "var(--primary-color)",
+      thumbBorderColor: "#111111",
       ticksColor: "var(--primary-color)",
       labelColor: "var(--primary-color)"
     },
@@ -157,11 +159,11 @@ let audioMotionConfig = {
 };
 
 const audioMotion = new AudioMotionAnalyzer(
-  document.getElementById('analyzer'),audioMotionConfig
+  document.getElementById('analyzer'), audioMotionConfig
 );
 
 Object.assign(audioMotionConfig, audioMotionConfigs[audio_motion_preset]);
-if(!AudioMotionAnalyzer.GRADIENTS.includes(audioMotionConfig.gradient)) {
+if (!AudioMotionAnalyzer.GRADIENTS.includes(audioMotionConfig.gradient)) {
   let _new_gradient_ = createGradient();
   let _gradient_name = _new_gradient_[0];
   let _gradient_options = _new_gradient_[1];
@@ -221,6 +223,9 @@ function changeGain(target) {
 
 // instantiate the playlist
 var playlist = Playlist.from(audioList, mediaElement);
+window['playlist'] = playlist;
+
+var song_title = playlist.items_[0].sources[0].filename;
 
 //create playlist html
 var playlist_cont = document.getElementById("playlist_cont");
@@ -246,15 +251,25 @@ for (let index = 0; index < playlist.items_.length; index++) {
   liObj.style.fontSize = "14px";
   liObj.style.marginBottom = "3px";
   if (index == 0) {
-    liObj.style.backgroundColor = 'white';
+    liObj.style.backgroundColor = "var(--primary-color)";
+    liObj.style.color = "#111111";
     liObj.style.fontWeight = '700';
+  } else {
+    liObj.style.backgroundColor = 'transparent';
+    liObj.style.fontWeight = 'normal';
+    liObj.style.color = "var(--primary-color)";
   }
 
   var aObj = document.createElement("a");
   aObj.href = "javascript:void(0)";
   aObj.innerText = file;
   aObj.index = index;
-  aObj.style.color = "var(--primary-color)";
+  aObj.style.color = "inherit";
+  /*   if (index == 0) {
+      aObj.style.color = "#111111";
+    }else {
+      aObj.style.color = "var(--primary-color)";    
+    } */
   aObj.style.fontWeight = '700';
   aObj.style.textDecoration = 'none';
   aObj.style.cursor = "pointer";
@@ -270,8 +285,9 @@ for (let index = 0; index < playlist.items_.length; index++) {
       element.style.color = "var(--primary-color)";
     });
 
-    this.parentElement.style.backgroundColor = 'white';
+    this.parentElement.style.backgroundColor = "var(--primary-color)";
     this.parentElement.style.fontWeight = '700';
+    this.parentElement.style.color = '#111111';
   });
   liObj.appendChild(aObj);
 
@@ -305,39 +321,346 @@ nexttrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.
 repeatbtn.addEventListener('click', function () {
   playlist.toggleRepeat();
   if (playlist.getRepeatStatus() === 'off') {
+    this.className = "btn btn-secondary controls disabled";
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat"></i>';
   } else if (playlist.getRepeatStatus() === 'one') {
+    this.className = "btn btn-secondary controls";
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;">1</i>';
   } else {
+    this.className = "btn btn-secondary controls";
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;"></i>';
   }
 });
+
+
+////////////////// DISPLAYS //////////////////
+var time_mode = "playing"; // playing, remaining
+var currentDisplay = "led";
+
+// LED Display //
+
+var ledDisplayBack = document.createElement("div");
+Object.assign(ledDisplayBack.style, {
+  height: '60px',
+  backgroundColor: '#000000',
+  fontFamily: 'Digital7',
+  fontSize: '56px',
+  textIndent: '5px',
+  color: '#888',
+  display: 'none',
+});
+ledDisplayBack.id = "ledDisplayBack";
+ledDisplayBack.innerText = "888888888888888888888888";
+
+var ledDisplayFront = document.createElement("div");
+Object.assign(ledDisplayFront.style, {
+  position: 'relative',
+  height: '60px',
+  backgroundColor: 'rgba(34, 34, 34, 0.82)',
+  boxShadow: 'inset 0px 0px 8px 1px var(--primary-color)',
+  top: '-57px',
+  left: '1px',
+  fontFamily: 'Digital7',
+  fontSize: '56px',
+  color: 'var(--primary-color)',
+  cursor: 'pointer'
+});
+ledDisplayFront.id = "ledDisplayFront";
+ledDisplayFront.innerText = "00:00/00:00-" + playlist.items_[playlist.currentIndex_].sources[0].filename.substring(0, 12);
+ledDisplayFront.time_mode = "playing";
+ledDisplayFront.onclick = chageTimeMode();/* function () {
+  if (time_mode == "playing") {
+    time_mode = "remaining";
+  } else if (time_mode == "remaining") {
+    time_mode = "playing";
+  }
+} */
+ledDisplayBack.appendChild(ledDisplayFront);
+
+playlist_cont.parentElement.appendChild(ledDisplayBack);
+
+
+// Update LED display
+var ledDisplayTimer = 0;
+var ledDisplayIndex = 0;
+if (currentDisplay == "lcd") {
+  ledDisplayBack.style.display = "block";
+  ledDisplayTimer = setInterval(updateLedDisplay, 400);
+}
+
+function updateLedDisplay() {
+  //let ledDisplayTextArray = [" "].concat(playlist.items_[playlist.currentIndex_].sources[0].filename.split(""));
+  let ledDisplayTextArray = [" "].concat(song_title.split(""));
+  ledDisplayIndex++;
+  ledDisplayIndex = ledDisplayIndex % ledDisplayTextArray.length;
+  let ledDisplayMaxIndex = Math.max(12, ledDisplayIndex + 12);
+  let ledDisplayText = ledDisplayTextArray.slice(ledDisplayIndex, ledDisplayMaxIndex).join("");
+  if (ledDisplayIndex + 12 >= ledDisplayTextArray.length) {
+    ledDisplayText += ledDisplayTextArray.slice(0, (12 - ledDisplayText.length) % 12).join("");
+  }
+  if (mediaElement.paused) {
+    ledDisplayFront.innerText = "00:00/00:00-" + ledDisplayText;
+    return;
+  }
+  if (time_mode == "playing") {
+    ledDisplayFront.innerText = secondsToHHMMSS(mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration) + "-" + ledDisplayText;
+  } else if (time_mode == "remaining") {
+    ledDisplayFront.innerText = secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration) + "-" + ledDisplayText;
+  }
+}
+
+// LED Display 2 //
+var matrix = document.createElement("div");
+matrix.id = "matrix";
+matrix.className = "matrix";
+matrix.style.display = "none";
+playlist_cont.parentElement.appendChild(matrix);
+var vledDiplay = new XVirtualLedDisplay(matrix, { callback: chageTimeMode });
+// Update LED display 2
+vledDiplay.clearM();
+vledDiplay.drawText("00:00", 0, -1);
+vledDiplay.drawText(song_title, 30, -1);
+//vledDiplay.rotate('left', 30);
+//setInterval(updateLedDisplay, 100);
+var vledDisplayTimer = 0;//setInterval(vledDisplayClockTimer, 1000);
+function updateLedDisplay2() {
+  clearInterval(vledDisplayTimer);
+  vledDisplayTimer = 0;
+
+  vledDiplay.drawText(song_title, 30, -1);
+
+  vledDisplayTimer = setInterval(vledDisplayClockTimer, 1000);
+}
+
+if (currentDisplay == "led") {
+  matrix.style.display = 'block';
+  vledDiplay.rotate('left', 30);
+  updateLedDisplay2();
+}
+
+function vledDisplayClockTimer() {
+  if (time_mode == "playing") {
+    vledDiplay.drawText(secondsToHHMMSS(mediaElement.currentTime), 0, 30);
+  } else if (time_mode == "remaining") {
+    vledDiplay.drawText(secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime), 0, 30);
+  }
+}
+
+function chageTimeMode() {
+  if (time_mode == "playing") {
+    time_mode = "remaining";
+  } else if (time_mode == "remaining") {
+    time_mode = "playing";
+  }
+}
+
+document.addEventListener("displayPresetChange", function (event) {
+  currentDisplay = event.detail;
+  if (currentDisplay == "led") {
+    clearInterval(ledDisplayTimer);
+    ledDisplayTimer = 0;
+    ledDisplayBack.style.display = 'none';
+
+    matrix.style.display = 'block';
+    vledDiplay.rotate('left', 30);
+    updateLedDisplay2();
+  } else if (currentDisplay == "lcd") {
+    clearInterval(vledDisplayTimer);
+    vledDisplayTimer = 0;
+    vledDiplay.stop();
+    matrix.style.display = 'none';
+
+    ledDisplayBack.style.display = 'block';
+    ledDisplayTimer = setInterval(updateLedDisplay, 400);
+  }
+});
+
+
+/////////////////////////////////////////////////////
 
 // Add a playlist info element to your HTML
 var pl_info = document.createElement("div");
 pl_info.id = "pl_info";
 Object.assign(pl_info.style, {
   position: 'relative',
-  height: 'calc(100vh - 30px)',
+  height: 'calc(100vh - 20px)',
   overflow: 'auto',
   border: '2px solid ' + "var(--primary-color)",
   marginLeft: '10px',
   color: "var(--primary-color)",
-  padding: '10px',
+  /*padding: '10px',*/
   fontSize: '12px',
   fontWeight: 'bold',
   backgroundColor: "#111111"
 });
 
+var pl_info_controls = document.createElement("div");
+Object.assign(pl_info_controls.style, {
+  height: "18px"
+});
+
+var pl_info_controlBtn = document.createElement("button");
+pl_info_controlBtn.id = "set-playlist";
+pl_info_controlBtn.className = "btn btn-secondary controls";
+Object.assign(pl_info_controlBtn.style, {
+  width: "20px",
+  height: "20px",
+  padding: "0px",
+  margin: "4px",
+  float: "right",
+  color: "var(--primary-color)"
+});
+pl_info_controlBtn.onclick = function (event) {
+  window['showSearchSongDialog'](event);
+};
+
+var pl_info_controlBtnIcon = document.createElement("i");
+pl_info_controlBtnIcon.className = "fa fa-search";
+pl_info_controlBtn.appendChild(pl_info_controlBtnIcon);
+pl_info_controls.appendChild(pl_info_controlBtn);
+
+pl_info.appendChild(pl_info_controls);
+
+var pl_info_tabs_cont = document.createElement("div");
+Object.assign(pl_info_tabs_cont.style, {
+  paddingLeft: '10px',
+  width: '100%',
+  height: '22px',
+  display: 'flex',
+  borderBottom: '2px solid var(--primary-color)'
+});
+
+var pl_info_tab_lyrics = document.createElement("div");
+pl_info_tab_lyrics.className="active-tab";
+pl_info_tab_lyrics.innerText = "lyrics";
+pl_info_tab_lyrics.onclick = function () {
+  pl_lyriscontainer.style.display = 'block';
+  pl_info_tab_lyrics.className="active-tab";
+
+  pl_info_infocontainer.style.display = 'none';
+  pl_info_tab_info.className="inactive-tab";
+};
+pl_info_tabs_cont.appendChild(pl_info_tab_lyrics);
+
+var pl_info_tab_info = document.createElement("div");
+pl_info_tab_info.className="inactive-tab";
+pl_info_tab_info.innerText = "info";
+pl_info_tab_info.onclick = function () {
+  pl_lyriscontainer.style.display = 'none';
+  pl_info_tab_lyrics.className="inactive-tab";
+
+  pl_info_infocontainer.style.display = 'block';
+  pl_info_tab_info.className="active-tab";
+}
+pl_info_tabs_cont.appendChild(pl_info_tab_info);
+
+pl_info.appendChild(pl_info_tabs_cont);
+
+
 var pl_lyriscontainer = document.createElement("div");
 pl_lyriscontainer.id = "pl_lyriscontainer";
 Object.assign(pl_lyriscontainer.style, {
+  padding: "10px",
   width: "100%",
   color: "var(--primary-color)",
   fontSize: "14px"
 });
 
 pl_info.appendChild(pl_lyriscontainer);
+
+var pl_info_infocontainer = document.createElement("div");
+pl_info_infocontainer.id = "pl_info_infocontainer";
+Object.assign(pl_info_infocontainer.style, {
+  width: "100%",
+  color: "var(--primary-color)",
+  fontSize: "14px",
+  display: "none",
+  padding: "10px"
+});
+
+var pl_infocont_imagecont = document.createElement("div");
+pl_infocont_imagecont.className="song-image";
+
+var pl_infocont_image = document.createElement("img");
+pl_infocont_image.src="";
+pl_infocont_imagecont.appendChild(pl_infocont_image);
+pl_info_infocontainer.appendChild(pl_infocont_imagecont);
+
+var pl_info_infosonginfocont = document.createElement("div");
+pl_info_infosonginfocont.className="song-info";
+
+var pl_info_artist_p = document.createElement("p");
+
+var pl_info_artist_text = document.createElement("b");
+pl_info_artist_text.innerText = "Artist: ";
+pl_info_artist_p.appendChild(pl_info_artist_text);
+
+var pl_info_artist_link = document.createElement("a");
+pl_info_artist_link.style.color= 'white';
+pl_info_artist_link.href="";
+pl_info_artist_link.target = "_blank";
+pl_info_artist_link.innerText = "";
+
+pl_info_artist_p.appendChild(pl_info_artist_link);
+
+pl_info_infosonginfocont.appendChild(pl_info_artist_p);
+
+var pl_info_song_p = document.createElement("p");
+
+var pl_info_song_text = document.createElement("b");
+pl_info_song_text.innerText = "Song: ";
+pl_info_song_p.appendChild(pl_info_song_text);
+
+var pl_info_song_link = document.createElement("a");
+pl_info_song_link.style.color= 'white';
+pl_info_song_link.href="";
+pl_info_song_link.target = "_blank";
+pl_info_song_link.innerText = "";
+
+pl_info_song_p.appendChild(pl_info_song_link);
+
+pl_info_infosonginfocont.appendChild(pl_info_song_p);
+
+var pl_info_release_p = document.createElement("p");
+
+var pl_info_release_text = document.createElement("b");
+pl_info_release_text.innerText = "Release Date: ";
+pl_info_release_p.appendChild(pl_info_release_text);
+
+var pl_info_release_value = document.createElement("span");
+pl_info_release_value.style.color= 'white';
+pl_info_release_value.innerText = "";
+pl_info_release_p.appendChild(pl_info_release_value);
+
+pl_info_infosonginfocont.appendChild(pl_info_release_p);
+
+pl_info_infocontainer.appendChild(pl_info_infosonginfocont);
+
+pl_info.appendChild(pl_info_infocontainer);
+
+
+function updateInfoPanel(data){
+  if (data.error) {
+    pl_info.innerText = data.error;
+  } else {
+    //var pl_lyriscontainer = document.getElementById('pl_lyriscontainer');
+    var body = data.body;
+    var lyrics = data.lyrics[0];
+    lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
+    lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
+    pl_lyriscontainer.innerText = lyrics;
+    song_title = body['artist_names'] + ' - ' + body['title'];
+    //document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url
+    updateLedDisplay2();
+
+    pl_infocont_image.src = body.header_image_thumbnail_url;
+    pl_info_song_link.innerText = body.title;
+    pl_info_song_link.href = body.url;
+    pl_info_artist_link.innerText = body.artist_names;
+    pl_info_artist_link.href = body.primary_artist.url;
+    pl_info_release_value.innerText=body.release_date_for_display;
+  }
+}
 
 // Add a loader element to your HTML
 /* var pl_lyrics_loader = document.createElement('div');
@@ -362,14 +685,14 @@ var pl_lyrics_loader = document.createElement('span');
 pl_lyrics_loader.style.position = 'absolute';
 pl_lyrics_loader.style.top = '50%';
 pl_lyrics_loader.style.left = '50%';
-pl_lyrics_loader.style.width= '48px';
-pl_lyrics_loader.style.height= '48px';
-pl_lyrics_loader.style.border= '5px solid';
-pl_lyrics_loader.style.borderColor= 'var(--primary-color) transparent';
-pl_lyrics_loader.style.borderRadius= '50%';
-pl_lyrics_loader.style.display= 'inline-block';
-pl_lyrics_loader.style.boxSizing= 'border-box';
-pl_lyrics_loader.style.animation= 'rotation 1s linear infinite';
+pl_lyrics_loader.style.width = '48px';
+pl_lyrics_loader.style.height = '48px';
+pl_lyrics_loader.style.border = '5px solid';
+pl_lyrics_loader.style.borderColor = 'var(--primary-color) transparent';
+pl_lyrics_loader.style.borderRadius = '50%';
+pl_lyrics_loader.style.display = 'inline-block';
+pl_lyrics_loader.style.boxSizing = 'border-box';
+pl_lyrics_loader.style.animation = 'rotation 1s linear infinite';
 
 // Append the loader to the modal body
 pl_info.appendChild(pl_lyrics_loader);
@@ -383,21 +706,24 @@ playlist.addEventListener('playlistitemload', () => {
   for (let index = 0; index < liItems.length; index++) {
     let li = liItems[index];
     if (index == playlist.getCurrentIndex()) {
-      li.style.backgroundColor = 'white';
+      li.style.backgroundColor = "var(--primary-color)";
+      li.style.color = '#111111';
       li.style.fontWeight = '700';
       li.style.fontWeight = 'bold';
     } else {
       li.style.backgroundColor = 'transparent';
       li.style.fontWeight = 'normal';
+      li.style.color = "var(--primary-color)";
     }
   }
 
   // Show the loader
   pl_lyrics_loader.style.display = 'block';
-  $.get(URLJoin(location.origin, '/api/getLyrics?title=')+ playlist.items_[playlist.getCurrentIndex()].sources[0].filename +'&path='+ playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
+  $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
-    if (data.error) {
+    updateInfoPanel(data);
+    /* if (data.error) {
       pl_info.innerText = data.error;
     } else {
       var pl_lyriscontainer = document.getElementById('pl_lyriscontainer');
@@ -406,15 +732,28 @@ playlist.addEventListener('playlistitemload', () => {
       lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
       lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
       pl_lyriscontainer.innerText = lyrics;
+      song_title = body['artist_names'] + ' - ' + body['title'];
       //document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url
-    }
+
+      updateLedDisplay2();
+    } */
   });
+
+});
+
+document.addEventListener("songInfoChange", (event) => {
+  var data = event.detail;
+  updateInfoPanel(data);
 });
 
 
 mediaElement.addEventListener("timeupdate", (event) => {
   document.getElementById('player_progress').value = mediaElement.currentTime;
-  document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
+  if (time_mode == "playing") {
+    document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
+  } else if (time_mode == "remaining") {
+    document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
+  }
 });
 
 mediaElement.addEventListener("playing", (event) => {
@@ -446,7 +785,7 @@ document.addEventListener("audioMotionPresetChange", (event) => {
 document.addEventListener("playlistChangeEvent", (event) => {
   playlist.setItems(event.detail);
   playlist.loadPlaylistItem(0);
-  
+
   play_list.remove();
   play_list = document.createElement("ul");
   play_list.id = "playlist_ul";
@@ -469,15 +808,20 @@ document.addEventListener("playlistChangeEvent", (event) => {
     liObj.style.fontSize = "14px";
     liObj.style.marginBottom = "3px";
     if (index == 0) {
-      liObj.style.backgroundColor = 'white';
+      liObj.style.backgroundColor = "var(--primary-color)";
+      liObj.style.color = "#111111";
       liObj.style.fontWeight = '700';
+    } else {
+      liObj.style.backgroundColor = 'transparent';
+      liObj.style.fontWeight = 'normal';
+      liObj.style.color = "var(--primary-color)";
     }
 
     var aObj = document.createElement("a");
     aObj.href = "javascript:void(0)";
     aObj.innerText = file;
     aObj.index = index;
-    aObj.style.color = "var(--primary-color)";
+    aObj.style.color = "inherit";
     aObj.style.fontWeight = '700';
     aObj.style.textDecoration = 'none';
     aObj.style.cursor = "pointer";
@@ -493,8 +837,9 @@ document.addEventListener("playlistChangeEvent", (event) => {
         element.style.color = "var(--primary-color)";
       });
 
-      this.parentElement.style.backgroundColor = 'white';
+      this.parentElement.style.backgroundColor = "var(--primary-color)";
       this.parentElement.style.fontWeight = '700';
+      this.parentElement.style.color = "#111111";
     });
     liObj.appendChild(aObj);
 
@@ -513,6 +858,18 @@ document.getElementById('player_mute').addEventListener('click', () => {
     document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-off"></i>';
   } else {
     document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-up"></i>';
+  }
+});
+
+
+window.addEventListener('keyup', () => {
+  if (event.keyCode == 32 && window['focusSearchInput']==false) {
+    playlist.togglePlay();
+    if (mediaElement.paused) {
+      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
+    } else {
+      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
+    }
   }
 });
 
