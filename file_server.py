@@ -249,7 +249,7 @@ class PathView(MethodView):
                     app.logger.info('%s proxy_url', proxy_url)
                     full_path = full_path.replace(proxy_url,'')
                     if full_path.startswith("/"):
-                        full_path.replace('/', '', 1)
+                        full_path=full_path.replace('/', '', 1)
                     app.logger.info('%s full_path replaced url', full_path)
                     app.logger.info('%s root', root)
                     full_path = os.path.join(root, full_path)
