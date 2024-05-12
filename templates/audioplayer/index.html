@@ -55,7 +55,7 @@
 
     //////////////////////////
 
-    window['focusSearchInput']=false;
+    window['focusSearchInput'] = false;
 
     ///// Settings panel /////
 
@@ -180,8 +180,7 @@
 
 <body>
   <div style="position: absolute;top: 5px;left: 5px; width: 24px; height: 24px; z-index: 100;">
-    <button id="show-color-picker" style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;"
-            onclick="document.getElementById('color-input').value = primary_color; document.getElementById('settings-panel').style.display = 'block';">
+    <button id="show-color-picker" style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;" onclick="document.getElementById('color-input').value = primary_color; document.getElementById('settings-panel').style.display = 'block';">
       <i class="fa fa-cog" style="font-size: 18px;color: var(--primary-color);"></i>
     </button>
   </div>
@@ -212,16 +211,15 @@
     </div>
     <div class="column middle">
       <div id="playlist_cont">
-        <div style="height: 18px;"><button id="set-playlist" class="btn btn-secondary controls"
-                  style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);" onclick="setPlaylist(event)"><i
-               class="fa fa-list"></i></button></div>
+        <div style="height: 18px;display: inline;">
+          <div style="height: 18px;display: inline;"><button id="set-playlist" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);" onclick="setPlaylist(event)"><i class="fa fa-list"></i></button></div>
+          <div style="height: 18px;"><button id="save-playlist" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);" onclick="savePlaylist(event)"><i class="fa fa-save"></i></button></div>
+        </div>
       </div>
-      <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands"
-           style="display: flex;justify-content: space-between;align-items: center;">
+      <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands" style="display: flex;justify-content: space-between;align-items: center;">
         <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 70%;">
         <span id="player_timer" style="color: var(--primary-color);">0:00/0:00</span>
-        <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls"
-                style="width: 30px;padding-left: 10px;padding-right: 20px; margin-right: 0px;">
+        <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px; margin-right: 0px;">
           <i class="fa fa-volume-off" style="font-size: large;"></i>
         </button>
       </div>
@@ -255,8 +253,7 @@
 
   <div id="settings-panel" class="settings-panel">
     <div class="wrapper">
-      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;"
-              onclick="document.getElementById('settings-panel').style.display = 'none';">
+      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;" onclick="document.getElementById('settings-panel').style.display = 'none';">
         <i class="fa fa-times"></i>
       </button>
       <div class="form" style="padding: 0px;">
@@ -297,8 +294,7 @@
 
   <div id="eq-presets-panel" class="settings-panel" style="left: 49px;top: 1025px; z-index: 999;">
     <div class="wrapper" style="width: 200px;">
-      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;"
-              onclick="document.getElementById('eq-presets-panel').style.display = 'none';">
+      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;" onclick="document.getElementById('eq-presets-panel').style.display = 'none';">
         <i class="fa fa-times"></i>
       </button>
       <div class="form" style="padding: 0px;">
@@ -316,8 +312,7 @@
             </select>
           </p>
           <p class="full-width">
-            <button type="button" class="btn btn-secondary controls" style="float: right;margin: 0px;"
-                    onclick="applyEqPreset(event);document.getElementById('eq-presets-panel').style.display = 'none';">Ok</button>
+            <button type="button" class="btn btn-secondary controls" style="float: right;margin: 0px;" onclick="applyEqPreset(event);document.getElementById('eq-presets-panel').style.display = 'none';">Ok</button>
           </p>
         </form>
       </div>
@@ -328,14 +323,13 @@
   <div id="treedialog">
     <div id="tree"></div>
     <div>
-      <button id="btn" onclick="getSelections()" class="btn btn-secondary controls" style="color: var(--primary-color);">Accept</button>
+      <button id="treedialog_btn" onclick="getSelections()" class="btn btn-secondary controls" style="color: var(--primary-color);">Accept</button>
     </div>
   </div>
 
   <div id="search-song-panel" class="settings-panel" style="width: 350px;">
     <div class="wrapper">
-      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;"
-              onclick="document.getElementById('search-song-panel').style.display = 'none';window['focusSearchInput']=false;">
+      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;" onclick="document.getElementById('search-song-panel').style.display = 'none';window['focusSearchInput']=false;">
         <i class="fa fa-times"></i>
       </button>
       <div class="form" style="padding: 0px;">
@@ -366,13 +360,28 @@
         url: '/api/getMusicFolderTree',
         type: 'GET',
         success: function (data) {
+          document.getElementById('tree').innerHTML = '';
           renderTree([data], document.getElementById('tree'), '/');
           treedialog.style.visibility = 'visible';
         }
       });
     }
 
-    function renderTree(data, parentElement, path) {
+    function getFolderTree() {
+      $.ajax({
+        url: '/api/getFolderTree',
+        type: 'GET',
+        success: function (data) {
+          document.getElementById('tree').innerHTML = '<p><label for="newplaylist_name" style="color: var(--primary-color);">New playlist name: </label><input type="text" id="newplaylist_name"></p>\
+<br><label for="newplaylist_name" style="color: var(--primary-color);">Select folder:</label>';
+          renderTree([data], document.getElementById('tree'), '/', { folderOnly: true });
+          treedialog.style.visibility = 'visible';
+        }
+      });
+    }
+
+    function renderTree(data, parentElement, path, options) {
+      options = options || { folderOnly: false };
       const ul = document.createElement('ul');
       parentElement.appendChild(ul);
 
@@ -392,19 +401,24 @@
           span.textContent = newpath;
           const btn = document.createElement('input');
           btn.type = 'checkbox';
-          btn.onchange = function () {
-            if (this.checked) {
-              this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
-                cb.checked = true;
-                cb.folderChecked = true;
-              });
-            } else {
-              this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
-                cb.checked = false;
-                cb.folderChecked = false;
-              });
-            }
-          };
+          if (options.folderOnly) {
+            btn.folderChecked = false;
+            btn.dataset.path = path + item.name;
+          } else {
+            btn.onchange = function () {
+              if (this.checked) {
+                this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                  cb.checked = true;
+                  cb.folderChecked = true;
+                });
+              } else {
+                this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                  cb.checked = false;
+                  cb.folderChecked = false;
+                });
+              }
+            };
+          }
           li.appendChild(btn);
 
         } else {
@@ -424,7 +438,7 @@
         ul.appendChild(li);
 
         if (item.children && item.children.length > 0) {
-          renderTree(item.children, li, newpath);
+          renderTree(item.children, li, newpath, options);
         }
       });
     }
@@ -454,6 +468,37 @@
       genPlaylist(selected);
     }
 
+    function savePlaylist(event) {
+      if (treedialog.style.visibility == 'visible') {
+        treedialog.style.visibility = 'hidden';
+        return;
+      }
+      treedialog.style.left = event.clientX - treedialog.offsetWidth + 'px';
+      treedialog.style.top = event.clientY + 20 + 'px';
+      document.getElementById("treedialog_btn").onclick = function () {
+        const checkbox = treeContainer.querySelectorAll('input[type="checkbox"]:checked')[0];
+        path = checkbox.dataset.path;
+        path = path.substr(1);
+        const newplaylist_name = document.getElementById("newplaylist_name").value;
+        var newPlayList = [];
+        for (let index = 0; index < audio_files.length; index++) {
+          const file = audio_files[index];
+
+          var item = { url: location.origin + "/" + file, name: file };
+          newPlayList.push(item);
+        }
+        $.post('/api/genPlaylistM3u', { path: path + '/' + newplaylist_name + '.m3u', playlist_obj: JSON.stringify(newPlayList) }, function (data) {
+          if (data.status == 'success') {
+            alert("created playlist successfully");
+            treedialog.style.visibility = 'hidden';
+          } else {
+            alert(data.message);
+          }
+        });
+      };
+      getFolderTree();
+    }
+
     function setPlaylist(event) {
       if (treedialog.style.visibility == 'visible') {
         treedialog.style.visibility = 'hidden';
@@ -461,21 +506,38 @@
       }
       treedialog.style.left = event.clientX - treedialog.offsetWidth + 'px';
       treedialog.style.top = event.clientY + 20 + 'px';
+      document.getElementById("treedialog_btn").onclick = getSelections;
       getMusicFoldersTree();
     }
 
-    function genPlaylist(audioList_) {
+    async function genPlaylist(audioList_) {
       audio_files = audioList_;
       audioList = [];
       for (let index = 0; index < audio_files.length; index++) {
         const file = audio_files[index];
 
-        var track = {};
-        var sources = [{ src: location.origin + "/" + file, type: 'audio/mpeg', filename: file }];
-        var poster = location.origin + '/assets/images/default_poster.png';
-        track.sources = sources;
-        track.poster = poster;
-        audioList.push(track);
+        if (file.endsWith('.m3u')) {
+          await $.get('/api/getPlaylistM3u', { path: file }, function (data) {
+            playlistFiles = data.playlist
+
+            for (let plindex = 0; plindex < playlistFiles.length; plindex++) {
+              const item = playlistFiles[plindex];
+              var track = {};
+              var sources = [{ src: item.url, type: 'audio/mpeg', filename: item.name }];
+              var poster = location.origin + '/assets/images/default_poster.png';
+              track.sources = sources;
+              track.poster = poster;
+              audioList.push(track);
+            }
+          });
+        } else {
+          var track = {};
+          var sources = [{ src: location.origin + "/" + file, type: 'audio/mpeg', filename: file }];
+          var poster = location.origin + '/assets/images/default_poster.png';
+          track.sources = sources;
+          track.poster = poster;
+          audioList.push(track);
+        }
       }
       var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: audioList });
       document.dispatchEvent(playlistChangeEvent);
@@ -488,7 +550,7 @@
       panel.style.top = '15px';
       document.getElementById('full_path').value = full_path.substring(location.origin.length + 1);
       panel.style.display = 'block';
-      window['focusSearchInput']=true;
+      window['focusSearchInput'] = true;
     }
 
     function searchSong(event) {
@@ -500,7 +562,7 @@
         var songInfoChangeEvent = new CustomEvent('songInfoChange', { detail: data });
         document.dispatchEvent(songInfoChangeEvent);
         document.getElementById('search-song-panel').style.display = 'none';
-        window['focusSearchInput']=false;
+        window['focusSearchInput'] = false;
         window['pl_lyrics_loader'].style.display = 'none';
       });
     }

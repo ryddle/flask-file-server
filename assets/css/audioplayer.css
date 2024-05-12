@@ -89,7 +89,7 @@ button.controls:hover {
   display: block;
   height: 100px;
   width: 80px;
-  -webkit-appearance: slider-vertical;
+  -webkit-appearanch: slider-vertical;
 }
 
 /* range 2 */

@@ -148,6 +148,36 @@ $(document).ready(function () {
 
     });
 
+    $('#movepath-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget)
+        var name = button.data('name') // Extract info from data-* attributes
+        var path = location.pathname;
+        var modal = $(this)
+        modal.find('.modal-title').text('Move ' + name + ' to');
+
+        document.getElementById('movepath_source').value = (path + name).replace('/', '');
+        document.getElementById('movepath_filename').value = name;
+
+        $.ajax({
+            url: '/api/getFolderTree',
+            type: 'GET',
+            success: function (data) {
+                document.getElementById('movepath_tree').innerHTML = '';
+                renderTree([data], document.getElementById('movepath_tree'), '/', path);
+            }
+        });
+    });
+
+    $('#send-movepath').on('click', function (event) {
+        const checkbox = document.getElementById('movepath_tree').querySelectorAll('input[type="checkbox"]:checked')[0];
+        var newpath = checkbox.parentElement.path;
+        newpath = newpath.replace('/', '');
+        const name = document.getElementById('movepath_filename').value;
+        const form = document.getElementById('movepath-form');
+        document.getElementById('movepath_target').value = newpath+name;
+        form.submit();
+    });
+
     /* $('#send-ytad-videos').on('click', function (event) {
         var parent = event.target.parentElement;
         var videos_urls = $('#video_urls').val()
@@ -231,3 +261,71 @@ $(document).ready(function () {
         this.href += '?download=true';
     });
 });
+
+
+function renderTree(data, parentElement, path, opath) {
+    const ul = document.createElement('ul');
+    if(path!="/"){
+        ul.style.display="none";
+    }
+    parentElement.appendChild(ul);
+
+    data.forEach((item) => {
+        const li = document.createElement('li');
+        const expcontBtn = document.createElement('a');
+        expcontBtn.href = 'javascript:void(0)';
+        expcontBtn.style.marginRight = '6px';
+        const icon = document.createElement('i');
+        icon.className = 'fa fa-minus-square';//.fa-plus-square
+        expcontBtn.appendChild(icon);
+        expcontBtn.icon = icon;
+        expcontBtn.onclick = function () {
+            var _li = this.parentElement;
+            if(_li.children.length > 3){
+                if(_li.children[3].style.display==""){
+                    _li.children[3].style.display="none";
+                    this.icon.className = "fa fa-plus-square";
+                }else{
+                    _li.children[3].style.display="";
+                    this.icon.className = "fa fa-minus-square";
+                }
+            }  
+        };
+        li.appendChild(expcontBtn);
+        const span = document.createElement('span');
+        span.textContent = item.name;
+        span.className = item.type;
+        li.appendChild(span);
+        if (item.type == 'folder') {
+            children = [];
+            newpath = path.charAt(0) == '/' ? path + item.name + '/' : path + item.name;
+            newpath = newpath.replace('//', '/');
+            li.path = newpath;
+            li.title = newpath;
+            span.textContent = newpath;
+            const btn = document.createElement('input');
+            btn.type = 'checkbox';
+            if(newpath == opath){
+                btn.disabled = true;
+                btn.checked = false;
+            }
+            btn.onchange = function () {
+                document.getElementById('movepath_tree').querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                    if(this!=cb){
+                        cb.checked = false;
+                        cb.folderChecked = false;
+                    }
+                });
+            };
+            li.appendChild(btn);
+
+        }
+        ul.appendChild(li);
+
+        if (item.children && item.children.length > 0) {
+            icon.className = 'fa fa-plus-square';
+            renderTree(item.children, li, newpath, opath);
+            //renderTree(item.children, li, newpath);
+        }
+    });
+}

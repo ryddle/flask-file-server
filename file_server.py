@@ -3,7 +3,7 @@ from flask.views import MethodView
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from config import (root, ytad_url, GENIUS_ACCESS_TOKEN)
+from config import (root, ytad_url, proxy_url, GENIUS_ACCESS_TOKEN)
 from pytube import YouTube, Playlist
 import shutil
 import humanize
@@ -15,23 +15,10 @@ import mimetypes
 import sys
 from pathlib2 import Path
 import lyricsgenius
-from logging.config import dictConfig
+import logging
+from m3u import M3U
 
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
-    'root': {
-        'level': 'INFO',
-        'handlers': ['wsgi']
-    }
-})
+logging.basicConfig(filename='record.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 app = Flask(__name__, static_url_path='/assets', static_folder='assets')
 CORS(app)
@@ -164,7 +151,7 @@ def sorted_alphanumeric(data):
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(data, key=alphanum_key)
 
-def create_folder_structure_json(path): 
+def create_music_folder_structure_json(path): 
     # Initialize the result dictionary with folder 
     # name, type, and an empty list for children 
     result = {'name': (os.path.basename(path), '')[path==root], 
@@ -182,16 +169,38 @@ def create_folder_structure_json(path):
         # If the entry is a directory, recursively call the function 
         if os.path.isdir(entry_path): 
             #if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
-            if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
-                result['children'].append(create_folder_structure_json(entry_path)) 
             if any(os.path.isdir(os.path.join(entry_path, fname)) for fname in os.listdir(entry_path)):
                 child_dir = next((fname for fname in os.listdir(entry_path) if os.path.isdir(os.path.join(entry_path, fname))), None)
-                if child_dir and any(sfname.endswith('.mp3') for sfname in os.listdir(os.path.join(entry_path, child_dir))):
-                    result['children'].append(create_folder_structure_json(os.path.join(entry_path)))
+                if child_dir and any(sfname.endswith('.mp3') or sfname.endswith('.m3u') for sfname in os.listdir(os.path.join(entry_path, child_dir))):
+                    result['children'].append(create_music_folder_structure_json(os.path.join(entry_path)))
+            else:
+                if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
+                    result['children'].append(create_music_folder_structure_json(entry_path)) 
         # If the entry is a file, create a dictionary with name and type 
         else:
-            if entry.endswith('.mp3'):
+            if entry.endswith('.mp3') or entry.endswith('.m3u'):
                 result['children'].append({'name': entry, 'type': 'file'}) 
+  
+    return result 
+
+def create_folder_structure_json(path): 
+    # Initialize the result dictionary with folder 
+    # name, type, and an empty list for children 
+    result = {'name': (os.path.basename(path), '')[path==root], 
+              'type': 'folder', 'children': []} 
+  
+    # Check if the path is a directory 
+    if not os.path.isdir(path): 
+        return result 
+  
+    # Iterate over the entries in the directory 
+    for entry in sorted_alphanumeric(os.listdir(path)): 
+       # Create the full path for the current entry 
+        entry_path = os.path.join(path, entry) 
+  
+        # If the entry is a directory, recursively call the function 
+        if os.path.isdir(entry_path): 
+            result['children'].append(create_folder_structure_json(entry_path)) 
   
     return result 
 
@@ -207,6 +216,8 @@ class PathView(MethodView):
         
         if p == 'audioplayer/index.html':
             dir_path = request.args.get('path')
+            if dir_path:
+                dir_path = dir_path.replace('/', '', 1)
             path = os.path.join(root, dir_path or '')
             path = os.path.normpath(path)
             if os.path.isdir(path):
@@ -229,15 +240,28 @@ class PathView(MethodView):
         if p == 'api/getLyrics':
             orig_title = request.args.get('title')
             full_path = request.args.get('path')
+            app.logger.info('%s orig_title', orig_title)
+            app.logger.info('%s full_path', full_path)
             if full_path:
+                app.logger.info('%s full_path exists', full_path)
                 if not full_path.startswith(root):
                     full_path = full_path.replace(request.host_url, '')
+                    app.logger.info('%s proxy_url', proxy_url)
+                    full_path = full_path.replace(proxy_url,'')
+                    if full_path.startswith("/"):
+                        full_path.replace('/', '', 1)
+                    app.logger.info('%s full_path replaced url', full_path)
+                    app.logger.info('%s root', root)
                     full_path = os.path.join(root, full_path)
+                    #full_path = root + full_path
+                    app.logger.info('%s full_path joined root', full_path)
                     full_path = os.path.normpath(full_path)
+                    app.logger.info('%s norm full_path', full_path)
                 full_path_no_ext, ext = os.path.splitext(full_path)
                 full_path = full_path_no_ext + '.lyr'
+                app.logger.info('%s full_path as lyr', full_path)
             if os.path.exists(full_path):
-                with open(full_path, 'r') as f:
+                with open(full_path, encoding="utf-8") as f:
                     song = json.load(f)                
                 result = {}
                 result['lyrics']= song['lyrics'],
@@ -249,11 +273,13 @@ class PathView(MethodView):
                 genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
                 song = genius.search_song(title=title, artist=title)
                 if song != None and song.lyrics:
+                    app.logger.info('%s song info returned', song.title)
                     if song.title.lower() == "Band Names".lower():
                         return {"status": 400, "error": "No lyrics found"}
                     _song = {}
                     _song['lyrics'] = song.lyrics
                     _song['_body'] = song._body
+                    app.logger.info('%s writting song', song.title)
                     with open(full_path, 'w') as f:
                         json.dump(_song, f, indent=4)                    
                     result = {}
@@ -261,16 +287,31 @@ class PathView(MethodView):
                     result['body'] = song._body
                     return json.dumps(result)
                 else:
+                    app.logger.info('%s no song returned')
                     result = {}
                     result['status'] = 400
                     result['error'] = "No lyrics found"
                     return json.dumps(result)
             
         if p == 'api/getMusicFolderTree':
-            jsonTree =create_folder_structure_json(root)
-            """ res = make_response(jsonTree, 200)
-            res.headers.add('Content-type', 'application/json') """
+            jsonTree =create_music_folder_structure_json(root)
             return jsonTree
+        if p == 'api/getFolderTree':
+            jsonTree =create_folder_structure_json(root)
+            return jsonTree
+        if p == 'api/getPlaylistM3u':
+            path = request.args.get('path')
+            if not path or not path.endswith('.m3u'):
+                return {"status": 400, "error": "No playlist found"}
+            if path.startswith('/'):
+                path = path.replace('/', '', 1)
+            path = os.path.join(root, path)
+            path = os.path.normpath(path)
+            if os.path.exists(path):
+                playlist = M3U.parse(path)
+                return {"status": 200, "playlist": playlist}
+            else:
+                return {"status": 400, "error": "No playlist found"}
             
         path = os.path.join(root, p)
         path = os.path.normpath(path)
@@ -365,7 +406,6 @@ class PathView(MethodView):
         res = None
         if request.cookies.get('auth_cookie') == key:
             path = os.path.join(root, p)
-            Path(path).mkdir(mode=0o777, parents=True, exist_ok=True)
 
             info = {}
             if request.path == '/newfolder':
@@ -382,6 +422,31 @@ class PathView(MethodView):
                         info['status'] = 'error'
                         info['msg'] = str(e)
                     return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
+            if request.path == '/movepath':
+                opath = os.path.join(root, request.form['opath'])
+                opath = os.path.normpath(opath)
+                dpath = os.path.join(root, request.form['dpath'])
+                dpath = os.path.normpath(dpath)
+                if(os.path.exists(opath) and opath != dpath):
+                    try:
+                        if(os.path.isdir(opath)):
+                            shutil.move(opath, dpath, copy_function = shutil.copytree)
+                        else:
+                            shutil.move(opath, dpath)
+                    except Exception as e:
+                        info['status'] = 'error'
+                        info['msg'] = str(e)
+                    else:
+                        info['status'] = 'success'
+                        info['msg'] = 'File Moved'
+                        dir_path = dpath[len(root)+1:]
+                        dir_path=dir_path[:-len(request.form['movepath_filename'])] #dir_path.replace(request.form['movepath_filename'],'')
+                        dir_path = dir_path.replace('\\', '/')
+                    return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
+                else:
+                    info['status'] = 'error'
+                    info['msg'] = 'Invalid Operation'
+                    return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
             elif request.path == '/api/':
                 res_obj = {}
                 yturls = list(map(str.strip, request.form["videos_urls"].split(',')))
@@ -390,9 +455,6 @@ class PathView(MethodView):
                 res_obj['status'] = 'success'
                 res_obj['data'] = filesObj
                 res_obj['errors'] = errors
-                """ res = make_response(json.JSONEncoder().encode(res_obj), 200)
-                res.headers.add('Content-type', 'application/json')
-                return res """
                 return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
             elif request.path == '/api/playlist/':
                 res_obj = {}
@@ -402,9 +464,6 @@ class PathView(MethodView):
                 if not playlist_url:
                     res_obj['status'] = 'error'
                     res_obj['msg'] = "Empty playlist URL"
-                    """ res = make_response(json.JSONEncoder().encode(res_obj), 400)
-                    res.headers.add('Content-type', 'application/json')
-                    return res """
                     return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
                 try:
                     playlist = Playlist(playlist_url)
@@ -415,9 +474,6 @@ class PathView(MethodView):
                     if not videos:
                         res_obj['status'] = 'error'
                         res_obj['msg'] = "Playlist is empty"
-                        """ res = make_response(json.JSONEncoder().encode(res_obj), 400)
-                        res.headers.add('Content-type', 'application/json')
-                        return res """
                         return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
                     yturls = ",".join(videos)
                     print(yturls)
@@ -427,23 +483,20 @@ class PathView(MethodView):
                     res_obj['status'] = 'success'
                     res_obj['data'] = filesObj
                     res_obj['errors'] = errors
-                    """ res = make_response(json.JSONEncoder().encode(res_obj), 200)
-                    res.headers.add('Content-type', 'application/json')
-                    return res """
                     return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
                 except Exception as e:
                     import traceback
                     traceback.print_exc()
                     res_obj['status'] = 'error'
                     res_obj['msg'] = traceback.format_exc()
-                    """ res = make_response(json.JSONEncoder().encode(res_obj), 500)
-                    res.headers.add('Content-type', 'application/json')
-                    return res """
                     return redirect(url_for('path_view', p=request.form.get("path")),302, json.JSONEncoder().encode(res_obj))
             elif request.path == '/api/searchSong':
                 title = request.form['title']
                 artist = request.form['artist']
-                full_path = os.path.join(root, request.form['full_path'])
+                full_path = request.form['full_path']
+                if(full_path.startswith('/')):
+                    full_path = full_path.replace('/', '', 1)
+                full_path = os.path.join(root, full_path)
                 full_path = os.path.normpath(full_path)
                 full_path_no_ext, ext = os.path.splitext(full_path)
                 full_path = full_path_no_ext + '.lyr'
@@ -466,7 +519,23 @@ class PathView(MethodView):
                     result['status'] = 400
                     result['error'] = "No lyrics found"
                     return json.dumps(result)
+            elif request.path == '/api/genPlaylistM3u':
+                res_obj = {}
+                playlist_obj = json.loads(request.form.get("playlist_obj")) #request.form.get("playlist_obj")
+                dest_path = os.path.join(root, request.form.get("path"))
+                print(playlist_obj)
+                try:
+                    M3U.create(playlist_obj, dest_path)
+                    res_obj['status'] = 'success'
+                    return res_obj
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    res_obj['status'] = 'error'
+                    res_obj['msg'] = traceback.format_exc()
+                    return res_obj
             else:
+                Path(path).mkdir(mode=0o777, parents=True, exist_ok=True)
                 if os.path.isdir(path):
                     files = request.files.getlist('files[]')
                     for file in files:
@@ -537,7 +606,7 @@ app.add_url_rule('/newfolder', view_func=path_view)
 
 if __name__ == '__main__':
     bind = os.getenv('FS_BIND', '0.0.0.0')
-    port = os.getenv('FS_PORT', '8008')
+    port = os.getenv('FS_PORT', '8000')
     root = os.path.normpath(os.getenv('FS_PATH', 'D:/Desarrollo/projects/python/flask-file-server/filestore'))
     key = os.getenv('FS_KEY')
     app.run(bind, port, threaded=True, debug=False)

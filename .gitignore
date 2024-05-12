@@ -5,3 +5,4 @@ config.py
 __pycache__
 config_raspberry.py
 .vscode/launch.json
+record.log

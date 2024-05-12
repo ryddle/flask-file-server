@@ -1,8 +1,39 @@
 .session {
-    float:right;
+    float: right;
     margin: 5px 10px 0 0;
 }
 
 .login {
-    float:right
+    float: right
+}
+
+#movepath_tree {
+    max-height: 900px;
+    overflow: auto;
+}
+
+#movepath_tree #tree {
+    width: 100%;
+    height: calc(100% - 50px);
+    overflow: auto;
+}
+
+#movepath_tree ul {
+    list-style-type: none;
+    margin-left: 20px;
+    padding: 0;
+}
+
+#movepath_tree li {
+    margin-top: 5px;
+}
+
+#movepath_tree #btn {
+    float: right;
+    margin-right: 20px;
+}
+
+#movepath_tree .folder {
+    color: var(--primary-color);
+    font-weight: bold;
 }
