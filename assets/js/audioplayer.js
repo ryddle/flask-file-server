@@ -41,7 +41,7 @@ const context = new ctx();
 const audioContainer = document.getElementById('audio-container');
 // create new <audio> element
 //audioEl = new Audio('https://icecast2.ufpel.edu.br/live');
-let mediaElement = new Audio(audioList[0].sources[0].src);
+let mediaElement = (audioList.length>0)?new Audio(audioList[0].sources[0].src):new Audio();
 mediaElement.controls = true;
 mediaElement.crossOrigin = 'anonymous';
 mediaElement.style.display = 'none';
@@ -202,7 +202,7 @@ function changeGain(target) {
 var playlist = Playlist.from(audioList, mediaElement);
 window['playlist'] = playlist;
 
-var song_title = playlist.items_[0].sources[0].filename;
+var song_title = (playlist.items_.length>0)?playlist.items_[0].sources[0].filename:"";
 
 //create playlist html
 var playlist_cont = document.getElementById("playlist_cont");
@@ -330,7 +330,7 @@ Object.assign(ledDisplayFront.style, {
   cursor: 'pointer'
 });
 ledDisplayFront.id = "ledDisplayFront";
-ledDisplayFront.innerText = "00:00/00:00-" + playlist.items_[playlist.currentIndex_].sources[0].filename.substring(0, 12);
+ledDisplayFront.innerText = "00:00/00:00-" + (playlist.items_.length==0)?"":playlist.items_[playlist.currentIndex_].sources[0].filename.substring(0, 12);
 ledDisplayFront.time_mode = "playing";
 ledDisplayFront.onclick = chageTimeMode();
 ledDisplayBack.appendChild(ledDisplayFront);
