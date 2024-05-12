@@ -15,6 +15,23 @@ import mimetypes
 import sys
 from pathlib2 import Path
 import lyricsgenius
+from logging.config import dictConfig
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
 
 app = Flask(__name__, static_url_path='/assets', static_folder='assets')
 CORS(app)
@@ -164,7 +181,8 @@ def create_folder_structure_json(path):
   
         # If the entry is a directory, recursively call the function 
         if os.path.isdir(entry_path): 
-            if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
+            #if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
+            if any(os.path.isdir(os.path.join(entry_path, fname)) for fname in os.listdir(entry_path)) or any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
                 result['children'].append(create_folder_structure_json(entry_path)) 
         # If the entry is a file, create a dictionary with name and type 
         else:
