@@ -182,8 +182,12 @@ def create_folder_structure_json(path):
         # If the entry is a directory, recursively call the function 
         if os.path.isdir(entry_path): 
             #if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
-            if any(os.path.isdir(os.path.join(entry_path, fname)) for fname in os.listdir(entry_path)) or any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
+            if any(fname.endswith('.mp3') for fname in os.listdir(entry_path)):
                 result['children'].append(create_folder_structure_json(entry_path)) 
+            if any(os.path.isdir(os.path.join(entry_path, fname)) for fname in os.listdir(entry_path)):
+                child_dir = next((fname for fname in os.listdir(entry_path) if os.path.isdir(os.path.join(entry_path, fname))), None)
+                if child_dir and any(sfname.endswith('.mp3') for sfname in os.listdir(os.path.join(entry_path, child_dir))):
+                    result['children'].append(create_folder_structure_json(os.path.join(entry_path)))
         # If the entry is a file, create a dictionary with name and type 
         else:
             if entry.endswith('.mp3'):
