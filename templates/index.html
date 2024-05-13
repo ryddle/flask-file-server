@@ -18,8 +18,11 @@
 
     // @ts-ignore
     var audio_files_string = {{ audio_files | tojson }};
-
     var audio_files = eval(audio_files_string);
+
+    // @ts-ignore
+    var image_files_string = {{ image_files | tojson }};
+    var image_files = eval(image_files_string);
   </script>
 
 </head>

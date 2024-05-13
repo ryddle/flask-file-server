@@ -319,6 +319,8 @@ class PathView(MethodView):
             contents = []
             audio_files = []
             has_audio = False
+            image_files = []
+            has_image = False
             total = {'size': 0, 'dir': 0, 'file': 0}
             for filename in os.listdir(path):
                 filename_noext, ext = os.path.splitext(filename)
@@ -337,16 +339,22 @@ class PathView(MethodView):
                 sz = stat_res.st_size
                 info['size'] = sz
                 total['size'] += sz
-                exts = datatypes.get('audio')
-                if filename.split('.')[-1] in exts:
-                    audio_files.append(filename)
-                    has_audio = True
+                ext = filename.split('.')[-1]
+                if(ext!=''):
+                    audio_exts = datatypes.get('audio')
+                    if ext in audio_exts:
+                        audio_files.append(filename)
+                        has_audio = True
+                    image_exts = datatypes.get('image')
+                    if ext in image_exts:
+                        image_files.append(filename)
+                        has_image = True
                 contents.append(info)
             try:
                 audio_files = sorted(audio_files, key=lambda s: int(re.search(r'\d+', s).group()))
             except:
                 audio_files = sorted(audio_files)
-            page = render_template('index.html', path=p, dir_path=path, contents=contents, total=total, audio_files=json.dumps(audio_files), has_audio=has_audio, ytad_url=ytad_url, hide_dotfile=hide_dotfile)
+            page = render_template('index.html', path=p, dir_path=path, contents=contents, total=total, audio_files=json.dumps(audio_files), has_audio=has_audio, image_files=json.dumps(image_files), has_image=has_image, ytad_url=ytad_url, hide_dotfile=hide_dotfile)
             res = make_response(page, 200)
             res.set_cookie('hide-dotfile', hide_dotfile, max_age=16070400)
         elif os.path.isfile(path):

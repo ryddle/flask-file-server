@@ -304,16 +304,23 @@ function imageViewer(modal) {
 
     setModalHeader(modal, file_name, file_size);
 
-    if (document.getElementById("bs_modal_image") == null) {
-        var html = '<div><img id="bs_modal_image" data-original="' + url + '" src="' + url + '" alt="Picture"></div>';
+    //if (document.getElementById("bs_modal_image") == null) {
+        var html = '<div id="bs_modal_image_container"><img id="bs_modal_image" data-original="' + url + '" src="' + url + '" alt="Picture" style="max-height:calc(100vh - 280px); max-width: 100%;">';
+        for (var i = 0; i < image_files.length; i++) {
+            if(url.indexOf(image_files[i])==-1){
+                html += '<img src="' + image_files[i] + '" alt="Picture" style="display:none">';
+            }
+        }
+        html += '</div>';
 
         var modal_body = modal[0].getElementsByClassName('modal-body')[0];
         modal_body.style = {};
         //modal_body.style.height = "900px";
         modal_body.style.minHeight = "900px";
+        modal_body.style.maxHeight = "calc(100vh - 150px)";
         modal_body.style.backgroundColor = "#000";
         modal_body.innerHTML = html;
-    }
+    //}
 
     setModalFooter(modal, file_name, file_size);
 }
@@ -323,14 +330,14 @@ function imageViewerShown(e, modal) {
     var height = document.getElementById("bs_modal_image").clientHeight;
 
     if (e.namespace === 'bs.modal') {
-        window['viewer'] = new Viewer(document.getElementById("bs_modal_image"), {
+        window['viewer'] = new Viewer(document.getElementById("bs_modal_image_container"));/*, {
             url: 'data-original'
-        });
+        }*/
 
         $(window['viewer']).on('hidden', function () {
-            window['viewer'] = new Viewer(document.getElementById("bs_modal_image"), {
+            window['viewer'] = new Viewer(document.getElementById("bs_modal_image_container"));/*, {
                 url: 'data-original'
-            });
+            }*/
         });
     }
 }
