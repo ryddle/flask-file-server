@@ -613,8 +613,5 @@ app.add_url_rule('/<path:p>', view_func=path_view)
 app.add_url_rule('/newfolder', view_func=path_view)
 
 if __name__ == '__main__':
-    bind = os.getenv('FS_BIND', '0.0.0.0')
-    port = os.getenv('FS_PORT', '8000')
-    root = os.path.normpath(os.getenv('FS_PATH', 'D:/Desarrollo/projects/python/flask-file-server/filestore'))
-    key = os.getenv('FS_KEY')
-    app.run(bind, port, threaded=True, debug=False)
+    from config import BIND, PORT
+    app.run(BIND, PORT, threaded=True, debug=False)
