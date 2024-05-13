@@ -8,7 +8,7 @@ class XverticalSliderEventTarget extends EventTarget {
     }
 }
 
-class XverticalSlider extends XverticalSliderEventTarget {
+export default class XverticalSlider extends XverticalSliderEventTarget {
     /**
      * Initializes a new instance of the class with the provided configuration.
      *

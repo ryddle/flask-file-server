@@ -1,4 +1,4 @@
-var xhtmlColors = {
+const xhtmlColors = {
     "White": "#FFFFFF",
     "Snow": "#FFFAFA",
     "Ivory": "#FFFFF0",
@@ -137,3 +137,5 @@ var xhtmlColors = {
     "Slategray": "#708090",
     "Lightslategray": "#778899"
 };
+
+export default xhtmlColors;

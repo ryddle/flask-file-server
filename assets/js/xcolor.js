@@ -3,6 +3,9 @@
     return (x2 > y2) ? Math.min(Math.max(nv, y2), x2) : Math.max(Math.min(nv, y2), x2);
 } */
 
+import map from './xutils.js';
+import xhtmlColors from './xhtmlColors.js';
+
 /*
  * xcolor.js is a simple class to manipulate colors in JavaScript
  * It provides methods to parse color codes, convert color spaces and generate color codes.
@@ -16,7 +19,7 @@
  *   - Creating color palettes
  * 
 */
-class xcolor {
+export default class xcolor {
     static #rgbRegex = /^rgb\((\d{1,3}),\s?(\d{1,3}),\s?(\d{1,3})\)$/;
     static #rgbaRegex = /^rgba\((\d{1,3}),\s?(\d{1,3}),\s?(\d{1,3}),\s?(0?(\.\d+)?|1(\.0)?)\)$/;
     static #hexRegex = /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
@@ -1177,6 +1180,8 @@ class xcolor {
     }
 
 }
+
+window.xcolor = xcolor;
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = xcolor;

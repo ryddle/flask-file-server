@@ -10,9 +10,13 @@
   <link rel="stylesheet" href="{{url_for('static', filename='css/fontawesome.css')}}">
 
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
-  <script type="text/javascript" src="{{url_for('static', filename='js/xutils/xutils.js')}}"></script>
+  <!--   <script type="text/javascript" src="{{url_for('static', filename='js/xutils/xutils.js')}}"></script>
   <script type="text/javascript" src="{{url_for('static', filename='js/xhtmlColors.js')}}"></script>
-  <script type="text/javascript" src="{{url_for('static', filename='js/xcolor.js')}}"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='js/xcolor.js')}}"></script> -->
+
+  <script type="module" src="../assets/js/xutils.js"></script>
+  <script type="module" src="../assets/js/xhtmlColors.js"></script>
+  <script type="module" src="../assets/js/xcolor.js"></script>
   <script>
     const URLJoin = (...args) =>
       args
@@ -36,16 +40,6 @@
     var primary_color = rs.getPropertyValue('--primary-color');
     var secondary_color = rs.getPropertyValue('--secondary-color');
 
-    if (localStorage.getItem('primary_color') != null) {
-      primary_color = localStorage.getItem("primary_color");
-      secondary_color = localStorage.getItem("secondary_color");
-
-      setCssVar('--primary-color', primary_color);
-      var newcolor = xcolor.getXcolor(primary_color);
-      setCssVar('--primary-color-rgb', newcolor.rgb.r + ', ' + newcolor.rgb.g + ', ' + newcolor.rgb.b);
-      setCssVar('--secondary-color', secondary_color);
-    }
-
     // Create a function for setting a variable value
     function setCssVar(variable, value) {
       // Set the value of variable --blue to another value (in this case "lightblue")
@@ -56,6 +50,22 @@
     //////////////////////////
 
     window['focusSearchInput'] = false;
+
+
+    function loadSavedSettings() {
+      if (localStorage.getItem('primary_color') != null) {
+        primary_color = localStorage.getItem("primary_color");
+        secondary_color = localStorage.getItem("secondary_color");
+
+        setCssVar('--primary-color', primary_color);
+        var newcolor = xcolor.getXcolor(primary_color);
+        setCssVar('--primary-color-rgb', newcolor.rgb.r + ', ' + newcolor.rgb.g + ', ' + newcolor.rgb.b);
+        setCssVar('--secondary-color', secondary_color);
+
+        var primaryColorChangeEvent = new CustomEvent('primaryColorChange');
+        document.dispatchEvent(primaryColorChangeEvent);
+      }
+    }
 
     ///// Settings panel /////
 
@@ -84,6 +94,81 @@
     };
 
     var current_eq_preset = "default";
+
+    $(document).ready(function () {
+
+      // Load saved settings
+      loadSavedSettings();
+
+      // Show settings button
+      document.getElementById('show-settings-btn').addEventListener('click', function () {
+        document.getElementById('color-input').value = primary_color;
+        document.getElementById('settings-panel').style.display = 'block';
+      });
+
+      // Settings Panel close button
+      document.getElementById('settings-panel-open-btn').addEventListener('click', function () {
+        document.getElementById('settings-panel').style.display = 'none';
+      });
+
+      // Set play list button
+      document.getElementById('set-playlist-btn').addEventListener('click', function (event) {
+        setPlaylist(event);
+      });
+
+      // Save play list button
+      document.getElementById('save-playlist-btn').addEventListener('click', function (event) {
+        savePlaylist(event);
+      });
+
+      // Select display preset
+      document.getElementById('display-preset').addEventListener('change', function (event) {
+        applyDisplayPreset(event);
+      });
+
+      // Apply settings button
+      document.getElementById('apply-settings-btn').addEventListener('click', function (event) {
+        applySettings(event);
+      });
+
+      // Show eq presets button
+      document.getElementById('eq-preset-btn').addEventListener('click', function (event) {
+        showEqPresets(event);
+      });
+
+      // Eq Presets close button
+      document.getElementById('eq-presets-panel-close-btn').addEventListener('click', function (event) {
+        document.getElementById('eq-presets-panel').style.display = 'none';
+      });
+
+      // Select eq preset
+      document.getElementById('eq-preset').addEventListener('change', function (event) {
+        applyEqPreset(event);
+      });
+
+      // Apply eq preset button
+      document.getElementById('apply-eq-preset-btn').addEventListener('click', function (event) {
+        applyEqPreset(event);
+        document.getElementById('eq-presets-panel').style.display = 'none';
+      });
+
+      // Treedialog get selections button
+      document.getElementById('treedialog_btn').addEventListener('click', function (event) {
+        getSelections();
+      });
+
+      // Search song panel close button
+      document.getElementById('search-song-panel-close-btn').addEventListener('click', function (event) {
+        document.getElementById('search-song-panel').style.display = 'none';
+        window['focusSearchInput'] = false;
+      });
+
+      // Search song button
+      document.getElementById('search-song-btn').addEventListener('click', function (event) {
+        searchSong(event);
+      });
+
+    });
 
     function applySettings() {
       document.getElementById('settings-panel').style.display = 'none';
@@ -180,7 +265,7 @@
 
 <body>
   <div style="position: absolute;top: 5px;left: 5px; width: 24px; height: 24px; z-index: 100;">
-    <button id="show-color-picker" style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;" onclick="document.getElementById('color-input').value = primary_color; document.getElementById('settings-panel').style.display = 'block';">
+    <button id="show-settings-btn" style="width: 24px;height: 24px;padding: 0px;background-color: black;border: 0px;margin: 5px;">
       <i class="fa fa-cog" style="font-size: 18px;color: var(--primary-color);"></i>
     </button>
   </div>
@@ -192,7 +277,7 @@
 
       <div id="controls" class="eq_container">
         <div style="float: left;position: fixed;margin-left: -75px;margin-top: -15px;">
-          <button style="padding: 4px;" class="btn btn-secondary controls" onclick="showEqPresets(event)">
+          <button id="eq-preset-btn" class="btn btn-secondary controls" style="padding: 4px;">
             <i class="fa fa-solid" style="rotate: 90deg;color: var(--primary-color);"></i>
           </button>
         </div>
@@ -212,8 +297,8 @@
     <div class="column middle">
       <div id="playlist_cont">
         <div style="height: 18px;display: inline;">
-          <div style="height: 18px;display: inline;"><button id="set-playlist" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);" onclick="setPlaylist(event)"><i class="fa fa-list"></i></button></div>
-          <div style="height: 18px;"><button id="save-playlist" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);" onclick="savePlaylist(event)"><i class="fa fa-save"></i></button></div>
+          <div style="height: 18px;display: inline;"><button id="set-playlist-btn" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);"><i class="fa fa-list"></i></button></div>
+          <div style="height: 18px;"><button id="save-playlist-btn" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);"><i class="fa fa-save"></i></button></div>
         </div>
       </div>
       <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands" style="display: flex;justify-content: space-between;align-items: center;">
@@ -253,7 +338,7 @@
 
   <div id="settings-panel" class="settings-panel">
     <div class="wrapper">
-      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;" onclick="document.getElementById('settings-panel').style.display = 'none';">
+      <button id="settings-panel-open-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
         <i class="fa fa-times"></i>
       </button>
       <div class="form" style="padding: 0px;">
@@ -279,13 +364,13 @@
           </p>
           <p class="full-width" style="display: inline-flex; align-items: center;">
             <label for="">Display</label>
-            <select name="display-preset" id="display-preset" class="sized" size="2" onchange="applyDisplayPreset(event);">
+            <select name="display-preset" id="display-preset" class="sized" size="2">
               <option value="lcd">LCD</option>
               <option value="led">LED</option>
             </select>
           </p>
           <p class="full-width">
-            <button type="button" class="btn btn-secondary controls" style="float: right;margin: 0px;" onclick="applySettings(event);">Ok</button>
+            <button type="button" id="apply-settings-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
           </p>
         </form>
       </div>
@@ -294,7 +379,7 @@
 
   <div id="eq-presets-panel" class="settings-panel" style="left: 49px;top: 1025px; z-index: 999;">
     <div class="wrapper" style="width: 200px;">
-      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;" onclick="document.getElementById('eq-presets-panel').style.display = 'none';">
+      <button id="eq-presets-panel-close-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
         <i class="fa fa-times"></i>
       </button>
       <div class="form" style="padding: 0px;">
@@ -303,7 +388,7 @@
         </div>
         <form>
           <p class="full-width" style="display: inline-flex; align-items: center;">
-            <select name="eq-preset" id="eq-preset" size="5" class="sized" onchange="applyEqPreset(event);">
+            <select name="eq-preset" id="eq-preset" size="5" class="sized">
               <option value="default">default</option>
               <option value="pop">pop</option>
               <option value="rock">rock</option>
@@ -312,7 +397,7 @@
             </select>
           </p>
           <p class="full-width">
-            <button type="button" class="btn btn-secondary controls" style="float: right;margin: 0px;" onclick="applyEqPreset(event);document.getElementById('eq-presets-panel').style.display = 'none';">Ok</button>
+            <button type="button" id="apply-eq-preset-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
           </p>
         </form>
       </div>
@@ -323,13 +408,13 @@
   <div id="treedialog">
     <div id="tree"></div>
     <div>
-      <button id="treedialog_btn" onclick="getSelections()" class="btn btn-secondary controls" style="color: var(--primary-color);">Accept</button>
+      <button id="treedialog_btn" class="btn btn-secondary controls" style="color: var(--primary-color);">Accept</button>
     </div>
   </div>
 
   <div id="search-song-panel" class="settings-panel" style="width: 350px;">
     <div class="wrapper">
-      <button class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;" onclick="document.getElementById('search-song-panel').style.display = 'none';window['focusSearchInput']=false;">
+      <button id="search-song-panel-close-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
         <i class="fa fa-times"></i>
       </button>
       <div class="form" style="padding: 0px;">
@@ -347,7 +432,7 @@
           </p>
           <input type="hidden" id="full_path" name="full_path" value="">
           <p class="full-width">
-            <button type="button" class="btn btn-secondary controls" style="float: right;margin: 0px;" onclick="searchSong(event);">Ok</button>
+            <button type="button" id="search-song-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
           </p>
         </form>
       </div>
@@ -569,10 +654,9 @@
 
   </script>
 
-  <!-- <script type="module" src="../assets/js/vertical-slider.js"></script> -->
-  <script type="text/javascript" src="{{url_for('static', filename='js/xcolorcpicker.js')}}"></script>
-  <script type="text/javascript" src="{{url_for('static', filename='js/xvirtualleddisplay.js')}}"></script>
-  <script type="text/javascript" src="{{url_for('static', filename='js/xvertical-slider.js')}}"></script>
+  <script type="module" src="../assets/js/xcolorcpicker.js"></script>
+  <script type="module" src="../assets/js/xvirtualleddisplay.js"></script>
+  <script type="module" src="../assets/js/xvertical-slider.js"></script>
   <script type="module" src="../assets/js/audioplayer.js"></script>
 
 </body>

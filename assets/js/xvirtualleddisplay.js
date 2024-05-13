@@ -53,7 +53,7 @@ const letters = {
 
 const Array2D = (r, c) => [...Array(r)].map(_ => Array(c).fill(0));
 
-class XVirtualLedDisplay {
+export default class XVirtualLedDisplay {
     #options = {
         'mode': 'production', // 'production' or 'development'    
         'callback': null

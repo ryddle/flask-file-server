@@ -86,3 +86,25 @@ const randomChoice = function (choices) {
 const randomArray = function (array) {
     return array[Math.floor(Math.random() * array.length)];
 }
+
+export default {
+    angleAndModule,
+    angle,
+    mod,
+    map,
+    mapFloat,
+    clamp,
+    clamp01,
+    truncFloat,
+    lerp,
+    lerp01,
+    inverseLerp,
+    inverseLerp01,
+    random,
+    randomInt,
+    randomRange,
+    randomRangeInt,
+    randomSign,
+    randomBool,
+    randomChoice
+}
