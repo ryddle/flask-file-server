@@ -45,8 +45,7 @@
         <div class="btn-group">
           <a data-toggle="modal" data-target="#newfolder-modal" class="btn btn-secondary text-muted">New Folder</a>
           <a data-toggle="modal" data-target="#uploader-modal" class="btn btn-secondary text-muted">Upload</a>
-          <a data-toggle="modal" data-target="#ytad-modal" class="btn btn-secondary text-muted" style="background-color: red; color: white !important;"><i
-               class="fa fa-fw fa-play"></i><strong id="ytad">YTAD</strong></a>
+          <a data-toggle="modal" data-target="#ytad-modal" class="btn btn-secondary text-muted" style="background-color: red; color: white !important;"><i class="fa fa-fw fa-play"></i><strong id="ytad">YTAD</strong></a>
         </div>
       </div>
     </div>
@@ -64,8 +63,7 @@
         <tbody>
           {% for entry in contents if entry.type == 'dir' %}
           <tr>
-            <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a
-                 href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
+            <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
             <td class="text-xs-right " data-sort-value="-1">&mdash;</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
             <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
@@ -75,9 +73,7 @@
           {% for entry in contents if entry.type == 'file' %}
           <tr>
             <td class="text-xs-left " data-sort-value="file-{{entry.name | lower}}"><i class="fa fa-fw {{entry.name | icon_fmt}} " aria-hidden="true"></i>&nbsp;
-              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}"
-                 data-type="{{entry.name | data_fmt}}" {%
-                 endif %} href="{{entry.name}}" data-size="{{entry.size | size_fmt}}">{{entry.name}}</a>
+              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}" data-type="{{entry.name | data_fmt}}" {% endif %} href="{{entry.name}}" data-size="{{entry.size | size_fmt}}">{{entry.name}}</a>
             </td>
             <td class="text-xs-right " data-sort-value="{{entry.size}}" title="{{entry.size}} bytes">{{entry.size | size_fmt}}</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
@@ -128,114 +124,114 @@
       </div>
     </div>
 
-  <div class="modal fade" id="player-modal" tabindex="-1" role="dialog" aria-labelledby="file-name" aria-hidden="true">
-    <div class="modal-dialog modal-xxl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title text-left" id="file-name">&nbsp;</h4>
-          <small class="text-muted" id="file-meta"></small>
-        </div>
-        <div class="modal-body"></div>
-        <div class="modal-footer">
-          <div class="pull-xs-left">
-            <button type="button" class="btn btn-link highlight hidden-xs-up">Apply syntax highlighting</button>
+    <div class="modal fade" id="player-modal" tabindex="-1" role="dialog" aria-labelledby="file-name" aria-hidden="true">
+      <div class="modal-dialog modal-xxl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title text-left" id="file-name">&nbsp;</h4>
+            <small class="text-muted" id="file-meta"></small>
           </div>
-          <div class="pull-xs-right">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <div class="pull-xs-left">
+              <button type="button" class="btn btn-link highlight hidden-xs-up">Apply syntax highlighting</button>
+            </div>
+            <div class="pull-xs-right">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="modal fade" id="uploader-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-body">
-          <form id="upload-files" method="post" enctype="multipart/form-data">
-            <input type="file" name="files[]" id="filer_input" multiple="multiple">
+    <div class="modal fade" id="uploader-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form id="upload-files" method="post" enctype="multipart/form-data">
+              <input type="file" name="files[]" id="filer_input" multiple="multiple">
+            </form>
+          </div>
+          <div class="modal-footer">
+            <div class="pull-xs-right">
+              <button type="button" id="close-uploader" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="newfolder-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form id="newfolder" method="post" action="/newfolder">
+            <div class="modal-body">
+              <div class="md-form">
+                <i class="fa fa-folder prefix grey-text"> </i> <label>Folder Name</label>
+                <input type="text" id="foldername" name="foldername" class="form-control">
+                <input type="hidden" id="path" name="path" value="{{path}}">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="pull-xs-right">
+                <button type="button" id="close-newfolder" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" id="send-newfolder" class="btn btn-secondary">Create</button>
+              </div>
+            </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <div class="pull-xs-right">
-            <button type="button" id="close-uploader" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="movepath-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form id="movepath_form" method="post" action="/movepath">
+            <div class="modal-body">
+              <div class="md-form">
+                <i class="fa fa-share prefix grey-text"> </i> <label>Select Folder</label>
+                <div id="movepath_tree"></div>
+                <input type="hidden" id="movepath_target" name="dpath">
+                <input type="hidden" id="movepath_source" name="opath">
+                <input type="hidden" id="movepath_filename" name="movepath_filename">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="pull-xs-right">
+                <button type="button" id="close-movepath" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" id="send-movepath" class="btn btn-secondary">Move</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  </div>
-  <div class="modal fade" id="newfolder-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <form id="newfolder" method="post" action="/newfolder">
-          <div class="modal-body">
-            <div class="md-form">
-              <i class="fa fa-folder prefix grey-text"> </i> <label>Folder Name</label>
-              <input type="text" id="foldername" name="foldername" class="form-control">
-              <input type="hidden" id="path" name="path" value="{{path}}">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <div class="pull-xs-right">
-              <button type="button" id="close-newfolder" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button type="submit" id="send-newfolder" class="btn btn-secondary">Create</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 
-  <div class="modal fade" id="movepath-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <form id="movepath_form" method="post" action="/movepath">
-          <div class="modal-body">
-            <div class="md-form">
-              <i class="fa fa-share prefix grey-text"> </i> <label>Select Folder</label>
-              <div id="movepath_tree"></div>
-              <input type="hidden" id="movepath_target" name="dpath">
-              <input type="hidden" id="movepath_source" name="opath">
-              <input type="hidden" id="movepath_filename" name="movepath_filename">
-            </div>
+    <div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h5 class="modal-title" style="width: 100%;"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
-          <div class="modal-footer">
-            <div class="pull-xs-right">
-              <button type="button" id="close-movepath" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button type="submit" id="send-movepath" class="btn btn-secondary">Move</button>
+          <form id="delete-files">
+            <div class="modal-body">
+              <label>Are you sure you want to delete these file?</label>
+              <input type="hidden" name="name" id="del_name" class="form-control">
+              <input type="hidden" name="type" id="del_type" class="form-control">
             </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <h5 class="modal-title" style="width: 100%;"></h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+            <div class="modal-footer">
+              <div class="pull-xs-right">
+                <button type="button" id="close-delete" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" id="send-delete" class="btn btn-secondary">Accept</button>
+              </div>
+            </div>
+          </form>
         </div>
-        <form id="delete-files">
-          <div class="modal-body">
-            <label>Are you sure you want to delete these file?</label>
-            <input type="hidden" name="name" id="del_name" class="form-control">
-            <input type="hidden" name="type" id="del_type" class="form-control">
-          </div>
-          <div class="modal-footer">
-            <div class="pull-xs-right">
-              <button type="button" id="close-delete" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button type="button" id="send-delete" class="btn btn-secondary">Accept</button>
-            </div>
-          </div>
-        </form>
       </div>
     </div>
-  </div>
-  <!-- <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -271,47 +267,54 @@
     </div>
   </div> -->
 
-  <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title text-left" id="ytad-modal-title">Youtube Audio Downloader</h4>
-          <small class="text-muted" id="file-meta"></small>
-        </div>
-        <form id="video_urls_form" method="post" action="/api/">
-        <div class="modal-body">
-          <div class="md-form">
-            <label>Videos urls</label>
-            <textarea id="video_urls" name="videos_urls" class="form-control"></textarea>
-            <input type="hidden" id="path" name="path" value="{{path}}">
+    <div class="modal fade" id="ytad-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title text-left" id="ytad-modal-title">Youtube Audio Downloader</h4>
+            <small class="text-muted" id="file-meta"></small>
           </div>
+          <form id="video_urls_form" method="post" action="/api/">
+            <div class="modal-body">
+              <div class="md-form">
+                <label>Videos urls</label>
+                <textarea id="video_urls" name="videos_urls" class="form-control"></textarea>
+                <input type="hidden" id="path" name="path" value="{{path}}">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="pull-xs-right">
+                <button type="button" id="close-ytad-videos" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" id="send-ytad-videos" class="btn btn-secondary">Download</button>
+              </div>
+            </div>
+          </form>
+          <form id="playlist_url_form" method="post" action="/api/playlist/">
+            <div class="modal-body">
+              <div class="md-form">
+                <label>Playlist url</label>
+                <input type="text" id="playlist_url" name="playlist_url" class="form-control">
+                <input type="hidden" id="path" name="path" value="{{path}}">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="pull-xs-right">
+                <button type="button" id="close-ytad-playlist" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" id="send-ytad-playlist" class="btn btn-secondary">Download</button>
+              </div>
+            </div>
+          </form>
         </div>
-        <div class="modal-footer">
-          <div class="pull-xs-right">
-            <button type="button" id="close-ytad-videos" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" id="send-ytad-videos" class="btn btn-secondary">Download</button>
-          </div>
-        </div>
-        </form>
-        <form id="playlist_url_form" method="post" action="/api/playlist/">
-        <div class="modal-body">
-          <div class="md-form">
-            <label>Playlist url</label>
-            <input type="text" id="playlist_url" name="playlist_url" class="form-control">
-            <input type="hidden" id="path" name="path" value="{{path}}">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div class="pull-xs-right">
-            <button type="button" id="close-ytad-playlist" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" id="send-ytad-playlist" class="btn btn-secondary">Download</button>
-          </div>
-        </div>
-        </form>
       </div>
     </div>
   </div>
+
+  <div id="progress-bar-container"
+    style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);z-index: 999; display: none; background-color: white;text-align: center;border: 1px solid rgb(153, 153, 153);padding: 10px;border-radius: 30px;width: 400px;height: 100px;padding-top: 30px;">
+    <span id="uploadprogress-result" style="color: #000;"></span>
+    <progress id="progress-bar" max="100" value="0" style="width: 350px;"></progress>
+    <br>
   </div>
 
   <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
@@ -329,3 +332,75 @@
 </body>
 
 </html>
+<script>
+  ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    document.addEventListener(eventName, preventDefaults, false)
+  })
+
+  function preventDefaults(e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  document.addEventListener('drop', handleFiles, false);
+
+  let filesDone = 0
+  let filesToDo = 0
+  let progressBarContainer = document.getElementById('progress-bar-container')
+  let progressBar = document.getElementById('progress-bar')
+  let uploadprogressResult = document.getElementById('uploadprogress-result');
+  let uploadProgress = []
+
+  function initializeProgress(numFiles) {
+    progressBarContainer.style.display = 'block';
+    progressBar.value = 0
+    uploadProgress = []
+
+    for (let i = numFiles; i > 0; i--) {
+      uploadProgress.push(0)
+    }
+  }
+
+  function updateProgress(percent) {
+    progressBar.value = percent;
+    if (Math.round(percent) == 100) {
+      uploadprogressResult.innerText = 'Finishing upload...';
+    } else {
+      uploadprogressResult.innerText = 'Uploading...' + Math.round(percent) + '%';
+    }
+  }
+
+  function handleFiles(files_) {
+    files = [...files_.dataTransfer.files]
+    initializeProgress(files.length) // <- Add this line
+    uploadFiles(files);
+  }
+
+  function uploadFiles(files) {
+    let url = '#'
+    var xhr = new XMLHttpRequest()
+    var formData = new FormData()
+    xhr.open('POST', url, true)
+
+    // Add following event listener
+    xhr.upload.addEventListener("progress", function (e) {
+      updateProgress((e.loaded * 100.0 / e.total) || 100)
+    })
+
+    xhr.addEventListener('readystatechange', function (e) {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        uploadprogressResult.innerText = 'Files upload complete';
+        setTimeout(function () { progressBarContainer.style.display = 'none'; }, 3000);
+      }
+      else if (xhr.readyState == 4 && xhr.status != 200) {
+        // Error. Inform the user
+        alert("Error while uploading file/s: " + xhr.responseText);
+      }
+    })
+
+    for (var file in files) {
+      formData.append("files[]", files[file]);
+    }
+    xhr.send(formData)
+  }
+</script>
