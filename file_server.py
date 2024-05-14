@@ -450,7 +450,7 @@ class PathView(MethodView):
 
     def post(self, p=''):
         res = None
-        if request.cookies.get('auth_cookie') == key or request.cookies.get('auth_cookie') == None:
+        if request.cookies.get('auth_cookie') == key:
             path = os.path.join(root, p)
 
             info = {}
