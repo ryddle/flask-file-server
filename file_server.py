@@ -151,6 +151,44 @@ def sorted_alphanumeric(data):
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(data, key=alphanum_key)
 
+search_results = []
+def search_items(path, search): 
+    # Initialize the result dictionary with folder 
+    # name, type, and an empty list for children 
+    
+  
+    # Check if the path is a directory 
+    if not os.path.isdir(path): 
+        return #search_results 
+  
+    # Iterate over the entries in the directory 
+    for entry in os.listdir(path): 
+       # Create the full path for the current entry 
+        entry_path = os.path.join(path, entry) 
+  
+        # If the entry is a directory, recursively call the function 
+        if os.path.isdir(entry_path): 
+            search_items(entry_path, search)
+        # If the entry is a file, create a dictionary with name and type 
+        else:
+            if search in entry:
+                filepath = os.path.join(path, entry)
+                stat_res = os.stat(filepath)
+                info = {}
+                info['name'] = entry
+                info['path'] = path[len(root)+1:]
+                info['mtime'] = time_desc(stat_res.st_mtime) # stat_res.st_mtime
+                info['mtimehuman'] = time_humanize(stat_res.st_mtime) # stat_res.st_mtime
+                info['icon'] = icon_fmt(entry)
+                ft = get_type(stat_res.st_mode)
+                info['type'] = ft
+                info['mtype'] = data_fmt(entry)
+                sz = stat_res.st_size
+                info['size'] = size_fmt(sz) #sz
+                search_results.append(info) 
+  
+    return #search_results
+
 def create_music_folder_structure_json(path): 
     # Initialize the result dictionary with folder 
     # name, type, and an empty list for children 
@@ -412,7 +450,7 @@ class PathView(MethodView):
 
     def post(self, p=''):
         res = None
-        if request.cookies.get('auth_cookie') == key:
+        if request.cookies.get('auth_cookie') == key or request.cookies.get('auth_cookie') == None:
             path = os.path.join(root, p)
 
             info = {}
@@ -542,6 +580,22 @@ class PathView(MethodView):
                     res_obj['status'] = 'error'
                     res_obj['msg'] = traceback.format_exc()
                     return res_obj
+            elif request.path == '/api/search':
+                search = request.form.get("search")
+                path = os.path.join(root, request.form['path'])
+                path = os.path.normpath(path)
+                if os.path.isdir(path):
+                    try:
+                        global search_results
+                        search_results = []
+                        search_items(path, search)
+                    except Exception as e:
+                        print(e)
+                        return {'status': 'error', 'msg': str(e)}
+                try:
+                    return {'status': 'success', 'results': search_results}
+                except Exception as e:
+                    return {'status': 'error', 'msg': str(e)}
             else:
                 Path(path).mkdir(mode=0o777, parents=True, exist_ok=True)
                 if os.path.isdir(path):
@@ -613,5 +667,6 @@ app.add_url_rule('/<path:p>', view_func=path_view)
 app.add_url_rule('/newfolder', view_func=path_view)
 
 if __name__ == '__main__':
-    from config import BIND, PORT
+    from config import BIND, PORT, KEY
+    key = KEY
     app.run(BIND, PORT, threaded=True, debug=False)

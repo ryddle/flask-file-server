@@ -23,10 +23,63 @@ $(document).ready(function () {
         $('#login-modal').modal('toggle');
         event.preventDefault();
     });
+
     $("#userlogin").text(getCookie("username") || "Login");
+
+    $('#searchBox').on('change', function () {
+        if (this.value.length > 3) {
+            $.post( "/api/search", { search: $('#searchBox').val(), path: $('#path').val().replace(/\/$/, '') }, function( data ) {
+                $('#content-results').hide();
+                $('#content-footer').hide();
+                $('#search-results').show();
+                $('#search-footer').show();
+
+                var html='';
+                for (let index = 0; index < data.results.length; index++) {
+                    const entry = data.results[index];
+                    if(entry.type == 'dir') {
+                        html+='<tr>\
+                            <td class="text-xs-left " data-sort-value="dir-'+entry.name.toLowerCase()+'"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="'+entry.name+'/"><strong>'+entry.name+'</strong></a></td>\
+                            <td class="text-xs-right " data-sort-value="-1">&mdash;</td>\
+                            <td class="text-xs-right " data-sort-value="'+entry.mtime+'" title="'+ entry.mtime +'">'+entry.mtimehuman+'</td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="'+entry.name+'"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="'+entry.name+'" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>\
+                        </tr>';
+                    }else if(entry.type == 'file') {
+
+                        html+='<tr>\
+                            <td class="text-xs-left " data-sort-value="file-'+entry.name.toLowerCase()+'"><i class="fa fa-fw '+entry.icon+' " aria-hidden="true"></i>&nbsp;\
+                            <a ';
+                            /* if(!['unknown', 'archive'].includes(entry.mtype)) {
+                               html+='data-toggle="modal" data-target="#viewer-modal" data-url="'+entry.name+'" data-type="'+entry.mtype+'" ';
+                            } */
+                            html+='href="'+entry.path+'" data-size="'+entry.size+'">'+ entry.path.replaceAll('\\','/') +'/'+entry.name+'</a>\
+                            </td>\
+                            <td class="text-xs-right " data-sort-value="'+entry.size+'" title="'+entry.size+' bytes">'+entry.size+'</td>\
+                            <td class="text-xs-right " data-sort-value="'+entry.mtime+'" title="'+entry.mtime+'">'+entry.mtimehuman+'</td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="'+entry.name+'"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="'+entry.name+'" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>\
+                        </tr >';
+                    }
+
+                    $('#search-results').html(html);
+                }
+              }, "json");
+        }
+    });
+
+    $('#close-search').on('click', function () {
+        $('#search-results').hide();
+        $('#search-footer').hide();
+        $('#content-results').show();
+        $('#content-footer').show();
+        $('#searchBox').val("");
+    });
+
     $('#uploader-modal').on('hidden.bs.modal', function () {
         location.reload();
-    })
+    });
+
     $('#filer_input').filer({
         showThumbs: true,
         addMore: true,
@@ -174,7 +227,7 @@ $(document).ready(function () {
         newpath = newpath.replace('/', '');
         const name = document.getElementById('movepath_filename').value;
         const form = document.getElementById('movepath-form');
-        document.getElementById('movepath_target').value = newpath+name;
+        document.getElementById('movepath_target').value = newpath + name;
         form.submit();
     });
 
@@ -265,8 +318,8 @@ $(document).ready(function () {
 
 function renderTree(data, parentElement, path, opath) {
     const ul = document.createElement('ul');
-    if(path!="/"){
-        ul.style.display="none";
+    if (path != "/") {
+        ul.style.display = "none";
     }
     parentElement.appendChild(ul);
 
@@ -281,15 +334,15 @@ function renderTree(data, parentElement, path, opath) {
         expcontBtn.icon = icon;
         expcontBtn.onclick = function () {
             var _li = this.parentElement;
-            if(_li.children.length > 3){
-                if(_li.children[3].style.display==""){
-                    _li.children[3].style.display="none";
+            if (_li.children.length > 3) {
+                if (_li.children[3].style.display == "") {
+                    _li.children[3].style.display = "none";
                     this.icon.className = "fa fa-plus-square";
-                }else{
-                    _li.children[3].style.display="";
+                } else {
+                    _li.children[3].style.display = "";
                     this.icon.className = "fa fa-minus-square";
                 }
-            }  
+            }
         };
         li.appendChild(expcontBtn);
         const span = document.createElement('span');
@@ -305,13 +358,13 @@ function renderTree(data, parentElement, path, opath) {
             span.textContent = newpath;
             const btn = document.createElement('input');
             btn.type = 'checkbox';
-            if(newpath == opath){
+            if (newpath == opath) {
                 btn.disabled = true;
                 btn.checked = false;
             }
             btn.onchange = function () {
                 document.getElementById('movepath_tree').querySelectorAll('input[type="checkbox"]').forEach((cb) => {
-                    if(this!=cb){
+                    if (this != cb) {
                         cb.checked = false;
                         cb.folderChecked = false;
                     }

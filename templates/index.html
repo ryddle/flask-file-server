@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
@@ -40,8 +40,8 @@
       </div>
       <div class="col-xs-12 col-sm-5 col-md-4 col-sm-offset-7 col-md-offset-8 pull-sm-right">
         <div class="form-group">
-          <label class="form-control-label sr-only" for="listr-search">Search</label>
-          <input type="text" id="listr-search" class="form-control" placeholder="Search">
+          <label class="form-control-label sr-only" for="searchBox">Search</label>
+          <input type="text" id="searchBox" class="form-control" placeholder="Search">
         </div>
       </div>
       <div class="pull-sm-right">
@@ -63,7 +63,7 @@
             <th class="text-xs-right "></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="content-results">
           {% for entry in contents if entry.type == 'dir' %}
           <tr>
             <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
@@ -85,7 +85,29 @@
           </tr>
           {% endfor %}
         </tbody>
-        <tfoot>
+        <tbody id="search-results" style="display: none;">
+          {% for entry in searchResults if entry.type == 'dir' %}
+          <tr>
+            <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
+            <td class="text-xs-right " data-sort-value="-1">&mdash;</td>
+            <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+          </tr>
+          {% endfor %}
+          {% for entry in searchResults if entry.type == 'file' %}
+          <tr>
+            <td class="text-xs-left " data-sort-value="file-{{entry.name | lower}}"><i class="fa fa-fw {{entry.name | icon_fmt}} " aria-hidden="true"></i>&nbsp;
+              <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}" data-type="{{entry.name | data_fmt}}" {% endif %} href="{{entry.name}}" data-size="{{entry.size | size_fmt}}">{{entry.name}}</a>
+            </td>
+            <td class="text-xs-right " data-sort-value="{{entry.size}}" title="{{entry.size}} bytes">{{entry.size | size_fmt}}</td>
+            <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot id="content-footer">
           {% if has_audio %}
           <tr>
             <td colspan="3">
@@ -97,6 +119,13 @@
             <td colspan="3">
               <input id="dir_path" type="hidden" value="{{dir_path}}">
               <small class="pull-xs-left text-muted" dir="ltr">{{total.dir}} folders and {{total.file}} files, {{total.size | size_fmt}} in total</small>
+            </td>
+          </tr>
+        </tfoot>
+        <tfoot id="search-footer" style="display: none;">
+          <tr>
+            <td colspan="3">
+              <a id="close-search" class="btn btn-primary">Close Search</a>
             </td>
           </tr>
         </tfoot>

@@ -1094,6 +1094,21 @@ export default class AudioMotionAnalyzer {
 		this._setCanvas( REASON_USER );
 	}
 
+	setCanvasBgColor( color ) {
+		if ( ! overlay || showBgColor ) {
+			if ( overlay )
+				_ctx.globalAlpha = this.bgAlpha;
+			
+			_ctx.fillStyle = color;
+
+			// exclude the reflection area when overlay is true and reflexAlpha == 1 (avoids alpha over alpha difference, in case bgAlpha < 1)
+			if ( channel == 0 || ( ! _radial && ! isDualCombined ) )
+				_ctx.fillRect( initialX, channelTop - channelGap, analyzerWidth, ( overlay && this.reflexAlpha == 1 ? analyzerHeight : channelHeight ) + channelGap );
+
+			_ctx.globalAlpha = 1;
+		}
+	}
+
 	/**
 	 * Set desired frequency range
 	 *

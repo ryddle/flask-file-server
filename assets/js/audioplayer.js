@@ -427,7 +427,7 @@ mediaElement.addEventListener("pause", (event) => {
 });
 
 let current_primary_color = primary_color;
-document.addEventListener("primaryColorChange", (event) => {
+document.addEventListener("colorSettingsChange", (event) => {
   if (current_primary_color != primary_color && (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror")) {
     current_primary_color = primary_color;
     setGradient();

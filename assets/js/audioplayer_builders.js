@@ -22,7 +22,7 @@ const build_play_list = function (file, index, callback_) {
     liObj.style.marginBottom = "3px";
     if (index == 0) {
         liObj.style.backgroundColor = "var(--primary-color)";
-        liObj.style.color = "#111111";
+        liObj.style.color = "var(--bg-comp-color)";
         liObj.style.fontWeight = '700';
     } else {
         liObj.style.backgroundColor = 'transparent';
@@ -49,7 +49,7 @@ const build_lcdisplay = function (playlist, callback_) {
     let lcdDisplayBack = document.createElement("div");
     Object.assign(lcdDisplayBack.style, {
         height: '60px',
-        backgroundColor: '#000000',
+        backgroundColor: "var(--bg-color)",
         fontFamily: 'Digital7',
         fontSize: '56px',
         textIndent: '5px',
@@ -94,7 +94,7 @@ const build_pl_info = function () {
         color: "var(--primary-color)",
         fontSize: '12px',
         fontWeight: 'bold',
-        backgroundColor: "#111111"
+        backgroundColor: "var(--bg-comp-color)",
     });
 
     let pl_info_controls = document.createElement("div");
