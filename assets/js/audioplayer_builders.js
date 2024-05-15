@@ -2,11 +2,11 @@ const build_play_list_ul = function () {
     let play_list = document.createElement("ul");
     play_list.id = "playlist_ul";
     Object.assign(play_list.style, {
-        height: "400px",
-        overflowY: "auto",
-        color: "var(--primary-color)",
-        marginBottom: "12px",
-        padding: "5px"
+        height: 'calc(100vh - 206px)',
+        overflowY: 'auto',
+        color: 'var(--primary-color)',
+        marginBottom: '12px',
+        padding: '5px'
     });
     return play_list;
 }

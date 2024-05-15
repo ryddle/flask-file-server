@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, redirect, session, render_template, send_file, Response, url_for
+from flask import Flask, make_response, request, redirect, render_template, send_file, Response, url_for
 from flask.views import MethodView
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -12,7 +12,6 @@ import re
 import stat
 import json
 import mimetypes
-import sys
 from pathlib2 import Path
 import lyricsgenius
 import logging

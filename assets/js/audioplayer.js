@@ -29,7 +29,7 @@ mediaElement.style.display = 'none';
 mediaElement.onloadeddata = () => {
   document.getElementById('player_progress').max = mediaElement.duration;
   document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
-  mediaElement.play();
+  //mediaElement.play();
 }
 audioContainer.append(mediaElement); // add it to the DOM
 
@@ -161,6 +161,7 @@ let song_title = (playlist.items_.length > 0) ? playlist.items_[0].sources[0].fi
 
 //create playlist html
 let playlist_cont = document.getElementById("playlist_cont");
+playlist_cont.style.overflow="hidden";
 
 let play_list = build_play_list_ul();
 

@@ -369,7 +369,7 @@ function playerViewer() {
     modal_body.innerHTML = htmlBody;
 
     var htmlFooter = '<div class="pull-xs-left">\
-            <a type="button" class="btn btn-primary" style="background-color: chocolate; border-color: chocolate;" href="' + URLJoin(location.origin, '/audioplayer/index.html?path=', location.pathname.replaceAll('/', '')) + '" target="_blank"><i class="fa fa-external-link"></i> Open audio player</a>\
+            <a type="button" class="btn btn-primary" style="background-color: chocolate; border-color: chocolate;" href="' + URLJoin(location.origin, '/audioplayer/index.html?path=', location.pathname) + '" target="_blank"><i class="fa fa-external-link"></i> Open audio player</a>\
         </div>\
         <div class="pull-xs-right">\
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\

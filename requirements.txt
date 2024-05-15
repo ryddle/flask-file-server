@@ -5,5 +5,4 @@ humanize
 pathlib2
 lyricsgenius
 pathlib2
-shutil
 pytube
