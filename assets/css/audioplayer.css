@@ -186,7 +186,7 @@ button.controls:hover {
 /* Create three unequal columns that floats next to each other */
 .column {
   float: left;
-  padding: 10px;
+  padding: 5px;
   height: calc(100vh - 10px);
   background-color: var(--bg-color);
 }
@@ -434,7 +434,7 @@ select.sized::-webkit-scrollbar {
   visibility: hidden;
   background-color: black;
   border: 2px solid var(--primary-color);
-  width: 520px;
+  width: 750px;
   height: 750px;
   padding: 10px;
 }

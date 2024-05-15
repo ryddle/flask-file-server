@@ -27,6 +27,8 @@ ignored = ['.lyr','.sbo','.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.
 datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
 icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'fa-file-text': 'doc'}
 
+lyrics_excluded_terms = ['official music video', 'video', 'vynil', 'hq', 'rip', 'lyrics', 'lyrics', 'letra', 'versos', 'versos', 'paroles', 'paroles', 'liedtexte', 'liedtexte', '歌詞', '歌詞', 'muziek', 'muziek', 'liedtext', 'liedtext', 'muziek', 'muziek', 'notas', 'notas', 'notas', 'notas', 'notas', 'notas']
+
 @app.template_filter('size_fmt')
 def size_fmt(size):
     return humanize.naturalsize(size)
@@ -305,8 +307,13 @@ class PathView(MethodView):
                 result['body'] = song['_body']
                 return json.dumps(result)
             else:
-                title = orig_title.replace('_', ' ').replace('.mp3', '')
+                title = orig_title.replace('_', ' ').replace('.mp3', '').replace('-','')
                 title = re.sub(r'\d+\.', '', title).replace('/', ' ')
+                title = title.lower().strip()
+                for term in lyrics_excluded_terms:
+                    if term in title:
+                        title = title.replace(term, '').strip()
+                        title = re.sub(r'\s+', ' ', title)
                 genius = lyricsgenius.Genius(GENIUS_ACCESS_TOKEN, response_format='html', sleep_time=1.0, timeout=15, retries=3)
                 song = genius.search_song(title=title, artist=title)
                 if song != None and song.lyrics:

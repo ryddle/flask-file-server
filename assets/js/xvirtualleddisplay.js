@@ -1,6 +1,6 @@
 //letter definitions 5x7
 const letters = {
-    'a': [[1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0], [1, 0, 0, 1, 0, 0, 0], [1, 0, 0, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1]],
+    'a': [[0, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0], [1, 0, 0, 1, 0, 0, 0], [1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 1, 1, 1, 1]],
     'b': [[1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1], [0, 1, 1, 0, 1, 1, 0]],
     'c': [[0, 1, 1, 1, 1, 1, 0], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1]],
     'd': [[1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1], [0, 1, 1, 1, 1, 1, 0]],
@@ -55,7 +55,8 @@ const Array2D = (r, c) => [...Array(r)].map(_ => Array(c).fill(0));
 
 export default class XVirtualLedDisplay {
     #options = {
-        'mode': 'production', // 'production' or 'development'    
+        'mode': 'production', // 'production' or 'development'
+        'inverse_colors': false,
         'callback': null
     };
     constructor(container_, options_) {
@@ -237,7 +238,11 @@ export default class XVirtualLedDisplay {
         for (var i = 0; i < this.mat.length; i++) {
             var max = (this.end_index == -1) ? (this.mat[i].length - 1) : this.end_index;
             for (var j = 0 + this.start_index; j < max; j++) {
-                this.mat[i][j].className = (this.vmat[i][j] == 1) ? "led" : "led off";
+                if(this.#options.inverse_colors){
+                    this.mat[i][j].className = (this.vmat[i][j] == 1) ? "led off" : "led";
+                }else{
+                    this.mat[i][j].className = (this.vmat[i][j] == 1) ? "led" : "led off";
+                }
             }
         }
     }
@@ -281,7 +286,11 @@ export default class XVirtualLedDisplay {
         for (var i = 0; i < this.mat.length; i++) {
             var calcLeftOffset = this.leftOffset + this.start_anim_index;
             for (var j = calcLeftOffset; j < this.mat[i].length + this.leftOffset - 1; j++) {
-                this.mat[i][(j - this.leftOffset) % this.vmatrowlength].className = (this.vmat[i][((j - this.start_anim_index + 1) % (this.vmatrowlength)) + this.start_anim_index] == 1) ? "led" : "led off";
+                if(this.#options.inverse_colors){
+                    this.mat[i][(j - this.leftOffset) % this.vmatrowlength].className = (this.vmat[i][((j - this.start_anim_index + 1) % (this.vmatrowlength)) + this.start_anim_index] == 1) ? "led off" : "led";
+                }else{
+                    this.mat[i][(j - this.leftOffset) % this.vmatrowlength].className = (this.vmat[i][((j - this.start_anim_index + 1) % (this.vmatrowlength)) + this.start_anim_index] == 1) ? "led" : "led off";
+                }
             }
         }
         this.leftOffset++;
@@ -295,8 +304,13 @@ export default class XVirtualLedDisplay {
 
         for (var i = 0; i < this.mat.length; i++) {
             var last = this.vmat[i][vmat[i].length - 1];
-            for (var j = this.rightOffset; j < this.mat[i].length + this.rightOffset - 1; j++)
-                this.mat[i][(j - this.rightOffset) % this.vmatrowlength].className = (this.vmat[i][(j - 1) % this.vmatrowlength] == 1) ? "led" : "led off";
+            for (var j = this.rightOffset; j < this.mat[i].length + this.rightOffset - 1; j++){
+                if(this.#options.inverse_colors){
+                    this.mat[i][(j - this.rightOffset) % this.vmatrowlength].className = (this.vmat[i][(j - 1) % this.vmatrowlength] == 1) ? "led off" : "led";
+                }else{
+                    this.mat[i][(j - this.rightOffset) % this.vmatrowlength].className = (this.vmat[i][(j - 1) % this.vmatrowlength] == 1) ? "led" : "led off";
+                }
+            }
             this.mat[i][mat[i].length - 1].className = last;
         }
         this.rightOffset--;
@@ -324,6 +338,10 @@ export default class XVirtualLedDisplay {
         for (var i = 0; i < this.mat.length; i++)
             for (var j = 0; j < this.mat[i].length; j++)
                 this.mat[i][j].className = "led";
+    }
+
+    inverseColors(){
+        this.#options.inverse_colors = !this.#options.inverse_colors;
     }
 
     printFormattedMatrix(matrix) {

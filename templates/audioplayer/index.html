@@ -72,6 +72,13 @@
 
         var colorSettingsChangeEvent = new CustomEvent('colorSettingsChange');
         document.dispatchEvent(colorSettingsChangeEvent);
+
+        var last_playlist = localStorage.getItem('lastplaylist');
+        if(last_playlist!==undefined && last_playlist!=null && last_playlist.length>0){
+          audioList = JSON.parse(last_playlist);
+          var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: audioList });
+          document.dispatchEvent(playlistChangeEvent);
+        }
       }
     }
 
@@ -330,7 +337,7 @@
       </div>
       <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands" style="display: flex;justify-content: space-between;align-items: center;">
         <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 70%;">
-        <span id="player_timer" style="color: var(--primary-color);">0:00/0:00</span>
+        <span id="player_timer" style="color: var(--primary-color); font-weight: bold; font-size: large;">0:00/0:00</span>
         <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px; margin-right: 0px;">
           <i class="fa fa-volume-off" style="font-size: large;"></i>
         </button>
@@ -659,6 +666,7 @@
           audioList.push(track);
         }
       }
+      localStorage.setItem('lastplaylist', JSON.stringify(audioList));
       var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: audioList });
       document.dispatchEvent(playlistChangeEvent);
     }

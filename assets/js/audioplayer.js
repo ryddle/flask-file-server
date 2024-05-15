@@ -9,7 +9,7 @@
  */
 
 
-import { URLJoin, secondsToHHMMSS } from './audioplayer_utils.js';
+import { URLJoin, secondsToHHMMSS, median } from './audioplayer_utils.js';
 import AudioMotionAnalyzer from './audioMotion-analyzer.js';
 import Playlist from './audioplayer_playlist.js';
 import { build_play_list_ul, build_play_list, build_lcdisplay, build_pl_info, build_loader } from './audioplayer_builders.js';
@@ -30,6 +30,15 @@ mediaElement.onloadeddata = () => {
   document.getElementById('player_progress').max = mediaElement.duration;
   document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
   //mediaElement.play();
+  $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
+    pl_lyrics_loader.style.display = 'none';
+    data = JSON.parse(data);
+    updateInfoPanel(data);
+  })
+    .fail(function () {
+      const data = { 'error': 'Lyrics not found.' };
+      updateInfoPanel(data);
+    });
 }
 audioContainer.append(mediaElement); // add it to the DOM
 
@@ -50,6 +59,7 @@ const filters = [];
   eqbandDiv.className = 'eqband';
 
   let eqbandLabel = document.createElement('label');
+  eqbandLabel.style.color='var(--primary-color)';
   eqbandLabel.innerHTML = `${freq < 1000 ? freq : freq / 1000 + 'k'}Hz`;
   eqbandDiv.appendChild(eqbandLabel);
 
@@ -82,6 +92,7 @@ const filters = [];
   eqbandSlider.setAttribute("data-filter", i);
   eqbandSlider.setAttribute("lists", "tickmarks");
   let eqbandOutput = document.createElement('output');
+  eqbandOutput.style.color='var(--primary-color)';
   eqbandOutput.id = 'gain' + i;
   eqbandOutput.innerHTML = '0 dB';
   eqbandDiv.appendChild(eqbandOutput);
@@ -158,6 +169,7 @@ let playlist = Playlist.from(audioList, mediaElement);
 window.playlist = playlist;
 
 let song_title = (playlist.items_.length > 0) ? playlist.items_[0].sources[0].filename : "";
+document.title = "Audio Player - " + song_title;
 
 //create playlist html
 let playlist_cont = document.getElementById("playlist_cont");
@@ -326,7 +338,7 @@ document.addEventListener("displayPresetChange", function (event) {
 ////////////////////// PLAYLIST INFO ///////////////////////////////
 
 // Add a playlist info element to your HTML
-let [pl_info, pl_info_controls, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics, 
+let [pl_info, pl_info_controls, pl_info_controls_hidelabel, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics, 
   pl_info_tab_info, pl_lyriscontainer, pl_info_infocontainer, pl_infocont_imagecont, pl_infocont_image, pl_info_infosonginfocont, 
   pl_info_artist_p, pl_info_artist_link, pl_info_song_p, pl_info_song_link, pl_info_release_p, pl_info_release_text, pl_info_release_value] = build_pl_info();
 
@@ -339,6 +351,10 @@ function updateInfoPanel(data) {
     var lyrics = data.lyrics[0];
     lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
     lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
+
+    lyrics = lyrics.replace(new RegExp("^\s*.*"+body.title),body.title);
+    lyrics = lyrics.replace(/\$\d+You might also like/, "");
+    lyrics = lyrics.replace(body.pyongs_count+"Embed", "");
     
     pl_lyriscontainer.innerText = "";
     pl_lyrics_loader.style.display = 'none';
@@ -409,7 +425,8 @@ document.addEventListener("songInfoChange", (event) => {
   updateInfoPanel(data);
 });
 
-
+/* let voice_range_energy = [0.5];
+let m0=0, m1=0.5; */
 mediaElement.addEventListener("timeupdate", (event) => {
   document.getElementById('player_progress').value = mediaElement.currentTime;
   if (time_mode == "playing") {
@@ -417,6 +434,25 @@ mediaElement.addEventListener("timeupdate", (event) => {
   } else if (time_mode == "remaining") {
     document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime) + ' / ' + secondsToHHMMSS(mediaElement.duration);
   }
+
+  /* let current_energy = audioMotion.getEnergy(250,700);
+  voice_range_energy.push(current_energy);
+
+  if (voice_range_energy.length > 10) {
+    let m = median(voice_range_energy);
+    if(m0==0){
+      m0=m;
+    }else{
+      m1=m;
+      if(Math.abs(m0-m1)>0.6){
+        pl_info_controls_hidelabel.innerText = 'is singing: ' + m0.toFixed(2).toString() + ' - ' + m1.toFixed(2).toString() + ' - ' + current_energy.toFixed(2).toString();
+      }else{
+        pl_info_controls_hidelabel.innerText = 'NOT singing ' + m0.toFixed(2).toString() + ' - ' + m1.toFixed(2).toString() + ' - ' + current_energy.toFixed(2).toString();
+      }
+      m0=m1;
+    }
+    voice_range_energy = voice_range_energy.slice(9);
+  } */
 });
 
 mediaElement.addEventListener("playing", (event) => {

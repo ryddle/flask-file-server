@@ -90,7 +90,7 @@ const build_pl_info = function () {
         height: 'calc(100vh - 20px)',
         overflow: 'auto',
         border: '2px solid ' + "var(--primary-color)",
-        marginLeft: '10px',
+        /*marginLeft: '10px',*/
         color: "var(--primary-color)",
         fontSize: '12px',
         fontWeight: 'bold',
@@ -98,9 +98,14 @@ const build_pl_info = function () {
     });
 
     let pl_info_controls = document.createElement("div");
+    pl_info_controls.id = "pl_info_controls";
     Object.assign(pl_info_controls.style, {
         height: "18px"
     });
+
+    let pl_info_controls_hidelabel = document.createElement("span");
+    pl_info_controls_hidelabel.id = "pl_info_controls_hidelabel";
+    pl_info_controls.appendChild(pl_info_controls_hidelabel);
 
     let pl_info_controlBtn = document.createElement("button");
     pl_info_controlBtn.id = "set-playlist";
@@ -241,7 +246,7 @@ const build_pl_info = function () {
 
     pl_info.appendChild(pl_info_infocontainer);
 
-    return [pl_info, pl_info_controls, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics,
+    return [pl_info, pl_info_controls, pl_info_controls_hidelabel, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics,
         pl_info_tab_info, pl_lyriscontainer, pl_info_infocontainer, pl_infocont_imagecont, pl_infocont_image, pl_info_infosonginfocont,
         pl_info_artist_p, pl_info_artist_link, pl_info_song_p, pl_info_song_link, pl_info_release_p, pl_info_release_text, pl_info_release_value];
 }
