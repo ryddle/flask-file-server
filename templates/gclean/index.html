@@ -102,9 +102,9 @@
             <span style="color: #4285f4;">G</span>
         </h1>
 
-        <form class="gsearch__form" action="https://www.google.com/search" method="get" onsubmit="searchFormHandler(event)">
+        <form class="gsearch__form" method="get">
             <input type="text" name="search" id="search" placeholder="Search in Clean-G">
-            <button class="gsearch__btn" type="submit" id="searchBtn">Search</button>
+            <button class="gsearch__btn" type="button" id="searchBtn">Search</button>
         </form>
     </div>
 </body>
@@ -115,7 +115,7 @@
     searchInput.addEventListener('keydown', function (event) {
         if (event.keyCode === 13) {
             event.preventDefault(); // Prevent default form submission
-            search();
+            search(searchInput.value);
         }
     });
 
