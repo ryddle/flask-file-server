@@ -65,6 +65,28 @@
             padding: 10px;
         }
     </style>
+    <script>
+        function search(searchTerm) {
+            const encodedSearchTerm = encodeURIComponent(searchTerm);
+            const googleUrl = "https://www.google.com/search?q=" + encodedSearchTerm + "&udm=14";
+            window.location.href = googleUrl;
+        }
+
+        // recuperamos el querystring
+        const querystring = window.location.search
+        console.log(querystring); // "?search=hello"
+
+        // usando el querystring, creamos un objeto del tipo URLSearchParams
+        const params = new URLSearchParams(querystring);
+
+        // recuperamos los valores del querystring
+        const searchTerm = params.get('search');
+
+        if (searchTerm) {
+            search(searchTerm);
+        }
+
+    </script>
 </head>
 
 <body>
@@ -99,20 +121,13 @@
     const searchBtn = document.getElementById('searchBtn');
     searchBtn.addEventListener('click', function (event) {
         event.preventDefault(); // Prevent default form submission
-        search();
+        search(searchInput.value);
     });
-
-    function search() {
-        const searchTerm = searchInput.value;
-        const encodedSearchTerm = encodeURIComponent(searchTerm);
-        const googleUrl = "https://www.google.com/search?q=" + encodedSearchTerm + "&udm=14";
-        window.location.href = googleUrl;
-    }
 
     function searchFormHandler(event) {
         if (!navigator.onLine) {
             event.preventDefault();
-            search();
+            search(searchInput.value);
         }
     }
 
