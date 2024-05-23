@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Clean-G</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .gsearch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /*justify-content: center;*/
+            margin-top: 10%;
+            height: 100vh;
+        }
+
+        .gsearch__form {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 20%;
+            margin: 0 auto;
+        }
+
+        .gsearch__form input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            outline: none;
+        }
+
+        .gsearch__form input:focus {
+            border-color: #aaa;
+        }
+
+        .gsearch__btn {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 80px;
+        }
+
+        .gsearch__btn:hover {
+            background-color: #357ceb;
+        }
+
+        .gsearch__title {
+            font-family: 'Roboto', sans-serif;
+            font-weight: bold;
+            font-size: 56px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            border-radius: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="gsearch">
+        <h1 class="gsearch__title">
+            <span style="color: #4285f4;">C</span>
+            <span style="color: #ea4335;">l</span>
+            <span style="color: #fbbc05;">e</span>
+            <span style="color: #4285f4;">a</span>
+            <span style="color: #34a853;">n</span>
+            <span style="color: #ea4335;">-</span>
+            <span style="color: #4285f4;">G</span>
+        </h1>
+
+        <form class="gsearch__form" action="https://www.google.com/search" method="get" onsubmit="searchFormHandler(event)">
+            <input type="text" name="search" id="search" placeholder="Search in Clean-G">
+            <button class="gsearch__btn" type="submit" id="searchBtn">Search</button>
+        </form>
+    </div>
+</body>
+<script>
+
+    const searchInput = document.getElementById('search');
+    searchInput.focus();
+    searchInput.addEventListener('keydown', function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Prevent default form submission
+            search();
+        }
+    });
+
+    const searchBtn = document.getElementById('searchBtn');
+    searchBtn.addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default form submission
+        search();
+    });
+
+    function search() {
+        const searchTerm = searchInput.value;
+        const encodedSearchTerm = encodeURIComponent(searchTerm);
+        const googleUrl = "https://www.google.com/search?q=" + encodedSearchTerm + "&udm=14";
+        window.location.href = googleUrl;
+    }
+
+    function searchFormHandler(event) {
+        if (!navigator.onLine) {
+            event.preventDefault();
+            search();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", event => {
+        searchInput.focus();
+    });
+</script>

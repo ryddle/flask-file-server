@@ -18,17 +18,6 @@
   <script type="module" src="../assets/js/xhtmlColors.js"></script>
   <script type="module" src="../assets/js/xcolor.js"></script>
   <script>
-    const URLJoin = (...args) =>
-      args
-        .join('/')
-        .replace(/[\/]+/g, '/')
-        .replace(/^(.+):\//, '$1://')
-        .replace(/^file:/, 'file:/')
-        .replace(/\/(\?|&|#[^!])/g, '$1')
-        .replace(/\?/g, '&')
-        .replace('&', '?');
-  </script>
-  <script>
     // Get the root element
     var r = document.querySelector(':root');
     // Create a function for getting a variable value
@@ -73,11 +62,13 @@
         var colorSettingsChangeEvent = new CustomEvent('colorSettingsChange');
         document.dispatchEvent(colorSettingsChangeEvent);
 
-        var last_playlist = localStorage.getItem('lastplaylist');
-        if(last_playlist!==undefined && last_playlist!=null && last_playlist.length>0){
-          audioList = JSON.parse(last_playlist);
-          var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: audioList });
-          document.dispatchEvent(playlistChangeEvent);
+        if (new URLSearchParams(location.search).get('path') == null) {
+          var last_playlist = localStorage.getItem('lastplaylist');
+          if (last_playlist !== undefined && last_playlist != null && last_playlist.length > 0) {
+            audioList = JSON.parse(last_playlist);
+            var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: audioList });
+            document.dispatchEvent(playlistChangeEvent);
+          }
         }
       }
     }
@@ -170,9 +161,9 @@
       });
 
       // Treedialog get selections button
-      document.getElementById('treedialog_btn').addEventListener('click', function (event) {
+      /* document.getElementById('treedialog_btn').addEventListener('click', function (event) {
         getSelections();
-      });
+      }); */
 
       // Search song panel close button
       document.getElementById('search-song-panel-close-btn').addEventListener('click', function (event) {
@@ -191,9 +182,9 @@
       document.getElementById('settings-panel').style.display = 'none';
 
       var colors = {
-        'primary_color':document.getElementById('primary-color-input').value, 
-        'bg-color':document.getElementById('bg-color-input').value,
-        'bg-comp-color':document.getElementById('bgcomp-color-input').value
+        'primary_color': document.getElementById('primary-color-input').value,
+        'bg-color': document.getElementById('bg-color-input').value,
+        'bg-comp-color': document.getElementById('bgcomp-color-input').value
       };
       if (colors['primary_color'] != primary_color || colors['bg-color'] != bg_color || colors['bg-comp-color'] != bg_comp_color) {
         applyColors(colors);
@@ -210,7 +201,7 @@
       primary_color = new_primary_color.getHexString();
       setCssVar('--primary-color', primary_color);
       setCssVar('--primary-color-rgb', new_primary_color.rgb.r + ', ' + new_primary_color.rgb.g + ', ' + new_primary_color.rgb.b);
-      
+
       var newsecondary_color = xcolor.getHsl(new_primary_color.hsl.h, Math.max(0, new_primary_color.hsl.s - 12), Math.min(100, new_primary_color.hsl.l + 12));
       secondary_color = newsecondary_color.getHexString();
       setCssVar('--secondary-color', secondary_color);
@@ -482,6 +473,8 @@
   </div>
 
   <script>
+    const URLJoin = (...args) => args.join('/').replace(/[\/]+/g, '/').replace(/^(.+):\//, '$1://').replace(/^file:/, 'file:/').replace(/\/(\?|&|#[^!])/g, '$1').replace(/\?/g, '&').replace('&', '?');
+
     function getMusicFoldersTree() {
       $.ajax({
         url: '/api/getMusicFolderTree',

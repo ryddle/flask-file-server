@@ -24,8 +24,8 @@ CORS(app)
 key = ""
 
 ignored = ['.lyr','.sbo','.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
-datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
-icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'fa-file-text': 'doc'}
+datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm,mkv,avi', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
+icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm,mkv,avi', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'fa-file-text': 'doc'}
 
 lyrics_excluded_terms = ['official music video', 'video', 'vynil', 'hq', 'rip', 'lyrics', 'lyrics', 'letra', 'versos', 'versos', 'paroles', 'paroles', 'liedtexte', 'liedtexte', '歌詞', '歌詞', 'muziek', 'muziek', 'liedtext', 'liedtext', 'muziek', 'muziek', 'notas', 'notas', 'notas', 'notas', 'notas', 'notas']
 
@@ -190,6 +190,37 @@ def search_items(path, search):
   
     return #search_results
 
+def create_media_folder_structure_json(path): 
+    # Initialize the result dictionary with folder 
+    # name, type, and an empty list for children 
+    result = {'name': (os.path.basename(path), '')[path==root], 
+              'type': 'folder', 'children': []} 
+  
+    # Check if the path is a directory 
+    if not os.path.isdir(path): 
+        return result 
+  
+    # Iterate over the entries in the directory 
+    for entry in sorted_alphanumeric(os.listdir(path)): 
+       # Create the full path for the current entry 
+        entry_path = os.path.join(path, entry) 
+  
+        # If the entry is a directory, recursively call the function 
+        if os.path.isdir(entry_path): 
+            if any(os.path.isdir(os.path.join(entry_path, fname)) for fname in os.listdir(entry_path)):
+                child_dir = next((fname for fname in os.listdir(entry_path) if os.path.isdir(os.path.join(entry_path, fname))), None)
+                if child_dir and any((data_fmt(sfname) == 'audio' or data_fmt(sfname) == 'video') for sfname in os.listdir(os.path.join(entry_path, child_dir))):
+                    result['children'].append(create_media_folder_structure_json(os.path.join(entry_path)))
+            else:
+                if any((data_fmt(fname) == 'audio' or data_fmt(fname) == 'video') for fname in os.listdir(entry_path)):
+                    result['children'].append(create_media_folder_structure_json(entry_path)) 
+        # If the entry is a file, create a dictionary with name and type 
+        else:
+            if (data_fmt(entry) == 'audio' or data_fmt(entry) == 'video'):
+                result['children'].append({'name': entry, 'type': 'file', 'mimetype': mimetypes.guess_type(entry_path)[0]}) 
+  
+    return result 
+
 def create_music_folder_structure_json(path): 
     # Initialize the result dictionary with folder 
     # name, type, and an empty list for children 
@@ -247,6 +278,9 @@ class PathView(MethodView):
     def get(self, p=''):
         hide_dotfile = request.args.get('hide-dotfile', request.cookies.get('hide-dotfile', 'no'))
         
+        if p == 'gcleansearch':
+            return render_template('gclean/index.html')
+        
         if p == 'viewerJSODF/index.html':
             url_hash = request.url.split('#')
             if len(url_hash) == 2:
@@ -275,6 +309,28 @@ class PathView(MethodView):
                 except:
                     audio_files = sorted(audio_files)
                 return render_template('/audioplayer/index.html', path=p, dir_path=path, audio_files=json.dumps(audio_files), has_audio=has_audio)
+            
+        if p == 'mediaplayer/index.html':
+            dir_path = request.args.get('path')
+            if dir_path:
+                dir_path = dir_path.replace('/', '', 1)
+            path = os.path.join(root, dir_path or '')
+            path = os.path.normpath(path)
+            if os.path.isdir(path):
+                media_files = []
+                has_audio = False
+                for filename in os.listdir(path):
+                    filename_noext, ext = os.path.splitext(filename)
+                    if ext in ignored:
+                        continue
+                    media_src = {}
+                    data_type = data_fmt(filename)
+                    if data_type == 'audio' or data_type == 'video':
+                        media_src['mimetype'] = mimetypes.guess_type(filename)[0]
+                        media_src['name'] = filename
+                        media_files.append(media_src)
+                        has_audio = True
+                return render_template('/mediaplayer/index.html', path=p, dir_path=path, media_files=json.dumps(media_files))
         
         if p == 'api/getLyrics':
             orig_title = request.args.get('title')
@@ -289,6 +345,8 @@ class PathView(MethodView):
                     full_path = full_path.replace(proxy_url,'')
                     if full_path.startswith("/"):
                         full_path=full_path.replace('/', '', 1)
+                    urlpattern = r"((http|https)\:\/\/)?[0-9\.\/\?\:@\-_=#]+\/+"
+                    full_path = re.sub(urlpattern, '', full_path) #"((http|https)\:\/\/)?[0-9\.\/\?\:@\-_=#]+\/+"gm
                     app.logger.info('%s full_path replaced url', full_path)
                     app.logger.info('%s root', root)
                     full_path = os.path.join(root, full_path)
@@ -337,6 +395,9 @@ class PathView(MethodView):
                     result['error'] = "No lyrics found"
                     return json.dumps(result)
             
+        if p == 'api/getMediaFolderTree':
+            jsonTree =create_media_folder_structure_json(root)
+            return jsonTree
         if p == 'api/getMusicFolderTree':
             jsonTree =create_music_folder_structure_json(root)
             return jsonTree

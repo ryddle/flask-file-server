@@ -6,3 +6,5 @@ __pycache__
 config_raspberry.py
 .vscode/launch.json
 record.log
+filerserver.bat
+filerserver.lnk

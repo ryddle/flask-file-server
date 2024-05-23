@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Media Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/css/fontawesome.css">
+  <link rel="stylesheet" href="../../assets/css/xvirtualleddisplay.css">
+  <link rel="stylesheet" href="../../assets/css/mediaplayer.css">
+
+  <script type="text/javascript" src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+  <script type="module" src="../../assets/js/xutils.js"></script>
+  <script type="module" src="../../assets/js/xhtmlColors.js"></script>
+  <script type="module" src="../../assets/js/xcolor.js"></script>
+  <script>
+    // Get the root element
+    var r = document.querySelector(':root');
+    // Create a function for getting a variable value
+
+    var rs = getComputedStyle(r);
+    // Alert the value of the --blue variable
+    // alert("The value of --blue is: " + rs.getPropertyValue('--blue'));
+
+    var primary_color = rs.getPropertyValue('--primary-color');
+    var secondary_color = rs.getPropertyValue('--secondary-color');
+    var bg_color = rs.getPropertyValue('--bg-color');
+    var bg_comp_color = rs.getPropertyValue('--bg-comp-color');
+
+    // Create a function for setting a variable value
+    function setCssVar(variable, value) {
+      // Set the value of variable --blue to another value (in this case "lightblue")
+      // r.style.setProperty('--blue', 'lightblue');
+      r.style.setProperty(variable, value);
+    }
+
+    //////////////////////////
+
+    window['focusSearchInput'] = false;
+
+
+    function loadSavedSettings() {
+      if (localStorage.getItem('primary_color') != null) {
+        primary_color = localStorage.getItem("primary_color");
+        secondary_color = localStorage.getItem("secondary_color");
+        bg_color = localStorage.getItem("bg_color");
+        bg_comp_color = localStorage.getItem("bg_comp_color");
+
+        setCssVar('--primary-color', primary_color);
+
+        var newcolor = xcolor.getXcolor(primary_color);
+        setCssVar('--primary-color-rgb', newcolor.rgb.r + ', ' + newcolor.rgb.g + ', ' + newcolor.rgb.b);
+        setCssVar('--secondary-color', secondary_color);
+
+        setCssVar('--bg-color', bg_color);
+        setCssVar('--bg-comp-color', bg_comp_color);
+
+        document.getElementById('primary-color-input').value = primary_color;
+        document.getElementById('bg-color-input').value = bg_color;
+        document.getElementById('bgcomp-color-input').value = bg_comp_color;
+
+        var colorSettingsChangeEvent = new CustomEvent('colorSettingsChange');
+        document.dispatchEvent(colorSettingsChangeEvent);
+
+        if (new URLSearchParams(location.search).get('path') == null) {
+          var last_playlist = localStorage.getItem('lastplaylist');
+          if (last_playlist !== undefined && last_playlist != null && last_playlist.length > 0) {
+            mediaList = JSON.parse(last_playlist);
+            var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: mediaList });
+            document.dispatchEvent(playlistChangeEvent);
+          }
+        }
+      }
+    }
+
+    ///// Settings panel /////
+
+    const audioMotionConfigs = {
+      default: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, utlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 0.15, reflexBright: 1, reflexFit: true, reflexRatio: 0, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: true, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" },
+      bars: { mode: 6, barSpace: .4, frequencyScale: 'bark', gradient: 'rainbow', lumiBars: false, ledBars: true, linearAmplitude: true, linearBoost: 1.6, maxFreq: 20000, minFreq: 30, reflexRatio: .1, reflexAlpha: .25, weightingFilter: 'D' },
+      dual: { mode: 10, channelLayout: 'dual-combined', fillAlpha: .3, gradientLeft: 'steelblue', gradientRight: 'orangered', linearAmplitude: true, linearBoost: 1.2, lineWidth: 0, maxFreq: 16000, minFreq: 30, peakLine: true, showScaleX: false, showPeaks: true, weightingFilter: 'D' },
+      wall: { mode: 2, barSpace: .1, gradient: 'prism', lumiBars: true, minDecibels: -60, maxDecibels: -30, maxFreq: 16000, minFreq: 30, showBgColor: false, showPeaks: false, showScaleX: false, weightingFilter: 'D' },
+      mirror: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, outlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 1, reflexBright: 1, reflexFit: true, reflexRatio: 0.5, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: true, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" }
+    }
+
+    var audio_motion_preset = "default";
+    /* if (localStorage.getItem('audio_motion_preset')) {
+      audio_motion_preset = localStorage.getItem('audio_motion_preset');
+      var audioMotionPresetChangeEvent = new Event('audioMotionPresetChange');
+      document.dispatchEvent(audioMotionPresetChangeEvent);
+    } */
+
+    ///// Eq Presets /////
+    const eq_presets = {
+      "default": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "pop": [0, 3, 2, 0, -1, 0, 1, 2, 3, 2],
+      "rock": [2, 3, 1, -1, 0, 1, 2, 3, 4, 3],
+      "classic": [1, 2, 0, -1, -2, 0, 1, 2, 3, 2],
+      "electronic": [4, 3, 2, 0, -1, 1, 2, 3, 4, 3]
+    };
+
+    var current_eq_preset = "default";
+    function applySettings() {
+      //document.getElementById('settingsSBPanel').style.display = 'none';
+      toggleSettingsPanel();
+
+      var colors = {
+        'primary_color': document.getElementById('primary-color-input').value,
+        'bg-color': document.getElementById('bg-color-input').value,
+        'bg-comp-color': document.getElementById('bgcomp-color-input').value
+      };
+      if (colors['primary_color'] != primary_color || colors['bg-color'] != bg_color || colors['bg-comp-color'] != bg_comp_color) {
+        applyColors(colors);
+      }
+
+      var audioMotionPreset = document.getElementById('audio-motion-preset').value;
+      if (audioMotionPreset != audio_motion_preset) {
+        applyAudioMotionPreset(audioMotionPreset);
+      }
+    }
+
+    function applyColors(colors) {
+      var new_primary_color = xcolor.getXcolor(colors['primary_color']);
+      primary_color = new_primary_color.getHexString();
+      setCssVar('--primary-color', primary_color);
+      setCssVar('--primary-color-rgb', new_primary_color.rgb.r + ', ' + new_primary_color.rgb.g + ', ' + new_primary_color.rgb.b);
+
+      var newsecondary_color = xcolor.getHsl(new_primary_color.hsl.h, Math.max(0, new_primary_color.hsl.s - 12), Math.min(100, new_primary_color.hsl.l + 12));
+      secondary_color = newsecondary_color.getHexString();
+      setCssVar('--secondary-color', secondary_color);
+
+      var new_bg_color = xcolor.getXcolor(colors['bg-color']);
+      bg_color = new_bg_color.getHexString();
+      setCssVar('--bg-color', bg_color);
+      setCssVar('--bg-color-rgb', new_bg_color.rgb.r + ", " + new_bg_color.rgb.g + ", " + new_bg_color.rgb.b);
+
+      var new_bg_comp_color = xcolor.getXcolor(colors['bg-comp-color']);
+      bg_comp_color = new_bg_comp_color.getHexString();
+      setCssVar('--bg-comp-color', bg_comp_color);
+      setCssVar('--bg-comp-color-rgb', new_bg_comp_color.rgb.r + ", " + new_bg_comp_color.rgb.g + ", " + new_bg_comp_color.rgb.b);
+
+      localStorage.setItem("primary_color", primary_color);
+      localStorage.setItem("secondary_color", secondary_color);
+      localStorage.setItem("bg_color", bg_color);
+      localStorage.setItem("bg_comp_color", bg_comp_color);
+
+      // Trigger a colorSettingsChangeEvent event
+      var colorSettingsChangeEvent = new CustomEvent('colorSettingsChange');
+      document.dispatchEvent(colorSettingsChangeEvent);
+    }
+
+    function applyAudioMotionPreset(audioMotionPreset) {
+      audio_motion_preset = audioMotionPreset;
+      var audioMotionPresetChangeEvent = new Event('audioMotionPresetChange');
+      document.dispatchEvent(audioMotionPresetChangeEvent);
+      localStorage.setItem('audio_motion_preset', audio_motion_preset);
+    }
+
+
+    ////////////////////////////////////////////////
+    function showEqPresets(event) {
+      document.getElementById('eq-preset').value = current_eq_preset;
+      let eqpresetspanel = document.getElementById('eq-presets-panel');
+      eqpresetspanel.style.left = (event.clientX + 15) + 'px';
+      eqpresetspanel.style.top = (event.clientY - 150) + 'px';
+      eqpresetspanel.style.display = (eqpresetspanel.style.display == 'block') ? 'none' : 'block';
+    }
+
+    function applyEqPreset() {
+      let preset = document.getElementById('eq-preset').value;
+      var eq = eq_presets[preset];
+      current_eq_preset = preset;
+      for (var i = 0; i < 10; i++) {
+        document.querySelector("#controls > div:nth-child(" + (i + 2) + ") > div").self.setValue(eq[i]);
+      }
+    }
+    ////////////////////////////////////////////////
+    var display_preset = "led";
+    function applyDisplayPreset() {
+      display_preset = document.getElementById('display-preset').value;
+      var displayPresetChangeEvent = new CustomEvent('displayPresetChange', { detail: display_preset });
+      document.dispatchEvent(displayPresetChangeEvent);
+      localStorage.setItem('display_preset', display_preset);
+    }
+  </script>
+  <script>
+    // @ts-ignore
+    var media_files_string = {{ media_files | tojson }};
+    var media_files = eval(media_files_string);
+    // creating media list
+    var mediaList = [];
+    var path = new URLSearchParams(location.search).get('path');
+    for (let index = 0; index < media_files.length; index++) {
+      const file = media_files[index];
+
+      var track = {};
+      var sources = [{ src: location.origin + "/" + ((path != null) ? path + "/" : "") + file.name, type: file.mimetype, filename: file.name }];
+      var poster = location.origin + '/assets/images/default_poster.png';
+      track.sources = sources;
+      track.poster = poster;
+      mediaList.push(track);
+    }
+
+    document.title += " - " + path;
+  </script>
+</head>
+
+<body>
+  <!--   <div style="position: absolute;top: 5px;left: 5px; width: 24px; height: 24px; z-index: 100;">
+    <button id="show-settings-btn" style="width: 24px;height: 24px;padding: 0px;background-color: var(--bg-comp-color);border: 0px;margin: 5px;">
+      <i class="fa fa-cog" style="font-size: 18px;color: var(--primary-color);"></i>
+    </button>
+  </div> -->
+  <div class="page-wrap">
+    <!--   <header class="header">
+    <h1>Header goes here</h1>
+    <button id="toggle">Toggle right column</button>
+  </header> -->
+    <main class="main">
+      <!-- Content column -->
+      <div id="content" class="content">
+        <!--         <div id="analyzer"></div> -->
+        <div id="media-container"></div>
+        <div id="audio-panel" class="audioPanel">
+          <div style="width: 245px;position: absolute;left: calc(50% - 135px);top: 15px;display: block;">
+            <button id="video-mode-btn_audiopanel" style="left: 30px;top: calc(-50% + 10px);color: var(--primary-color);float: left;margin: 0px;" class="controls"><i class="fa fa-solid fa-film"></i></button>
+          </div>
+        </div>
+        <div id="video-panel" class="videoPanel">
+          <div style="position: relative;left: 0px;top: 0px;height: 100%; width: 100%;">
+            <div>
+              <button id="video-mode-btn_videopanel" style="left: 30px;top: calc(-50% + 10px);color: var(--primary-color);float: right;margin: 0px;" class="controls"><i class="fa fa-film"></i></button>
+            </div>
+            <div id="video_container" style="display: flex;width: 100%;height: 100%;align-items: center;">
+            </div>
+          </div>
+        </div>
+        <div id="media-controls" class="media-controls"></div>
+        <div id="eq_container" class="eq_container">
+          <div style="float: left;position: fixed;margin-left: -75px;margin-top: -15px;">
+            <button id="eq-preset-btn" class="btn btn-secondary controls" style="padding: 4px;">
+              <i class="fa fa-solid" style="rotate: 90deg;color: var(--primary-color);"></i>
+            </button>
+          </div>
+        </div>
+        <datalist id="tickmarks">
+          <option value="-12" label="-12"></option>
+          <option value="-8"></option>
+          <option value="-4"></option>
+          <option value="0" label="0"></option>
+          <option value="4"></option>
+          <option value="8"></option>
+          <option value="12" label="12"></option>
+        </datalist>
+      </div>
+      <!-- Playlist column -->
+      <div id="playlist_column" class="column middle-column">
+        <div id="playlist_cont">
+          <div style="height: 18px;display: inline;">
+            <div style="height: 18px;display: inline;"><button id="set-playlist-btn" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);"><i class="fa fa-list"></i></button></div>
+            <div style="height: 18px;"><button id="save-playlist-btn" class="btn btn-secondary controls" style="width: 20px;height: 20px;padding: 0px;margin: 4px;float: right;color: var(--primary-color);"><i class="fa fa-save"></i></button></div>
+          </div>
+        </div>
+        <div id="playlist_controls_0" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist controls" style="display: flex;justify-content: space-between;align-items: center;">
+          <input id="player_progress" type="range" min="0" max="180" step="1" value="0" style=" width: 68%;">
+          <span id="player_timer" style="color: var(--primary-color); font-weight: bold; font-size: medium; cursor: pointer;">0:00/0:00</span>
+          <button id="player_mute" type="button" id="repeat-btn" class="btn btn-secondary controls" style="width: 30px;padding-left: 10px;padding-right: 20px; margin-right: 0px; margin-top: 10px;">
+            <i class="fa fa-volume-up" style="font-size: large;"></i>
+          </button>
+        </div>
+        <div id="playlist_controls" class="btn-group mr-2 playlist-controls" role="group" aria-label="playlist commands">
+          <button type="button" id="shuffle-btn" class="btn btn-secondary controls">
+            <i class="fa fa-random"></i>
+          </button>
+          <button type="button" id="prev-track-btn" class="btn btn-secondary controls">
+            <i class="fa fa-solid fa-step-backward"></i>
+          </button>
+          <button type="button" id="backward-btn" class="btn btn-secondary controls">
+            <i class="fa fa-solid fa-backward"></i>
+          </button>
+          <button type="button" id="play-track-btn" class="btn btn-secondary controls">
+            <i class="fa fa-solid fa-play"></i>
+          </button>
+          <button type="button" id="forward-btn" class="btn btn-secondary controls">
+            <i class="fa fa-solid fa-forward"></i>
+          </button>
+          <button type="button" id="next-track-btn" class="btn btn-secondary controls">
+            <i class="fa fa-solid fa-step-forward"></i>
+          </button>
+          <button type="button" id="repeat-btn" class="btn btn-secondary controls disabled">
+            <i class="fa fa-repeat"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Lyrics column -->
+      <div id="lyrics" class="column right-column">
+      </div>
+      <div class="column rightsb-column">
+        <div>
+          <button id="showSettingsBtn" class="sbbutton showSettingsBtn" onclick="toggleSettingsPanel()"><i class="fa fa-cog"></i></button>
+          <button id="showPlaylistBtn" class="sbbutton showPlaylistBtn" onclick="togglePlaylistPanel()"><i class="fa fa-list"></i></button>
+          <button id="showLyricsBtn" class="sbbutton showLyricsBtn" onclick="toggleLyricsPanel()"><i class="fa fa-book"></i></button>
+          <button class="sbbutton showInfoBtn" onclick="toggleInfoPanel()"><i class="fa fa-info-circle"></i></button>
+        </div>
+      </div>
+    </main>
+    <!--   <footer class="footer">
+    <p>Footer content goes here</p>
+    <p>Footer content goes here</p>
+  </footer> -->
+
+  </div>
+
+  <!-- <div id="settings-panel" class="settings-panel">
+    <div class="wrapper">
+      <button id="settings-panel-open-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
+        <i class="fa fa-times"></i>
+      </button>
+      <div class="form" style="padding: 0px;">
+        <div style="display: flex; align-items: start; justify-content: space-between; height: 50px;">
+          <span style="font-size: 22px; font-weight: bold;">Settings</span>
+        </div>
+        <form>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Primary Color</label>
+            <input type="color" id="primary-color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+            !-- <input type="button" id="color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit; background-color: var(--primary-color);border: 4px solid #111; outline-color: var(--primary-color);" 
+            onclick="colorPicker.show(event.clientX, event.clientY, function(color){this.value=color; this.style.backgroundColor=color;}, 'hsl');">--
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Bg Color</label>
+            <input type="color" id="bg-color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Bg Component</label>
+            <input type="color" id="bgcomp-color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Analyzer presets</label>
+            <select name="audio-motion-preset" id="audio-motion-preset">
+              <option value="default">default</option>
+              <option value="bars">bars</option>
+              <option value="dual">dual</option>
+              <option value="wall">wall</option>
+              <option value="mirror">mirror</option>
+            </select>
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Display</label>
+            <select name="display-preset" id="display-preset" class="sized" size="2">
+              <option value="lcd">LCD</option>
+              <option value="led">LED</option>
+            </select>
+          </p>
+          <p class="full-width">
+            <button type="button" id="apply-settings-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div> -->
+
+  <div id="eq-presets-panel" class="settings-panel" style="left: 49px;top: 1025px; z-index: 999;">
+    <div class="wrapper" style="width: 200px;">
+      <button id="eq-presets-panel-close-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
+        <i class="fa fa-times"></i>
+      </button>
+      <div class="form" style="padding: 0px;">
+        <div style="display: flex; align-items: start; justify-content: space-between; height: 50px;">
+          <span style="font-size: 22px; font-weight: bold;">Eq. Presets</span>
+        </div>
+        <form>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <select name="eq-preset" id="eq-preset" size="5" class="sized">
+              <option value="default">default</option>
+              <option value="pop">pop</option>
+              <option value="rock">rock</option>
+              <option value="classic">classic</option>
+              <option value="electronic">electronic</option>
+            </select>
+          </p>
+          <p class="full-width">
+            <button type="button" id="apply-eq-preset-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="treedialog">
+    <div id="tree"></div>
+    <div>
+      <button id="treedialog_btn" class="btn btn-secondary controls" style="color: var(--primary-color);">Accept</button>
+    </div>
+  </div>
+
+  <div id="search-song-panel" class="settings-panel" style="width: 350px;">
+    <div class="wrapper">
+      <button id="search-song-panel-close-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
+        <i class="fa fa-times"></i>
+      </button>
+      <div class="form" style="padding: 0px;">
+        <div style="display: flex; align-items: start; justify-content: space-between; height: 50px;">
+          <span style="font-size: 22px; font-weight: bold;">Search Song</span>
+        </div>
+        <form>
+          <p class="full-width">
+            <label for="song-title">Title</label>
+            <input type="text" id="song-title" name="song-title" value="">
+          </p>
+          <p class="full-width">
+            <label for="song-artist">Artist</label>
+            <input type="text" id="song-artist" name="song-artist" value="">
+          </p>
+          <input type="hidden" id="full_path" name="full_path" value="">
+          <p class="full-width">
+            <button type="button" id="search-song-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsSBPanel" class="settingsSBPanel settings-panel rightPanel">
+    <div class="wrapper">
+      <!-- <button id="settings-panel-open-btn" class="btn btn-secondary controls" style="width: 20px; height: 20px; margin: 0px; padding: 2px; float: right;">
+        <i class="fa fa-times"></i>
+      </button> -->
+      <div class="form" style="padding: 0px;">
+        <div style="display: flex; align-items: start; justify-content: space-between; height: 50px;">
+          <span style="font-size: 22px; font-weight: bold;">Settings</span>
+        </div>
+        <form>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Primary Color</label>
+            <input type="color" id="primary-color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+            <!-- <input type="button" id="color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit; background-color: var(--primary-color);border: 4px solid #111; outline-color: var(--primary-color);" 
+            onclick="colorPicker.show(event.clientX, event.clientY, function(color){this.value=color; this.style.backgroundColor=color;}, 'hsl');">-->
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Bg Color</label>
+            <input type="color" id="bg-color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Bg Component</label>
+            <input type="color" id="bgcomp-color-input" value="" style="width: 25px;height: 25px;margin-left: 20px; padding: inherit;">
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Analyzer presets</label>
+            <select name="audio-motion-preset" id="audio-motion-preset">
+              <option value="default">default</option>
+              <option value="bars">bars</option>
+              <option value="dual">dual</option>
+              <option value="wall">wall</option>
+              <option value="mirror">mirror</option>
+            </select>
+          </p>
+          <p class="full-width" style="display: inline-flex; align-items: center;">
+            <label for="">Display</label>
+            <select name="display-preset" id="display-preset" class="sized" size="2">
+              <option value="lcd">LCD</option>
+              <option value="led">LED</option>
+            </select>
+          </p>
+          <p class="full-width">
+            <button type="button" id="apply-settings-btn" class="btn btn-secondary controls" style="float: right;margin: 0px;">Ok</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="playlistSBPanel" class="playlistSBPanel rightPanel"></div>
+  <div id="lyricsSBPanel" class="lyricsSBPanel rightPanel"></div>
+  <div id="infoSBPanel" class="infoSBPanel rightPanel"></div>
+
+
+  <script type="module" src="../../assets/js/xcolorcpicker.js"></script>
+  <script type="module" src="../../assets/js/xvirtualleddisplay.js"></script>
+  <script type="module" src="../../assets/js/xvertical-slider.js"></script>
+  <script type="module" src="../../assets/js/mediaplayer.js"></script>
+
+  <script src="../../assets/js/mediaplayer_layout.js"></script>
+
+</body>
+
+</html>
+<script>
+  const URLJoin = (...args) => args.join('/').replace(/[\/]+/g, '/').replace(/^(.+):\//, '$1://').replace(/^file:/, 'file:/').replace(/\/(\?|&|#[^!])/g, '$1').replace(/\?/g, '&').replace('&', '?');
+
+  function getMediaFoldersTree() {
+    $.ajax({
+      url: '/api/getMediaFolderTree',
+      type: 'GET',
+      success: function (data) {
+        document.getElementById('tree').innerHTML = '';
+        renderTree([data], document.getElementById('tree'), '/');
+        treedialog.style.visibility = 'visible';
+      }
+    });
+  }
+
+  function getFolderTree() {
+    $.ajax({
+      url: '/api/getFolderTree',
+      type: 'GET',
+      success: function (data) {
+        document.getElementById('tree').innerHTML = '<p><label for="newplaylist_name" style="color: var(--primary-color);">New playlist name: </label><input type="text" id="newplaylist_name"></p>\
+<br><label for="newplaylist_name" style="color: var(--primary-color);">Select folder:</label>';
+        renderTree([data], document.getElementById('tree'), '/', { folderOnly: true });
+        treedialog.style.visibility = 'visible';
+      }
+    });
+  }
+
+  function renderTree(data, parentElement, path, options) {
+    options = options || { folderOnly: false };
+    const ul = document.createElement('ul');
+    parentElement.appendChild(ul);
+
+    let children = [];
+    data.forEach((item) => {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = item.name;
+      span.className = item.type;
+      li.appendChild(span);
+      if (item.type == 'folder') {
+        children = [];
+        newpath = path.charAt(0) == '/' ? path + item.name + '/' : path + item.name;
+        newpath = newpath.replace('//', '/');
+        li.path = newpath;
+        li.title = newpath;
+        span.textContent = newpath;
+        const btn = document.createElement('input');
+        btn.type = 'checkbox';
+        if (options.folderOnly) {
+          btn.folderChecked = false;
+          btn.dataset.path = path + item.name;
+        } else {
+          btn.onchange = function () {
+            if (this.checked) {
+              this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                cb.checked = true;
+                cb.folderChecked = true;
+              });
+            } else {
+              this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                cb.checked = false;
+                cb.folderChecked = false;
+              });
+            }
+          };
+        }
+        li.appendChild(btn);
+
+      } else {
+        children.push(JSON.stringify({'name':item.name, 'mimetype':item.mimetype, 'type':item.type}));
+        const btn = document.createElement('input');
+        btn.type = 'checkbox';
+        btn.folderChecked = false;
+        btn.dataset.path = path + item.name;
+        btn.dataset.mimetype = item.mimetype; // "audio/mpeg"
+        btn.dataset.name = item.name; // "4.Nightwish_-_Planet_Hell.mp3"
+        btn.dataset.type = item.type; // "file"
+        li.appendChild(btn);
+
+        if (parentElement.tagName == 'LI') {
+          let cb = parentElement.querySelectorAll('input[type="checkbox"]')[0];
+          cb.dataset.path = path;
+          cb.dataset.children = JSON.stringify(children);
+        }
+      }
+      ul.appendChild(li);
+
+      if (item.children && item.children.length > 0) {
+        renderTree(item.children, li, newpath, options);
+      }
+    });
+  }
+
+  const treedialog = document.getElementById('treedialog');
+  const treeContainer = document.getElementById('tree');
+
+  function getSelections() {
+    const selected = [];
+    const checkboxes = treeContainer.querySelectorAll('input[type="checkbox"]:checked');
+    checkboxes.forEach((checkbox) => {
+      if (checkbox.dataset.children !== undefined) {
+
+        JSON.parse(checkbox.dataset.children).forEach(child => {
+          let childObj = JSON.parse(child);
+          selected.push({ path: checkbox.dataset.path.replace('/', '') + childObj.name, name: childObj.name, mimetype: childObj.mimetype, type: childObj.type });
+        });
+      } else {
+        if (checkbox.folderChecked == false) {
+          let data = checkbox.dataset;
+          selected.push({path: data.path.replace('/', ''), name: data.name, mimetype: data.mimetype, type: data.type });
+        }
+      }
+    });
+    //alert(selected.join('\n'));
+    treedialog.style.visibility = 'hidden';
+    genPlaylist(selected);
+  }
+
+  function savePlaylist(event) {
+    if (treedialog.style.visibility == 'visible') {
+      treedialog.style.visibility = 'hidden';
+      return;
+    }
+    treedialog.style.left = event.clientX - treedialog.offsetWidth + 'px';
+    treedialog.style.top = event.clientY + 20 + 'px';
+    document.getElementById("treedialog_btn").onclick = function () {
+      const checkbox = treeContainer.querySelectorAll('input[type="checkbox"]:checked')[0];
+      path = checkbox.dataset.path;
+      path = path.substr(1);
+      const newplaylist_name = document.getElementById("newplaylist_name").value;
+      var newPlayList = [];
+      for (let index = 0; index < audio_files.length; index++) {
+        const file = audio_files[index];
+
+        var item = { url: location.origin + "/" + file, name: file };
+        newPlayList.push(item);
+      }
+      $.post('/api/genPlaylistM3u', { path: path + '/' + newplaylist_name + '.m3u', playlist_obj: JSON.stringify(newPlayList) }, function (data) {
+        if (data.status == 'success') {
+          alert("created playlist successfully");
+          treedialog.style.visibility = 'hidden';
+        } else {
+          alert(data.message);
+        }
+      });
+    };
+    getFolderTree();
+  }
+
+  function setPlaylist(event) {
+    if (treedialog.style.visibility == 'visible') {
+      treedialog.style.visibility = 'hidden';
+      return;
+    }
+    treedialog.style.left = event.clientX - treedialog.offsetWidth + 'px';
+    treedialog.style.top = event.clientY + 20 + 'px';
+    document.getElementById("treedialog_btn").onclick = getSelections;
+    getMediaFoldersTree();
+  }
+
+  async function genPlaylist(mediaList_) {
+    media_files = mediaList_;
+    mediaList = [];
+    for (let index = 0; index < media_files.length; index++) {
+      const file = media_files[index];
+
+      if (file.name.endsWith('.m3u')) {
+        await $.get('/api/getPlaylistM3u', { path: file.path }, function (data) {
+          playlistFiles = data.playlist
+
+          for (let plindex = 0; plindex < playlistFiles.length; plindex++) {
+            const item = playlistFiles[plindex];
+            var track = {};
+            var sources = [{ src: item.url, type: item.mimetype, filename: item.name }];
+            var poster = location.origin + '/assets/images/default_poster.png';
+            track.sources = sources;
+            track.poster = poster;
+            mediaList.push(track);
+          }
+        });
+      } else {
+        var track = {};
+        var sources = [{ src: location.origin + "/" + file.path, type: file.mimetype, filename: file.name }];
+        var poster = location.origin + '/assets/images/default_poster.png';
+        track.sources = sources;
+        track.poster = poster;
+        mediaList.push(track);
+      }
+    }
+    localStorage.setItem('lastplaylist', JSON.stringify(mediaList));
+    var playlistChangeEvent = new CustomEvent('playlistChangeEvent', { detail: mediaList });
+    document.dispatchEvent(playlistChangeEvent);
+  }
+
+  window['showSearchSongDialog'] = function (event) {
+    var full_path = window['playlist'].items_[window['playlist'].currentIndex_].sources[0].src;
+    var panel = document.getElementById('search-song-panel');
+    panel.style.left = (event.clientX - 360) + 'px';
+    panel.style.top = '15px';
+    document.getElementById('full_path').value = full_path.substring(location.origin.length + 1);
+    panel.style.display = 'block';
+    window['focusSearchInput'] = true;
+  }
+
+  function searchSong(event) {
+    var title = document.getElementById('song-title').value;
+    var artist = document.getElementById('song-artist').value;
+    var full_path = document.getElementById('full_path').value;
+    $.post(URLJoin(location.origin, '/api/searchSong'), { title: title, artist: artist, full_path: full_path }, function (data) {
+      data = JSON.parse(data);
+      var songInfoChangeEvent = new CustomEvent('songInfoChange', { detail: data });
+      document.dispatchEvent(songInfoChangeEvent);
+      document.getElementById('search-song-panel').style.display = 'none';
+      window['focusSearchInput'] = false;
+      window['pl_lyrics_loader'].style.display = 'none';
+    });
+  }
+
+  function toggleVideoMode(event) {
+    if (window['videoMode']) {
+      window['videoMode'] = false;
+      document.getElementById('content').parentNode.insertBefore(document.getElementById('content'),document.getElementById('playlist_column'));
+      document.getElementById('playlist_column').className='column middle-column';
+      document.getElementById('lyrics').style.display = 'block';
+      document.getElementById('video-mode-btn_audiopanel').firstElementChild.className = 'fa fa-solid fa-film';
+      document.getElementById('video-mode-btn_videopanel').firstElementChild.className = 'fa fa-solid fa-film';
+    } else {
+      window['videoMode'] = true;
+      document.getElementById('playlist_column').parentNode.insertBefore(document.getElementById('playlist_column'),document.getElementById('content'));
+      document.getElementById('playlist_column').className='column left-column';
+      document.getElementById('lyrics').style.display = 'none';
+      document.getElementById('video-mode-btn_audiopanel').firstElementChild.className = 'fa fa-solid fa-music';
+      document.getElementById('video-mode-btn_videopanel').firstElementChild.className = 'fa fa-solid fa-music';
+    }
+  }
+</script>
+
+<script>
+  $(document).ready(function () {
+
+    // Load saved settings
+    loadSavedSettings();
+
+    // Show settings button
+    /* document.getElementById('show-settings-btn').addEventListener('click', function () {
+      document.getElementById('primary-color-input').value = primary_color;
+      document.getElementById('bg-color-input').value = bg_color;
+      document.getElementById('bgcomp-color-input').value = bg_comp_color;
+      document.getElementById('settings-panel').style.display = 'block';
+    }); */
+
+    // Settings Panel close button
+    /* document.getElementById('settings-panel-open-btn').addEventListener('click', function () {
+      //document.getElementById('settings-panel').style.display = 'none';
+    }); */
+
+    // Set play list button
+    document.getElementById('set-playlist-btn').addEventListener('click', function (event) {
+      setPlaylist(event);
+    });
+
+    // Save play list button
+    document.getElementById('save-playlist-btn').addEventListener('click', function (event) {
+      savePlaylist(event);
+    });
+
+    // Select display preset
+    document.getElementById('display-preset').addEventListener('change', function (event) {
+      applyDisplayPreset(event);
+    });
+
+    // Apply settings button
+    document.getElementById('apply-settings-btn').addEventListener('click', function (event) {
+      applySettings(event);
+    });
+
+    // Show eq presets button
+    document.getElementById('eq-preset-btn').addEventListener('click', function (event) {
+      showEqPresets(event);
+    });
+
+    // Eq Presets close button
+    document.getElementById('eq-presets-panel-close-btn').addEventListener('click', function (event) {
+      document.getElementById('eq-presets-panel').style.display = 'none';
+    });
+
+    // Select eq preset
+    document.getElementById('eq-preset').addEventListener('change', function (event) {
+      applyEqPreset(event);
+    });
+
+    // Apply eq preset button
+    document.getElementById('apply-eq-preset-btn').addEventListener('click', function (event) {
+      applyEqPreset(event);
+      document.getElementById('eq-presets-panel').style.display = 'none';
+    });
+
+    // Search song panel close button
+    document.getElementById('search-song-panel-close-btn').addEventListener('click', function (event) {
+      document.getElementById('search-song-panel').style.display = 'none';
+      window['focusSearchInput'] = false;
+    });
+
+    // Search song button
+    document.getElementById('search-song-btn').addEventListener('click', function (event) {
+      searchSong(event);
+    });
+
+    document.getElementById('video-mode-btn_audiopanel').addEventListener('click', function (event) {
+      toggleVideoMode(event);
+    });
+
+    document.getElementById('video-mode-btn_videopanel').addEventListener('click', function (event) {
+      toggleVideoMode(event);
+    });
+
+  });
+</script>

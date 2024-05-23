@@ -1095,17 +1095,17 @@ export default class AudioMotionAnalyzer {
 	}
 
 	setCanvasBgColor( color ) {
-		if ( ! overlay || showBgColor ) {
-			if ( overlay )
-				_ctx.globalAlpha = this.bgAlpha;
+		if ( ! this.overlay || this.showBgColor ) {
+			if ( this.overlay )
+				this._ctx.globalAlpha = this.bgAlpha;
 			
-			_ctx.fillStyle = color;
+			this._ctx.fillStyle = color;
 
 			// exclude the reflection area when overlay is true and reflexAlpha == 1 (avoids alpha over alpha difference, in case bgAlpha < 1)
-			if ( channel == 0 || ( ! _radial && ! isDualCombined ) )
-				_ctx.fillRect( initialX, channelTop - channelGap, analyzerWidth, ( overlay && this.reflexAlpha == 1 ? analyzerHeight : channelHeight ) + channelGap );
+			if ( this.channel == 0 || ( ! this._radial && ! this.isDualCombined ) )
+				this._ctx.fillRect( this.initialX, this.channelTop - this.channelGap, this.analyzerWidth, ( this.overlay && this.reflexAlpha == 1 ? this.analyzerHeight : this.channelHeight ) + this.channelGap );
 
-			_ctx.globalAlpha = 1;
+			this._ctx.globalAlpha = 1;
 		}
 	}
 
@@ -2592,7 +2592,7 @@ export default class AudioMotionAnalyzer {
 		canvas.height = newHeight;
 
 		// if not in overlay mode, paint the canvas black
-		if ( ! this.overlay ) {
+		if ( ! this.overlay || this.showBgColor ) {
 			_ctx.fillStyle = '#000';
 			_ctx.fillRect( 0, 0, newWidth, newHeight );
 		}

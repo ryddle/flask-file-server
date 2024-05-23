@@ -1,35 +1,116 @@
-/**
- * This web implements a frequency equalizer
- * connected to audioMotion-analyzer
- *
- * Original equalizer code by Osman Colakoglu
- *
- * For audioMotion-analyzer documentation and
- * more demos, visit https://audiomotion.dev
- */
-
-
-import { URLJoin, secondsToHHMMSS, median } from './audioplayer_utils.js';
+import { URLJoin, secondsToHHMMSS, median } from './mediaplayer_utils.js';
 import AudioMotionAnalyzer from './audioMotion-analyzer.js';
-import Playlist from './audioplayer_playlist.js';
-import { build_play_list_ul, build_play_list, build_lcdisplay, build_pl_info, build_loader } from './audioplayer_builders.js';
+import { Playlist, MediaElement} from './mediaplayer_playlist.js';
+import { build_play_list_ul, build_play_list, build_lcdisplay, build_pl_info, build_loader } from './mediaplayer_builders.js';
 import XverticalSlider from './xvertical-slider.js';
 import XVirtualLedDisplay from './xvirtualleddisplay.js';
 
+const videoMimeTypes = ['video/mp4', 'video/m4v', 'video/webm', 'video/ogg', 'video/x-matroska', 'video/avi'];
+const audioMimeTypes = ['audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-wav', 'audio/webm'];
+
+
+let currentMediaElement = null;
+let mediaControls = document.getElementById('media-controls');
+let source_title = mediaList[0].sources[0].filename;
+
+$(document).ready(function () {
+  audioElement.addEventListener("timeupdate", (event) => {
+    document.getElementById('player_progress').value = audioElement.currentTime;
+    if (time_mode == "playing") {
+      document.getElementById('player_timer').innerText = secondsToHHMMSS(audioElement.currentTime) + '/' + secondsToHHMMSS(audioElement.duration);
+    } else if (time_mode == "remaining") {
+      document.getElementById('player_timer').innerText = secondsToHHMMSS(audioElement.duration - audioElement.currentTime) + '/' + secondsToHHMMSS(audioElement.duration);
+    }
+  });
+
+  audioElement.addEventListener("playing", (event) => {
+    document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
+  });
+
+  audioElement.addEventListener("pause", (event) => {
+    document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
+  });
+
+  videoElement.addEventListener("timeupdate", (event) => {
+    document.getElementById('player_progress').value = videoElement.currentTime;
+    if (time_mode == "playing") {
+      document.getElementById('player_timer').innerText = secondsToHHMMSS(videoElement.currentTime) + '/' + secondsToHHMMSS(videoElement.duration);
+    } else if (time_mode == "remaining") {
+      document.getElementById('player_timer').innerText = secondsToHHMMSS(videoElement.duration - videoElement.currentTime) + '/' + secondsToHHMMSS(videoElement.duration);
+    }
+  });
+
+  videoElement.addEventListener("playing", (event) => {
+    document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
+  });
+
+  videoElement.addEventListener("pause", (event) => {
+    document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
+  });
+
+});
+
+//////////////////////////////////// VIDEO VIEWER /////////////////////////////////////////////
+const videoPanel = document.getElementById('video-panel');
+const videoContainer = document.getElementById('video_container');
+let videoElement = document.createElement("video");
+if(mediaList.length > 0) {
+  //video.setAttribute("src", "nameOfFile.ogg");
+  if(videoMimeTypes.includes(mediaList[0].sources[0].type)) {
+    videoElement.src = mediaList[0].sources[0].src;
+  }
+}
+videoElement.controls = true;
+videoElement.crossOrigin = 'anonymous';
+videoElement.style.display = 'none';
+videoElement.style.maxWidth = '100%';
+videoElement.style.width = '100%';
+videoElement.style.maxHeight= 'calc(100vh - 210px)';
+videoElement.onloadeddata = () => {
+  if(currentMediaElement.localName!="video"){
+    return;
+  }
+  window.isPlayingVideo = true;
+  document.getElementById('player_progress').max = videoElement.duration;
+  document.getElementById('player_timer').innerText = secondsToHHMMSS(videoElement.currentTime) + '/' + secondsToHHMMSS(videoElement.duration);
+
+  source_title = playlist.getCurrentItem().sources[0].filename;
+  document.title = "Media Player - " + source_title;
+};
+//videoPanel.appendChild(videoElement); // add it to the DOM
+videoContainer.appendChild(videoElement); // add it to the DOM
+
+if(videoMimeTypes.includes(mediaList[0].sources[0].type)) {
+  currentMediaElement = videoElement;
+  videoElement.style.display = 'block';
+  videoPanel.style.display = 'flex';
+}
+
+//////////////////////////////////// END VIDEO VIEWER /////////////////////////////////////////
+
+//////////////////////////////////// AUDIO MOTION /////////////////////////////////////////////
 const ctx = window.AudioContext || window.webkitAudioContext;
 const context = new ctx();
 
-const audioContainer = document.getElementById('audio-container');
+const audioPanel = document.getElementById('audio-panel');
+const mediaContainer = document.getElementById('media-container');
 // create new <audio> element
-let mediaElement = (audioList.length > 0) ? new Audio(audioList[0].sources[0].src) : new Audio();
-mediaElement.controls = true;
-mediaElement.crossOrigin = 'anonymous';
-mediaElement.style.display = 'none';
-//mediaElement.onloadstart  = () => messageDiv.innerText = 'Buffering audio... please wait...';
-mediaElement.onloadeddata = () => {
-  document.getElementById('player_progress').max = mediaElement.duration;
-  document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration);
-  //mediaElement.play();
+let audioElement = (mediaList.length > 0 && audioMimeTypes.includes(mediaList[0].sources[0].type) ) ? new Audio(mediaList[0].sources[0].src) : new Audio();
+audioElement.controls = true;
+audioElement.crossOrigin = 'anonymous';
+audioElement.style.display = 'none';
+
+audioElement.onloadeddata = () => {
+  if(currentMediaElement.localName!="audio") {
+    return;
+  }
+  window.isPlayingVideo = false;
+  document.getElementById('player_progress').max = audioElement.duration;
+  document.getElementById('player_timer').innerText = secondsToHHMMSS(audioElement.currentTime) + '/' + secondsToHHMMSS(audioElement.duration);
+
+  source_title = playlist.getCurrentItem().sources[0].filename;
+  document.title = "Media Player - " + source_title;
+  
   $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
@@ -40,10 +121,17 @@ mediaElement.onloadeddata = () => {
       updateInfoPanel(data);
     });
 }
-audioContainer.append(mediaElement); // add it to the DOM
+mediaContainer.append(audioElement); // add it to the DOM
 
-const sourceNode = context.createMediaElementSource(mediaElement);
-const controls = document.getElementById('controls');
+const eq_container = document.getElementById('eq_container');
+
+if(audioMimeTypes.includes(mediaList[0].sources[0].type)) {
+  currentMediaElement = audioElement;
+  audioPanel.style.display = 'block';
+  eq_container.style.display = 'flex';
+}
+
+const sourceNode = context.createMediaElementSource(audioElement);
 
 const filters = [];
 
@@ -97,7 +185,7 @@ const filters = [];
   eqbandOutput.innerHTML = '0 dB';
   eqbandDiv.appendChild(eqbandOutput);
 
-  controls.appendChild(eqbandDiv);
+  eq_container.appendChild(eqbandDiv);
 });
 
 
@@ -114,10 +202,12 @@ for (let i = 0; i < filters.length - 1; i++) {
 let audioMotionConfig = {
   source: filters[filters.length - 1],
   gradient: 'chocolate',
+  overlay: false,
+  showBgColor: true
 };
 
 const audioMotion = new AudioMotionAnalyzer(
-  document.getElementById('analyzer'), audioMotionConfig
+  document.getElementById('audio-panel'), audioMotionConfig
 );
 
 Object.assign(audioMotionConfig, audioMotionConfigs[audio_motion_preset]);
@@ -136,7 +226,7 @@ function createGradient() {
   let _name = primary_color.replace('(', '_').replace(')', '_').replaceAll(',', '_').replaceAll(' ', '');
   let cap_name = _name.charAt(0).toUpperCase() + _name.slice(1);
   return [_name, {
-    bgColor: '#000000',
+    bgColor: bg_color,//'#000000',
     colorStops: [primary_color]
   }];
 }
@@ -163,13 +253,39 @@ function changeGain(target) {
 }
 
 
+let current_primary_color = primary_color;
+let current_bg_color = bg_color;
+document.addEventListener("colorSettingsChange", (event) => {
+  if (current_primary_color != primary_color && (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror")) {
+    current_primary_color = primary_color;
+    setGradient();
+  }
+  if (current_bg_color != bg_color) {
+    setGradient();
+    audioMotion.setCanvasBgColor(bg_color);
+  }
+});
+let current_audiomotion_preset = audio_motion_preset;
+document.addEventListener("audioMotionPresetChange", (event) => {
+  if (current_audiomotion_preset != audio_motion_preset) {
+    current_audiomotion_preset = audio_motion_preset;
+    audioMotion.setOptions(audioMotionConfigs[audio_motion_preset]);
+    if (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror") {
+      setGradient();
+    }
+  }
+});
+//////////////////////////////////// END AUDIO MOTION /////////////////////////////////////////
+
+
 //////////////////////////////////// PLAYLIST /////////////////////////////////////////////////
 // instantiate the playlist
-let playlist = Playlist.from(audioList, mediaElement);
+let mediaElementObj = new MediaElement(audioElement, videoElement);
+let playlist = Playlist.from(mediaList, mediaElementObj);
 window.playlist = playlist;
 
-let song_title = (playlist.items_.length > 0) ? playlist.items_[0].sources[0].filename : "";
-document.title = "Audio Player - " + song_title;
+source_title = (playlist.items_.length > 0) ? playlist.items_[0].sources[0].filename : "";
+document.title = "Media Player - " + source_title;
 
 //create playlist html
 let playlist_cont = document.getElementById("playlist_cont");
@@ -178,7 +294,7 @@ playlist_cont.style.overflow="hidden";
 let play_list = build_play_list_ul();
 
 for (let index = 0; index < playlist.items_.length; index++) {
-  const file = playlist.items_[index].sources[0].filename;
+  const file = playlist.items_[index].sources[0];
 
   var liObj = build_play_list(file, index, playListItemClicked);
 
@@ -187,6 +303,15 @@ for (let index = 0; index < playlist.items_.length; index++) {
 playlist_cont.appendChild(play_list);
 
 function playListItemClicked(target) {
+  if(videoMimeTypes.includes(target.type)) {
+    audioElement.pause();
+    currentMediaElement = videoElement;
+  }else if(audioMimeTypes.includes(target.type)) {
+    videoElement.pause();
+    currentMediaElement = audioElement;
+  }
+
+  //load playlist
   playlist.loadPlaylistItem(target.index);
   document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
   var liObjs = Array.from(play_list.getElementsByTagName('li'));
@@ -212,9 +337,9 @@ var repeatbtn = document.getElementById("repeat-btn");
 
 shufflebtn.addEventListener('click', () => playlist.toggleShuffle());
 prevtrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getPreviousIndex()));
-backwardbtn.addEventListener('click', () => mediaElement.currentTime = Math.max(0, mediaElement.currentTime - 5));
+backwardbtn.addEventListener('click', () => currentMediaElement.currentTime = Math.max(0, currentMediaElement.currentTime - 5));
 playtrackbtn.addEventListener('click', () => playlist.togglePlay());
-forwardbtn.addEventListener('click', () => mediaElement.currentTime = Math.min(mediaElement.duration, mediaElement.currentTime + 5));
+forwardbtn.addEventListener('click', () => currentMediaElement.currentTime = Math.min(currentMediaElement.duration, currentMediaElement.currentTime + 5));
 nexttrackbtn.addEventListener('click', () => playlist.loadPlaylistItem(playlist.getNextIndex()));
 repeatbtn.addEventListener('click', function () {
   playlist.toggleRepeat();
@@ -229,7 +354,6 @@ repeatbtn.addEventListener('click', function () {
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;"></i>';
   }
 });
-
 
 ////////////////// DISPLAYS //////////////////
 var time_mode = "playing"; // playing, remaining
@@ -249,7 +373,7 @@ if (currentDisplay == "lcd") {
 }
 
 function updateLcdDisplay() {
-  let lcdDisplayTextArray = [" "].concat(song_title.split(""));
+  let lcdDisplayTextArray = [" "].concat(source_title.split(""));
   lcdDisplayIndex++;
   lcdDisplayIndex = lcdDisplayIndex % lcdDisplayTextArray.length;
   let lcdDisplayMaxIndex = Math.max(12, lcdDisplayIndex + 12);
@@ -257,14 +381,14 @@ function updateLcdDisplay() {
   if (lcdDisplayIndex + 12 >= lcdDisplayTextArray.length) {
     lcdDisplayText += lcdDisplayTextArray.slice(0, (12 - lcdDisplayText.length) % 12).join("");
   }
-  if (mediaElement.paused) {
+  if (currentMediaElement.paused) {
     lcdDisplayFront.innerText = "00:00/00:00-" + lcdDisplayText;
     return;
   }
   if (time_mode == "playing") {
-    lcdDisplayFront.innerText = secondsToHHMMSS(mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration) + "-" + lcdDisplayText;
+    lcdDisplayFront.innerText = secondsToHHMMSS(currentMediaElement.currentTime) + '/' + secondsToHHMMSS(currentMediaElement.duration) + "-" + lcdDisplayText;
   } else if (time_mode == "remaining") {
-    lcdDisplayFront.innerText = secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration) + "-" + lcdDisplayText;
+    lcdDisplayFront.innerText = secondsToHHMMSS(currentMediaElement.duration - currentMediaElement.currentTime) + '/' + secondsToHHMMSS(currentMediaElement.duration) + "-" + lcdDisplayText;
   }
 }
 
@@ -278,15 +402,14 @@ var vledDiplay = new XVirtualLedDisplay(matrix, { callback: chageTimeMode });
 // Update LED display 2
 vledDiplay.clearM();
 vledDiplay.drawText("00:00", 0, -1);
-vledDiplay.drawText(song_title, 30, -1);
-//vledDiplay.rotate('left', 30);
-//setInterval(updateLedDisplay, 100);
-var vledDisplayTimer = 0;//setInterval(vledDisplayClockTimer, 1000);
+vledDiplay.drawText(source_title, 30, -1);
+
+var vledDisplayTimer = 0;
 function updateLedDisplay2() {
   clearInterval(vledDisplayTimer);
   vledDisplayTimer = 0;
 
-  vledDiplay.drawText(song_title, 30, -1);
+  vledDiplay.drawText(source_title, 30, -1);
 
   vledDisplayTimer = setInterval(vledDisplayClockTimer, 1000);
 }
@@ -299,9 +422,9 @@ if (currentDisplay == "led") {
 
 function vledDisplayClockTimer() {
   if (time_mode == "playing") {
-    vledDiplay.drawText(secondsToHHMMSS(mediaElement.currentTime), 0, 30);
+    vledDiplay.drawText(secondsToHHMMSS(currentMediaElement.currentTime), 0, 30);
   } else if (time_mode == "remaining") {
-    vledDiplay.drawText(secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime), 0, 30);
+    vledDiplay.drawText(secondsToHHMMSS(currentMediaElement.duration - currentMediaElement.currentTime), 0, 30);
   }
 }
 
@@ -312,6 +435,14 @@ function chageTimeMode() {
     time_mode = "playing";
   }
 }
+
+document.getElementById('player_timer').addEventListener('click', function () {
+  if (time_mode == "playing") {
+    time_mode = "remaining";
+  } else if (time_mode == "remaining") {
+    time_mode = "playing";
+  }
+});
 
 document.addEventListener("displayPresetChange", function (event) {
   currentDisplay = event.detail;
@@ -334,8 +465,113 @@ document.addEventListener("displayPresetChange", function (event) {
   }
 });
 
+document.addEventListener('change', function () {
+  currentMediaElement = mediaElementObj.activeMediaElement;
+});
 
-////////////////////// PLAYLIST INFO ///////////////////////////////
+// Add an event listener to the playlist
+playlist.addEventListener('playlistitemload', () => {
+  if(videoMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
+    currentMediaElement = videoElement;
+    window.isPlayingVideo = true;
+    videoElement.style.display = 'block';
+    videoPanel.style.display = 'flex';
+
+    audioPanel.style.display = 'none';
+    eq_container.style.display = 'none';
+    guidomElement.style.display = 'none';
+  }else if(audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
+    currentMediaElement = audioElement;
+    window.isPlayingVideo = false;
+    audioPanel.style.display = 'flex';
+    eq_container.style.display = 'flex';
+    guidomElement.style.display = 'block';
+
+    videoPanel.style.display = 'none';
+    videoElement.style.display = 'none';
+  }
+
+  var liItems = document.getElementById('playlist_ul').getElementsByTagName('li');
+  for (let index = 0; index < liItems.length; index++) {
+    let li = liItems[index];
+    if (index == playlist.getCurrentIndex()) {
+      li.style.backgroundColor = "var(--primary-color)";
+      li.style.color = '#111111';
+      li.style.fontWeight = '700';
+      li.style.fontWeight = 'bold';
+    } else {
+      li.style.backgroundColor = 'transparent';
+      li.style.fontWeight = 'normal';
+      li.style.color = "var(--primary-color)";
+    }
+  }
+
+  if(audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
+    // Show the loader
+    pl_lyrics_loader.style.display = 'block';
+    $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
+      pl_lyrics_loader.style.display = 'none';
+      data = JSON.parse(data);
+      updateInfoPanel(data);
+    })
+      .fail(function () {
+        const data = { 'error': 'Lyrics not found.' };
+        updateInfoPanel(data);
+      });
+
+  }else {
+    source_title = playlist.getCurrentItem().sources[0].filename;
+    updateLedDisplay2();
+    pl_lyriscontainer.innerText = "";
+    pl_info_infocontainer.innerText = "";
+  }
+
+});
+
+document.addEventListener("playlistChangeEvent", (event) => {
+  playlist.setItems(event.detail);
+  playlist.loadPlaylistItem(0);
+
+  play_list.remove();
+  play_list = build_play_list_ul();
+
+  for (let index = 0; index < playlist.items_.length; index++) {
+    const file = playlist.items_[index].sources[0];
+
+    var liObj = build_play_list(file, index, playListItemClicked);
+
+    play_list.appendChild(liObj);
+  }
+  playlist_cont.appendChild(play_list);
+});
+
+document.getElementById('player_progress').addEventListener('change', (event) => {
+  currentMediaElement.currentTime = document.getElementById('player_progress').value;
+});
+
+document.getElementById('player_mute').addEventListener('click', () => {
+  currentMediaElement.muted = !currentMediaElement.muted;
+  if (currentMediaElement.muted) {
+    document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-off"></i>';
+  } else {
+    document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-up"></i>';
+  }
+});
+
+window.addEventListener('keyup', (event) => {
+  if (event.key == " " && window['focusSearchInput'] == false) {
+    playlist.togglePlay();
+    if (playlist.mediaElement_.activeMediaElement.paused) {
+      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
+    } else {
+      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
+    }
+  }
+});
+//////////////////////////////////// END PLAYLIST /////////////////////////////////////////////////
+
+
+//////////////////////////////////// PLAYLIST INFO ///////////////////////////////////////////////
 
 // Add a playlist info element to your HTML
 let [pl_info, pl_info_controls, pl_info_controls_hidelabel, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics, 
@@ -360,7 +596,7 @@ function updateInfoPanel(data) {
     pl_lyrics_loader.style.display = 'none';
 
     pl_lyriscontainer.innerText = lyrics;
-    song_title = body['artist_names'] + ' - ' + body['title'];
+    source_title = body['artist_names'] + ' - ' + body['title'];
     updateLedDisplay2();
 
     pl_infocont_image.src = body.header_image_thumbnail_url;
@@ -388,143 +624,15 @@ pl_info.appendChild(pl_lyrics_loader);
 
 document.getElementById('lyrics').appendChild(pl_info);
 
-
-// Add an event listener to the playlist
-playlist.addEventListener('playlistitemload', () => {
-  var liItems = document.getElementById('playlist_ul').getElementsByTagName('li');
-  for (let index = 0; index < liItems.length; index++) {
-    let li = liItems[index];
-    if (index == playlist.getCurrentIndex()) {
-      li.style.backgroundColor = "var(--primary-color)";
-      li.style.color = '#111111';
-      li.style.fontWeight = '700';
-      li.style.fontWeight = 'bold';
-    } else {
-      li.style.backgroundColor = 'transparent';
-      li.style.fontWeight = 'normal';
-      li.style.color = "var(--primary-color)";
-    }
-  }
-
-  // Show the loader
-  pl_lyrics_loader.style.display = 'block';
-  $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
-    pl_lyrics_loader.style.display = 'none';
-    data = JSON.parse(data);
-    updateInfoPanel(data);
-  })
-    .fail(function () {
-      const data = { 'error': 'Lyrics not found.' };
-      updateInfoPanel(data);
-    });
-
-});
-
 document.addEventListener("songInfoChange", (event) => {
   var data = event.detail;
   updateInfoPanel(data);
 });
-
-/* let voice_range_energy = [0.5];
-let m0=0, m1=0.5; */
-mediaElement.addEventListener("timeupdate", (event) => {
-  document.getElementById('player_progress').value = mediaElement.currentTime;
-  if (time_mode == "playing") {
-    document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration);
-  } else if (time_mode == "remaining") {
-    document.getElementById('player_timer').innerText = secondsToHHMMSS(mediaElement.duration - mediaElement.currentTime) + '/' + secondsToHHMMSS(mediaElement.duration);
-  }
-
-  /* let current_energy = audioMotion.getEnergy(250,700);
-  voice_range_energy.push(current_energy);
-
-  if (voice_range_energy.length > 10) {
-    let m = median(voice_range_energy);
-    if(m0==0){
-      m0=m;
-    }else{
-      m1=m;
-      if(Math.abs(m0-m1)>0.6){
-        pl_info_controls_hidelabel.innerText = 'is singing: ' + m0.toFixed(2).toString() + ' - ' + m1.toFixed(2).toString() + ' - ' + current_energy.toFixed(2).toString();
-      }else{
-        pl_info_controls_hidelabel.innerText = 'NOT singing ' + m0.toFixed(2).toString() + ' - ' + m1.toFixed(2).toString() + ' - ' + current_energy.toFixed(2).toString();
-      }
-      m0=m1;
-    }
-    voice_range_energy = voice_range_energy.slice(9);
-  } */
-});
-
-mediaElement.addEventListener("playing", (event) => {
-  document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
-});
-
-mediaElement.addEventListener("pause", (event) => {
-  document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
-});
-
-let current_primary_color = primary_color;
-document.addEventListener("colorSettingsChange", (event) => {
-  if (current_primary_color != primary_color && (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror")) {
-    current_primary_color = primary_color;
-    setGradient();
-  }
-});
-let current_audiomotion_preset = audio_motion_preset;
-document.addEventListener("audioMotionPresetChange", (event) => {
-  if (current_audiomotion_preset != audio_motion_preset) {
-    current_audiomotion_preset = audio_motion_preset;
-    audioMotion.setOptions(audioMotionConfigs[audio_motion_preset]);
-    if (current_audiomotion_preset == "default" || current_audiomotion_preset == "mirror") {
-      setGradient();
-    }
-  }
-});
-
-document.addEventListener("playlistChangeEvent", (event) => {
-  playlist.setItems(event.detail);
-  playlist.loadPlaylistItem(0);
-
-  play_list.remove();
-  play_list = build_play_list_ul();
-
-  for (let index = 0; index < playlist.items_.length; index++) {
-    const file = playlist.items_[index].sources[0].filename;
-
-    var liObj = build_play_list(file, index, playListItemClicked);
-
-    play_list.appendChild(liObj);
-  }
-  playlist_cont.appendChild(play_list);
-});
-
-document.getElementById('player_progress').addEventListener('change', (event) => {
-  mediaElement.currentTime = document.getElementById('player_progress').value;
-});
-
-document.getElementById('player_mute').addEventListener('click', () => {
-  mediaElement.muted = !mediaElement.muted;
-  if (mediaElement.muted) {
-    document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-off"></i>';
-  } else {
-    document.getElementById('player_mute').innerHTML = '<i class="fa fa-solid fa-volume-up"></i>';
-  }
-});
-
-
-window.addEventListener('keyup', (event) => {
-  if (event.key == " " && window['focusSearchInput'] == false) {
-    playlist.togglePlay();
-    if (mediaElement.paused) {
-      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-pause"></i>';
-    } else {
-      document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
-    }
-  }
-});
+//////////////////////////////////// END PLAYLIST INFO ///////////////////////////////////////////////
 
 
 
+//////////////////////////////////// AUDIO  MOTION CONTROLS //////////////////////////////////////////
 /* ======== CONTROLS (dat-gui) ======== */
 import * as dat from './dat.gui.module.js';
 
@@ -619,7 +727,12 @@ let guidomElement = gui.domElement;
 Object.assign(guidomElement.style, {
   width: '245px',
   position: 'absolute',
-  left: 'calc(50% - 255px)',
-  top: '10px'
+  left: 'calc(50% - 400px)',
+  top: '18px'
 })
-document.getElementById('analyzer').appendChild(guidomElement);
+document.getElementById('audio-panel').appendChild(guidomElement);
+
+if(currentMediaElement.nodeName=="VIDEO"){
+  guidomElement.style.display = 'none';
+}
+//////////////////////////////////// END AUDIO  MOTION CONTROLS //////////////////////////////////////
