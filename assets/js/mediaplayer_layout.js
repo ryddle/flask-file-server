@@ -116,6 +116,7 @@ var mediaQueryUHD = window.matchMedia("(min-width: 1921px)");
 var mediaQueryFHD = window.matchMedia("(max-width: 1920px)");
 var mediaQueryHD = window.matchMedia("(max-width: 1280px)");
 var mediaQuerySD = window.matchMedia("(max-width: 900px)");
+var mediaQueryLD = window.matchMedia("(max-width: 650px)");
 
 $(document).ready(function () {
   window.isPlayingVideo = (mediaList.length > 0 && videoMimeTypes.includes(mediaList[0].sources[0].type))? true : false;
@@ -134,6 +135,7 @@ mediaQueryUHD.addEventListener("change", function () { mediaQueryListenerUHD(med
 mediaQueryFHD.addEventListener("change", function () { mediaQueryListenerFHD(mediaQueryFHD); });
 mediaQueryHD.addEventListener("change", function () { mediaQueryListenerHD(mediaQueryHD); });
 mediaQuerySD.addEventListener("change", function () { mediaQueryListenerSD(mediaQuerySD); });
+mediaQueryLD.addEventListener("change", function () { mediaQueryListenerLD(mediaQueryLD); });
 
 function mediaQueryListenerUHD(mq) {
   if (mq.matches) {
@@ -156,6 +158,12 @@ function mediaQueryListenerHD(mq) {
 function mediaQueryListenerSD(mq) {
   if (mq.matches) {
     updateLayout(scrmodes.sd);
+  }
+}
+
+function mediaQueryListenerLD(mq) {
+  if (mq.matches) {
+    updateLayout(scrmodes.ld);
   }
 }
 
@@ -184,9 +192,17 @@ function callUpdateLayout() {
   if(mediaQuerySD.matches) {
     updateLayout(scrmodes.sd);
   }
+  if(mediaQueryLD.matches) {
+    updateLayout(scrmodes.ld);
+  }
 }
 
 function updateLayout(mode) {
+  if (currentDisplay == "led") {
+    matrix.style.display = 'block';
+  }else{
+    lcdDisplayBack.style.display = 'block';
+  }
   if (mode == scrmodes.uhd) {
     if(window['videoMode']){
       showLyricsColumn(false);
@@ -194,6 +210,11 @@ function updateLayout(mode) {
       showLyricsColumn(true);
     }
   }else if (mode == scrmodes.fhd) {
+    if (currentDisplay == "led") {
+      matrix.style.display = 'block';
+    }else{
+      lcdDisplayBack.style.display = 'block';
+    }
     if(window['videoMode']){
       showLyricsColumn(false);
     }else{
@@ -204,6 +225,11 @@ function updateLayout(mode) {
       }
     }
   }else if (mode == scrmodes.hd) {
+    if (currentDisplay == "led") {
+      matrix.style.display = 'block';
+    }else{
+      lcdDisplayBack.style.display = 'block';
+    }
     showLyricsColumn(false);
     if(window['videoMode']){
       showPlaylistColumn(false);
@@ -218,6 +244,11 @@ function updateLayout(mode) {
       }
     }
   }else if (mode == scrmodes.sd) {
+    if (currentDisplay == "led") {
+      matrix.style.display = 'block';
+    }else{
+      lcdDisplayBack.style.display = 'block';
+    }
     showLyricsColumn(false);
     if(window['videoMode']){
       showPlaylistColumn(false);
@@ -231,6 +262,22 @@ function updateLayout(mode) {
         showContentColumn(false);
       }
     }
+  }else if (mode == scrmodes.ld) {
+    showLyricsColumn(false);
+    if(window['videoMode']){
+      showPlaylistColumn(false);
+      showContentColumn(true);
+    }else{
+      if(window.isPlayingVideo){
+        showPlaylistColumn(false);
+        showContentColumn(true);
+      }else{
+        showPlaylistColumn(true);
+        showContentColumn(false);
+      }
+    }
+    document.getElementById('ledDisplayBack').style.display = 'none';
+    document.getElementById('matrix').style.display = 'none';
   }
 }
 

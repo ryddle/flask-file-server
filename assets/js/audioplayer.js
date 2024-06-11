@@ -348,7 +348,7 @@ function updateInfoPanel(data) {
     pl_lyrics_loader.style.display = 'none';
   } else {
     var body = data.body;
-    var lyrics = data.lyrics[0];
+    var lyrics = data.lyrics;
     lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
     lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
 

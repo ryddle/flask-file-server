@@ -318,7 +318,7 @@ button:focus {
   to {right: -800px;}
 }
 
-@media screen and (max-width: 1920px) {
+/* @media screen and (max-width: 1920px) {
   .left-column {
     margin: 0 1rem 0 0;
     flex: 0 0 635px;
@@ -351,7 +351,7 @@ button:focus {
   .showInfoBtn {
     display: none;
   }
-}
+} */
 
 /*
 @media screen and (max-width: 1280px) {

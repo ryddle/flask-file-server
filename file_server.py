@@ -361,8 +361,10 @@ class PathView(MethodView):
                 with open(full_path, encoding="utf-8") as f:
                     song = json.load(f)                
                 result = {}
-                result['lyrics']= song['lyrics'],
+                result['lyrics']= song['lyrics']
                 result['body'] = song['_body']
+                if 'lyrics_ts' in song:
+                    result['lyrics_ts'] = song['lyrics_ts']
                 return json.dumps(result)
             else:
                 title = orig_title.replace('_', ' ').replace('.mp3', '').replace('-','')

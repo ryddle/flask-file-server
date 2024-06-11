@@ -1,6 +1,6 @@
 import { URLJoin, secondsToHHMMSS, median } from './mediaplayer_utils.js';
 import AudioMotionAnalyzer from './audioMotion-analyzer.js';
-import { Playlist, MediaElement} from './mediaplayer_playlist.js';
+import { Playlist, MediaElement } from './mediaplayer_playlist.js';
 import { build_play_list_ul, build_play_list, build_lcdisplay, build_pl_info, build_loader } from './mediaplayer_builders.js';
 import XverticalSlider from './xvertical-slider.js';
 import XVirtualLedDisplay from './xvirtualleddisplay.js';
@@ -21,6 +21,7 @@ $(document).ready(function () {
     } else if (time_mode == "remaining") {
       document.getElementById('player_timer').innerText = secondsToHHMMSS(audioElement.duration - audioElement.currentTime) + '/' + secondsToHHMMSS(audioElement.duration);
     }
+    updateParagraph();
   });
 
   audioElement.addEventListener("playing", (event) => {
@@ -29,6 +30,10 @@ $(document).ready(function () {
 
   audioElement.addEventListener("pause", (event) => {
     document.getElementById('play-track-btn').innerHTML = '<i class="fa fa-solid fa-play"></i>';
+  });
+
+  audioElement.addEventListener("ended", (event) => {
+    console.log(window.custom_lyrics_ts);
   });
 
   videoElement.addEventListener("timeupdate", (event) => {
@@ -54,9 +59,9 @@ $(document).ready(function () {
 const videoPanel = document.getElementById('video-panel');
 const videoContainer = document.getElementById('video_container');
 let videoElement = document.createElement("video");
-if(mediaList.length > 0) {
+if (mediaList.length > 0) {
   //video.setAttribute("src", "nameOfFile.ogg");
-  if(videoMimeTypes.includes(mediaList[0].sources[0].type)) {
+  if (videoMimeTypes.includes(mediaList[0].sources[0].type)) {
     videoElement.src = mediaList[0].sources[0].src;
   }
 }
@@ -65,9 +70,9 @@ videoElement.crossOrigin = 'anonymous';
 videoElement.style.display = 'none';
 videoElement.style.maxWidth = '100%';
 videoElement.style.width = '100%';
-videoElement.style.maxHeight= 'calc(100vh - 210px)';
+videoElement.style.maxHeight = 'calc(100vh - 210px)';
 videoElement.onloadeddata = () => {
-  if(currentMediaElement.localName!="video"){
+  if (currentMediaElement.localName != "video") {
     return;
   }
   window.isPlayingVideo = true;
@@ -80,7 +85,7 @@ videoElement.onloadeddata = () => {
 //videoPanel.appendChild(videoElement); // add it to the DOM
 videoContainer.appendChild(videoElement); // add it to the DOM
 
-if(videoMimeTypes.includes(mediaList[0].sources[0].type)) {
+if (videoMimeTypes.includes(mediaList[0].sources[0].type)) {
   currentMediaElement = videoElement;
   videoElement.style.display = 'block';
   videoPanel.style.display = 'flex';
@@ -95,13 +100,13 @@ const context = new ctx();
 const audioPanel = document.getElementById('audio-panel');
 const mediaContainer = document.getElementById('media-container');
 // create new <audio> element
-let audioElement = (mediaList.length > 0 && audioMimeTypes.includes(mediaList[0].sources[0].type) ) ? new Audio(mediaList[0].sources[0].src) : new Audio();
+let audioElement = (mediaList.length > 0 && audioMimeTypes.includes(mediaList[0].sources[0].type)) ? new Audio(mediaList[0].sources[0].src) : new Audio();
 audioElement.controls = true;
 audioElement.crossOrigin = 'anonymous';
 audioElement.style.display = 'none';
 
 audioElement.onloadeddata = () => {
-  if(currentMediaElement.localName!="audio") {
+  if (currentMediaElement.localName != "audio") {
     return;
   }
   window.isPlayingVideo = false;
@@ -110,7 +115,7 @@ audioElement.onloadeddata = () => {
 
   source_title = playlist.getCurrentItem().sources[0].filename;
   document.title = "Media Player - " + source_title;
-  
+
   $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
@@ -125,7 +130,7 @@ mediaContainer.append(audioElement); // add it to the DOM
 
 const eq_container = document.getElementById('eq_container');
 
-if(audioMimeTypes.includes(mediaList[0].sources[0].type)) {
+if (audioMimeTypes.includes(mediaList[0].sources[0].type)) {
   currentMediaElement = audioElement;
   audioPanel.style.display = 'block';
   eq_container.style.display = 'flex';
@@ -147,7 +152,7 @@ const filters = [];
   eqbandDiv.className = 'eqband';
 
   let eqbandLabel = document.createElement('label');
-  eqbandLabel.style.color='var(--primary-color)';
+  eqbandLabel.style.color = 'var(--primary-color)';
   eqbandLabel.innerHTML = `${freq < 1000 ? freq : freq / 1000 + 'k'}Hz`;
   eqbandDiv.appendChild(eqbandLabel);
 
@@ -180,7 +185,7 @@ const filters = [];
   eqbandSlider.setAttribute("data-filter", i);
   eqbandSlider.setAttribute("lists", "tickmarks");
   let eqbandOutput = document.createElement('output');
-  eqbandOutput.style.color='var(--primary-color)';
+  eqbandOutput.style.color = 'var(--primary-color)';
   eqbandOutput.id = 'gain' + i;
   eqbandOutput.innerHTML = '0 dB';
   eqbandDiv.appendChild(eqbandOutput);
@@ -289,7 +294,7 @@ document.title = "Media Player - " + source_title;
 
 //create playlist html
 let playlist_cont = document.getElementById("playlist_cont");
-playlist_cont.style.overflow="hidden";
+playlist_cont.style.overflow = "hidden";
 
 let play_list = build_play_list_ul();
 
@@ -303,10 +308,10 @@ for (let index = 0; index < playlist.items_.length; index++) {
 playlist_cont.appendChild(play_list);
 
 function playListItemClicked(target) {
-  if(videoMimeTypes.includes(target.type)) {
+  if (videoMimeTypes.includes(target.type)) {
     audioElement.pause();
     currentMediaElement = videoElement;
-  }else if(audioMimeTypes.includes(target.type)) {
+  } else if (audioMimeTypes.includes(target.type)) {
     videoElement.pause();
     currentMediaElement = audioElement;
   }
@@ -357,7 +362,7 @@ repeatbtn.addEventListener('click', function () {
 
 ////////////////// DISPLAYS //////////////////
 var time_mode = "playing"; // playing, remaining
-var currentDisplay = "led";
+window.currentDisplay = "led";
 
 // LED Display //
 let [lcdDisplayBack, lcdDisplayFront] = build_lcdisplay(playlist, chageTimeMode);
@@ -471,7 +476,7 @@ document.addEventListener('change', function () {
 
 // Add an event listener to the playlist
 playlist.addEventListener('playlistitemload', () => {
-  if(videoMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
+  if (videoMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
     currentMediaElement = videoElement;
     window.isPlayingVideo = true;
     videoElement.style.display = 'block';
@@ -480,7 +485,7 @@ playlist.addEventListener('playlistitemload', () => {
     audioPanel.style.display = 'none';
     eq_container.style.display = 'none';
     guidomElement.style.display = 'none';
-  }else if(audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
+  } else if (audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
     currentMediaElement = audioElement;
     window.isPlayingVideo = false;
     audioPanel.style.display = 'flex';
@@ -506,7 +511,7 @@ playlist.addEventListener('playlistitemload', () => {
     }
   }
 
-  if(audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
+  if (audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
     // Show the loader
     pl_lyrics_loader.style.display = 'block';
     $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
@@ -519,7 +524,7 @@ playlist.addEventListener('playlistitemload', () => {
         updateInfoPanel(data);
       });
 
-  }else {
+  } else {
     source_title = playlist.getCurrentItem().sources[0].filename;
     updateLedDisplay2();
     pl_lyriscontainer.innerText = "";
@@ -574,28 +579,61 @@ window.addEventListener('keyup', (event) => {
 //////////////////////////////////// PLAYLIST INFO ///////////////////////////////////////////////
 
 // Add a playlist info element to your HTML
-let [pl_info, pl_info_controls, pl_info_controls_hidelabel, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics, 
-  pl_info_tab_info, pl_lyriscontainer, pl_info_infocontainer, pl_infocont_imagecont, pl_infocont_image, pl_info_infosonginfocont, 
+let [pl_info, pl_info_controls, pl_info_controls_hidelabel, pl_info_controlBtn, pl_info_controlBtnIcon, pl_info_tabs_cont, pl_info_tab_lyrics,
+  pl_info_tab_info, pl_lyriscontainer, pl_info_infocontainer, pl_infocont_imagecont, pl_infocont_image, pl_info_infosonginfocont,
   pl_info_artist_p, pl_info_artist_link, pl_info_song_p, pl_info_song_link, pl_info_release_p, pl_info_release_text, pl_info_release_value] = build_pl_info();
 
+window.custom_lyrics_ts = [];
+window.lyrics_ts_textnodes = [];
+var __sn = document.createElement("span");
+__sn.style.color = "var(--primary-color)";
+
+var __hsn = document.createElement("span");
+__hsn.style.color = "white";
+__hsn.style.textShadow = "0px 0px 10px black";
+__hsn.style.backgroundColor = "var(--primary-color)";
 function updateInfoPanel(data) {
   if (data.error) {
     pl_lyriscontainer.innerText = data.error;
     pl_lyrics_loader.style.display = 'none';
   } else {
     var body = data.body;
-    var lyrics = data.lyrics[0];
+    var lyrics = data.lyrics;
     lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
     lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
 
-    lyrics = lyrics.replace(new RegExp("^\s*.*"+body.title),body.title);
+    lyrics = lyrics.replace(new RegExp("^\s*.*" + body.title), body.title);
     lyrics = lyrics.replace(/\$*\d*You might also like/, "")
-    lyrics = lyrics.replace(body.pyongs_count+"Embed", "");
-    
+    lyrics = lyrics.replace(body.pyongs_count + "Embed", "");
+
     pl_lyriscontainer.innerText = "";
     pl_lyrics_loader.style.display = 'none';
 
     pl_lyriscontainer.innerText = lyrics;
+
+
+    var textNodes = [];
+    var walker = document.createTreeWalker(pl_lyriscontainer, NodeFilter.SHOW_TEXT, null, false);
+    while (walker.nextNode()) {
+      var node = walker.currentNode;
+      if (node.nodeValue.trim() != "" && !node.nodeValue.trim().startsWith('[')) {
+        textNodes.push(node);
+      }
+    }
+    for (let index = 0; index < textNodes.length; index++) {
+      const node = textNodes[index];
+      var newsn = __sn.cloneNode();
+      newsn.innerText = node.nodeValue;
+      node.replaceWith(newsn);
+      newsn.addEventListener('click', (event) => {
+        window.custom_lyrics_ts.push(Math.floor(currentMediaElement.currentTime));
+        console.log(window.custom_lyrics_ts);
+      });
+    }
+    window.lyrics_ts_textnodes = pl_lyriscontainer.getElementsByTagName('span');
+    //window.lyrics_ts_textnodes = textNodes;
+    updateParagraph();
+
     source_title = body['artist_names'] + ' - ' + body['title'];
     updateLedDisplay2();
 
@@ -605,6 +643,21 @@ function updateInfoPanel(data) {
     pl_info_artist_link.innerText = body.artist_names;
     pl_info_artist_link.href = body.primary_artist.url;
     pl_info_release_value.innerText = body.release_date_for_display;
+
+    if (data.lyrics_ts !== undefined) {
+      window.lyrics_ts = data.lyrics_ts;
+      window.lyrics_ts_index = 0;
+    }
+  }
+}
+
+function updateParagraph() {
+  if (window.lyrics_ts !== undefined && Math.floor(currentMediaElement.currentTime) >= window.lyrics_ts[window.lyrics_ts_index]) {
+    let result = window.lyrics_ts_textnodes[window.lyrics_ts_index + 1];
+    var stext = __hsn.cloneNode();
+    stext.innerHTML = result.innerHTML;
+    result.replaceWith(stext);
+    window.lyrics_ts_index += 1;
   }
 }
 
@@ -732,7 +785,7 @@ Object.assign(guidomElement.style, {
 })
 document.getElementById('audio-panel').appendChild(guidomElement);
 
-if(currentMediaElement.nodeName=="VIDEO"){
+if (currentMediaElement.nodeName == "VIDEO") {
   guidomElement.style.display = 'none';
 }
 //////////////////////////////////// END AUDIO  MOTION CONTROLS //////////////////////////////////////
