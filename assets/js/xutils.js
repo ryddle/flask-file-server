@@ -106,5 +106,6 @@ export default {
     randomRangeInt,
     randomSign,
     randomBool,
-    randomChoice
+    randomChoice,
+    randomArray
 }

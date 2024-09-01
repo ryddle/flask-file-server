@@ -23,6 +23,7 @@
 }
 
 .led {
+    position: relative;
     z-index: 6;
     cursor: pointer;
     display: inline-block;

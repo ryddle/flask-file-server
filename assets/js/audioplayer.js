@@ -223,7 +223,7 @@ repeatbtn.addEventListener('click', function () {
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat"></i>';
   } else if (playlist.getRepeatStatus() === 'one') {
     this.className = "btn btn-secondary controls";
-    repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;">1</i>';
+    repeatbtn.innerHTML = '<span style="color: var(--primary-color);font-size: 11px; margin:0px 2px 0px 3px;">1</span>';
   } else {
     this.className = "btn btn-secondary controls";
     repeatbtn.innerHTML = '<i class="fa fa-solid fa-repeat" style="text-shadow: 0px 0px 10px white;"></i>';
@@ -405,6 +405,8 @@ playlist.addEventListener('playlistitemload', () => {
       li.style.color = "var(--primary-color)";
     }
   }
+
+  document.getElementsByTagName("title")[0].innerText="Audio Plater - " + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1);
 
   // Show the loader
   pl_lyrics_loader.style.display = 'block';
