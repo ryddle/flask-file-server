@@ -74,8 +74,9 @@
             <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
             <td class="text-xs-right " data-sort-value="-1">&mdash;</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share-square-o" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#renamepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-edit" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
           </tr>
           {% endfor %}
           {% for entry in contents if entry.type == 'file' %}
@@ -85,8 +86,9 @@
             </td>
             <td class="text-xs-right " data-sort-value="{{entry.size}}" title="{{entry.size}} bytes">{{entry.size | size_fmt}}</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share-square-o" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#renamepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-edit" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -96,8 +98,9 @@
             <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
             <td class="text-xs-right " data-sort-value="-1">&mdash;</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share-square-o" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#renamepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-edit" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
           </tr>
           {% endfor %}
           {% for entry in searchResults if entry.type == 'file' %}
@@ -107,8 +110,9 @@
             </td>
             <td class="text-xs-right " data-sort-value="{{entry.size}}" title="{{entry.size}} bytes">{{entry.size | size_fmt}}</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>
-            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#movepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-share-square-o" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#renamepath-modal" data-name="{{entry.name}}"><i class="fa fa-fw fa-edit" style="font-size: 18px;"></i></a></td>
+            <td class="text-xs-right " style="padding: 0px;align-content: center; width: 20px;"><a data-toggle="modal" data-target="#delete-modal" data-name="{{entry.name}}" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -236,6 +240,30 @@
               <div class="pull-xs-right">
                 <button type="button" id="close-movepath" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <button type="submit" id="send-movepath" class="btn btn-secondary">Move</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="renamepath-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form id="renamepath_form" method="post" action="/renamepath">
+            <div class="modal-body">
+              <div class="md-form">
+                <i class="fa fa-edit prefix grey-text"> </i> <label>Enter New Name</label>
+                <input type="text" id="renamepath_newname" name="renamepath_newname" class="form-control" value="">
+                <input type="hidden" id="renamepath_target" name="renamepath_dpath">
+                <input type="hidden" id="renamepath_source" name="renamepath_opath">
+                <input type="hidden" id="renamepath_filename" name="renamepath_filename">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="pull-xs-right">
+                <button type="button" id="close-renamepath" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" id="send-renamepath" class="btn btn-secondary">Rename</button>
               </div>
             </div>
           </form>

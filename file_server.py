@@ -562,6 +562,36 @@ class PathView(MethodView):
                     info['status'] = 'error'
                     info['msg'] = 'Invalid Operation'
                     return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
+            if request.path == '/renamepath':
+                opath = os.path.join(root, request.form['renamepath_opath'])
+                opath = os.path.normpath(opath)
+                renamepath_dpath = request.form['renamepath_dpath']
+                filename = secure_filename(renamepath_dpath.split('/')[-1])
+                path = renamepath_dpath[:-len(filename)]
+                dpath = os.path.join(root, path, filename)
+                dpath = os.path.normpath(dpath)
+                dir_path = path
+                if(os.path.exists(opath) and opath != dpath):
+                    try:
+                        os.rename(opath, dpath)
+                        opath_ext = os.path.splitext(opath)[1]
+                        opath_lyr = opath.replace(opath_ext, '.lyr')
+                        if(os.path.exists(opath_lyr)):
+                            os.rename(opath_lyr, dpath.replace(opath_ext, '.lyr'))
+                    except Exception as e:
+                        info['status'] = 'error'
+                        info['msg'] = str(e)
+                    else:
+                        info['status'] = 'success'
+                        info['msg'] = 'File Renamed'
+                        '''dir_path = dpath[len(root)+1:]
+                        dir_path = dir_path.replace('\\', '/')'''
+                    return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
+                else:
+                    info['status'] = 'error'
+                    info['msg'] = 'Invalid Operation'
+                    return redirect(url_for('path_view', p=dir_path),302, json.JSONEncoder().encode(info))
+            
             elif request.path == '/api/':
                 res_obj = {}
                 yturls = list(map(str.strip, request.form["videos_urls"].split(',')))

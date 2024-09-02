@@ -231,6 +231,26 @@ $(document).ready(function () {
         form.submit();
     });
 
+    $('#renamepath-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget)
+        var name = button.data('name') // Extract info from data-* attributes
+        var path = location.pathname;
+        var modal = $(this)
+        modal.find('.modal-title').text('Rename ' + name + ' to');
+
+        document.getElementById('renamepath_source').value = (path + name).replace('/', '');
+        document.getElementById('renamepath_newname').value = name;
+        document.getElementById('renamepath_filename').value = name;
+    });
+
+    $('#send-renamepath').on('click', function (event) {
+        var path = location.pathname;
+        const newname = document.getElementById('renamepath_newname').value;
+        const form = document.getElementById('renamepath-form');
+        document.getElementById('renamepath_target').value = (path + newname).replace('/', '');
+        form.submit();
+    });
+
     /* $('#send-ytad-videos').on('click', function (event) {
         var parent = event.target.parentElement;
         var videos_urls = $('#video_urls').val()
