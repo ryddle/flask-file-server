@@ -80,14 +80,17 @@ def partial_response(path, start, end=None):
     
     if end is not None:
         if start>end:
-            start, end = 0, file_size-1
+            #start, end = 0, file_size-1
+            start, end = 0, min(file_size - 1, start + int(file_size/10) - 1)
 
     if end is None:
-        end = file_size - start - 1
+        #end = file_size - start - 1
+        end = min(file_size - 1, start + int(file_size/10) - 1)
     end = min(end, file_size - 1)
     if end < start:
-        end = file_size - 1
-    length = end - start + 1
+        #end = file_size - 1
+        end = min(file_size - 1, start + int(file_size/10) - 1)
+    length = int(end - start + 1)
     if length < 0:
         print('invalid range')
 
@@ -575,9 +578,10 @@ class PathView(MethodView):
                     try:
                         os.rename(opath, dpath)
                         opath_ext = os.path.splitext(opath)[1]
-                        opath_lyr = opath.replace(opath_ext, '.lyr')
-                        if(os.path.exists(opath_lyr)):
-                            os.rename(opath_lyr, dpath.replace(opath_ext, '.lyr'))
+                        if opath_ext == '.mp3':
+                            opath_lyr = opath.replace(opath_ext, '.lyr')
+                            if(os.path.exists(opath_lyr)):
+                                os.rename(opath_lyr, dpath.replace(opath_ext, '.lyr'))
                     except Exception as e:
                         info['status'] = 'error'
                         info['msg'] = str(e)
