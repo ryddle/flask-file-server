@@ -1,13 +1,13 @@
 const URLJoin = (...args) =>
     args
-      .join('/')
-      .replace(/[\/]+/g, '/')
-      .replace(/^(.+):\//, '$1://')
-      .replace(/^file:/, 'file:/')
-      .replace(/\/(\?|&|#[^!])/g, '$1')
-      .replace(/\?/g, '&')
-      .replace('&', '?');
-  
+        .join('/')
+        .replace(/[\/]+/g, '/')
+        .replace(/^(.+):\//, '$1://')
+        .replace(/^file:/, 'file:/')
+        .replace(/\/(\?|&|#[^!])/g, '$1')
+        .replace(/\?/g, '&')
+        .replace('&', '?');
+
 // Example: URLJoin('http://www.google.com', 'a', '/b/cd', '?foo=123', '?bar=foo');
 
 //[image,video,audio,source]
@@ -32,8 +32,11 @@ function invokeViewer() {
         case 'pdf':
             docViewer(modal);
             break;
-        case 'source' || 'text':
+        case 'source':
             sourceViewer(modal);
+            break;
+        case 'text':
+            textViewer(modal);
             break;
         default:
             defaultViewer(modal);
@@ -212,6 +215,63 @@ function docViewer(modal) {
     setModalFooter(modal, file_name, file_size);
 }
 
+function textViewer(modal) {
+    var file_name = modal.data('bs.modal')._config.url;
+    var file_size = modal.data('bs.modal')._config.size;
+    var url = URLJoin(location.href, file_name);
+
+    setModalHeader(modal, file_name, file_size);
+
+    $.get(url, function (data) {
+        
+        var html = "<textarea id='text-editor' style='width: 100%; height: calc(100vh - 250px);'>" + 
+                   data + 
+                   "</textarea>";
+
+        var modal_body = modal[0].getElementsByClassName('modal-body')[0];
+        modal_body.style = {};
+        modal_body.style.height = "calc(100vh - 200px)";
+        modal_body.style.minHeight = "unset";
+        modal_body.style.backgroundColor = "#fff";
+        modal_body.innerHTML = html;
+    });
+
+    setModalFooter(modal, file_name, file_size);
+
+    var saveBtn = document.createElement('button');
+    saveBtn.setAttribute('type', 'button');
+    saveBtn.setAttribute('class', 'btn btn-primary');
+    saveBtn.setAttribute('id', 'save-newfile');
+    saveBtn.setAttribute('style', 'margin-right: 5px;');
+    saveBtn.innerHTML = 'Save';
+    saveBtn.addEventListener('click', function () {
+        var text = document.getElementById('text-editor').value;
+        var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        var formData = new FormData();
+        formData.append("files[]", blob, file_name);
+        $.ajax({
+            url: location.origin + '/',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                console.log('File posted successfully:', response);
+                var modal_footer = modal[0].getElementsByClassName('modal-footer')[0];
+                modal_footer.firstChild.innerHTML = "File saved successfully";
+                setTimeout(function () {
+                    modal_footer.firstChild.innerHTML = "";
+                }, 2000);
+            },
+            error: function (error) {
+                console.error('Error posting file:', error);
+            }
+        });
+    });
+
+    $("#download-File").parent().before(saveBtn);
+}
+
 function audioViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
@@ -252,14 +312,14 @@ function audioViewerShown(e, modal) {
     window['audio_player'] = videojs('my-audio-player', options, function onPlayerReady() {
         videojs.log('Your player is ready!');
 
-        this.audioOnlyMode("true")
-        this.audioPosterMode("true")
-        this.audioOnlyMode_ = true
-        this.audioPosterMode_ = true
+        this.audioOnlyMode("true");
+        this.audioPosterMode("true");
+        this.audioOnlyMode_ = true;
+        this.audioPosterMode_ = true;
         this.audioOnlyCache_ = {
             "playerHeight": "400px",
             "hiddenChildren": []
-        }
+        };
         this.on('ended', function () {
             videojs.log('Awww...over so soon?!');
         });
@@ -305,21 +365,21 @@ function imageViewer(modal) {
     setModalHeader(modal, file_name, file_size);
 
     //if (document.getElementById("bs_modal_image") == null) {
-        var html = '<div id="bs_modal_image_container"><img id="bs_modal_image" data-original="' + url + '" src="' + url + '" alt="Picture" style="max-height:calc(100vh - 280px); max-width: 100%;">';
-        for (var i = 0; i < image_files.length; i++) {
-            if(url.indexOf(image_files[i])==-1){
-                html += '<img src="' + image_files[i] + '" alt="Picture" style="display:none">';
-            }
+    var html = '<div id="bs_modal_image_container"><img id="bs_modal_image" data-original="' + url + '" src="' + url + '" alt="Picture" style="max-height:calc(100vh - 280px); max-width: 100%;">';
+    for (var i = 0; i < image_files.length; i++) {
+        if (url.indexOf(image_files[i]) == -1) {
+            html += '<img src="' + image_files[i] + '" alt="Picture" style="display:none">';
         }
-        html += '</div>';
+    }
+    html += '</div>';
 
-        var modal_body = modal[0].getElementsByClassName('modal-body')[0];
-        modal_body.style = {};
-        //modal_body.style.height = "900px";
-        modal_body.style.minHeight = "900px";
-        modal_body.style.maxHeight = "calc(100vh - 150px)";
-        modal_body.style.backgroundColor = "#000";
-        modal_body.innerHTML = html;
+    var modal_body = modal[0].getElementsByClassName('modal-body')[0];
+    modal_body.style = {};
+    //modal_body.style.height = "900px";
+    modal_body.style.minHeight = "900px";
+    modal_body.style.maxHeight = "calc(100vh - 150px)";
+    modal_body.style.backgroundColor = "#000";
+    modal_body.innerHTML = html;
     //}
 
     setModalFooter(modal, file_name, file_size);
@@ -340,6 +400,91 @@ function imageViewerShown(e, modal) {
             }*/
         });
     }
+}
+
+
+function newFileViewer(modal) {
+    //var file_name = modal.data('bs.modal')._config.url;
+    //var file_size = modal.data('bs.modal')._config.size;
+    //var url = URLJoin(location.href, file_name);
+    var modal = $('#newfile-modal');
+    //setModalHeader(modal, "New file", "");
+    var header = modal[0].getElementsByClassName('modal-header')[0];
+    header.style = {};
+    var label = document.createElement("span");
+    label.className = "modal-title";
+    label.innerHTML = "New file";
+    var editFileNameBtn = document.createElement("button");
+    editFileNameBtn.type = "button";
+    editFileNameBtn.dataset.toggle = "tooltip";
+    editFileNameBtn.dataset.placement = "left";
+    editFileNameBtn.title = "Edit";
+    editFileNameBtn.innerHTML = "<i class=\"fa fa-pencil\"></i>";
+    editFileNameBtn.style.border = '1px solid #ccc';
+    editFileNameBtn.style.borderRadius = '4px';
+    editFileNameBtn.style.color = '#666';
+    editFileNameBtn.style.marginLeft = '50px';
+    editFileNameBtn.onclick = function () {
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.style.width = '90rem';
+        input.value = label.innerText;
+        input.onblur = function () {
+            label.innerText = input.value;
+            header.removeChild(input);
+            label.style.display = '';
+            editFileNameBtn.style.display = '';
+        };
+
+        input.onkeyup = function (e) {
+            if (e.keyCode == 13) {
+                input.blur();
+            }
+        };
+
+        label.style.display = 'none';
+        editFileNameBtn.style.display = 'none';
+        header.appendChild(input);
+        input.focus();
+    };
+    header.appendChild(label);
+    header.appendChild(editFileNameBtn);
+
+    var modal_body = modal[0].getElementsByClassName('modal-body')[0];
+    modal_body.style = {};
+    modal_body.style.height = window.innerHeight - 200 + "px";
+    modal_body.style.minHeight = "unset";
+    modal_body.style.backgroundColor = "#fff";
+
+    var textEditor = document.createElement("textarea");
+    textEditor.style.width = "100%";
+    textEditor.style.height = "100%";
+
+    modal_body.appendChild(textEditor);
+
+    $("#save-newfile").on("click", function () {
+        $("#newfile-modal").modal('hide');
+        var file_name = label.innerText + ".txt";
+        var file_content = textEditor.value;
+
+        var blob = new Blob([file_content], { type: 'text/plain' });
+        var formData = new FormData();
+        formData.append("files[]", blob, file_name);
+        $.ajax({
+            url: location.origin + '/',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                console.log('File posted successfully:', response);
+            },
+            error: function (error) {
+                console.error('Error posting file:', error);
+            }
+        });
+    });
 }
 
 
@@ -433,10 +578,10 @@ function playerViewerShown(e) {
                     var pl_lyriscontainer = document.getElementById('pl_lyriscontainer');
                     var body = data.body;
                     var lyrics = data.lyrics[0];
-                    lyrics = lyrics.replace(/\d+\s\w+butors/gm,` `);
-                    lyrics = lyrics.replace(/Lyrics/gm,`\n\n`);
+                    lyrics = lyrics.replace(/\d+\s\w+butors/gm, ` `);
+                    lyrics = lyrics.replace(/Lyrics/gm, `\n\n`);
                     pl_lyriscontainer.innerText = lyrics;
-                    document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url
+                    document.getElementById('pl-player_html5_api').poster = body.header_image_thumbnail_url;
                 }
             });
         }
@@ -509,7 +654,7 @@ function playerViewerShown(e) {
 
         var liObj = document.createElement("li");
         liObj.style.listStyle = "decimal";
-        liObj.style.listStylePosition= 'inside';
+        liObj.style.listStylePosition = 'inside';
         liObj.style.cursor = "pointer";
         liObj.style.paddingLeft = "3px";
         if (index == 0) {
@@ -572,10 +717,10 @@ function playerViewerShown(e) {
     play_track_btn.innerHTML = '<i class="fa fa-solid fa-play"></i>';
     play_track_btn.addEventListener('click', function () {
         var isPaused = pl_player.paused();
-        if(isPaused) {
+        if (isPaused) {
             pl_player.play();
             this.innerHTML = '<i class="fa fa-solid fa-pause"></i>';
-        }else {
+        } else {
             pl_player.pause();
             this.innerHTML = '<i class="fa fa-solid fa-play"></i>';
         }

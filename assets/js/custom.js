@@ -16,10 +16,10 @@ function getCookie(cname) {
 }
 $(document).ready(function () {
     $("#login").submit(function (event) {
-        var hash = $.base64.encode($("#username").val() + ":" + $("#password").val())
-        document.cookie = "username=" + $("#username").val() + ";path=/"
-        document.cookie = "auth_cookie=" + hash + ";path=/"
-        $("#userlogin").text($("#username").val())
+        var hash = $.base64.encode($("#username").val() + ":" + $("#password").val());
+        document.cookie = "username=" + $("#username").val() + ";path=/";
+        document.cookie = "auth_cookie=" + hash + ";path=/";
+        $("#userlogin").text($("#username").val());
         $('#login-modal').modal('toggle');
         event.preventDefault();
     });
@@ -28,43 +28,43 @@ $(document).ready(function () {
 
     $('#searchBox').on('change', function () {
         if (this.value.length > 3) {
-            $.post( "/api/search", { search: $('#searchBox').val(), path: $('#path').val().replace(/\/$/, '') }, function( data ) {
+            $.post("/api/search", { search: $('#searchBox').val(), path: $('#path').val().replace(/\/$/, '') }, function (data) {
                 $('#content-results').hide();
                 $('#content-footer').hide();
                 $('#search-results').show();
                 $('#search-footer').show();
 
-                var html='';
+                var html = '';
                 for (let index = 0; index < data.results.length; index++) {
                     const entry = data.results[index];
-                    if(entry.type == 'dir') {
-                        html+='<tr>\
-                            <td class="text-xs-left " data-sort-value="dir-'+entry.name.toLowerCase()+'"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="'+entry.name+'/"><strong>'+entry.name+'</strong></a></td>\
+                    if (entry.type == 'dir') {
+                        html += '<tr>\
+                            <td class="text-xs-left " data-sort-value="dir-'+ entry.name.toLowerCase() + '"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="' + entry.name + '/"><strong>' + entry.name + '</strong></a></td>\
                             <td class="text-xs-right " data-sort-value="-1">&mdash;</td>\
-                            <td class="text-xs-right " data-sort-value="'+entry.mtime+'" title="'+ entry.mtime +'">'+entry.mtimehuman+'</td>\
-                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="'+entry.name+'"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>\
-                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="'+entry.name+'" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>\
+                            <td class="text-xs-right " data-sort-value="'+ entry.mtime + '" title="' + entry.mtime + '">' + entry.mtimehuman + '</td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="'+ entry.name + '"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="'+ entry.name + '" data-type="dir"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>\
                         </tr>';
-                    }else if(entry.type == 'file') {
+                    } else if (entry.type == 'file') {
 
-                        html+='<tr>\
-                            <td class="text-xs-left " data-sort-value="file-'+entry.name.toLowerCase()+'"><i class="fa fa-fw '+entry.icon+' " aria-hidden="true"></i>&nbsp;\
+                        html += '<tr>\
+                            <td class="text-xs-left " data-sort-value="file-'+ entry.name.toLowerCase() + '"><i class="fa fa-fw ' + entry.icon + ' " aria-hidden="true"></i>&nbsp;\
                             <a ';
-                            /* if(!['unknown', 'archive'].includes(entry.mtype)) {
-                               html+='data-toggle="modal" data-target="#viewer-modal" data-url="'+entry.name+'" data-type="'+entry.mtype+'" ';
-                            } */
-                            html+='href="'+entry.path+'" data-size="'+entry.size+'">'+ entry.path.replaceAll('\\','/') +'/'+entry.name+'</a>\
+                        /* if(!['unknown', 'archive'].includes(entry.mtype)) {
+                           html+='data-toggle="modal" data-target="#viewer-modal" data-url="'+entry.name+'" data-type="'+entry.mtype+'" ';
+                        } */
+                        html += 'href="' + entry.path + '" data-size="' + entry.size + '">' + entry.path.replaceAll('\\', '/') + '/' + entry.name + '</a>\
                             </td>\
-                            <td class="text-xs-right " data-sort-value="'+entry.size+'" title="'+entry.size+' bytes">'+entry.size+'</td>\
-                            <td class="text-xs-right " data-sort-value="'+entry.mtime+'" title="'+entry.mtime+'">'+entry.mtimehuman+'</td>\
-                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="'+entry.name+'"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>\
-                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="'+entry.name+'" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>\
+                            <td class="text-xs-right " data-sort-value="'+ entry.size + '" title="' + entry.size + ' bytes">' + entry.size + '</td>\
+                            <td class="text-xs-right " data-sort-value="'+ entry.mtime + '" title="' + entry.mtime + '">' + entry.mtimehuman + '</td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#movepath-modal" data-name="'+ entry.name + '"><i class="fa fa-fw fa-share" style="font-size: 18px;"></i></a></td>\
+                            <td class="text-xs-right " style="padding: 0px;align-content: center;"><a data-toggle="modal" data-target="#delete-modal" data-name="'+ entry.name + '" data-type="file"><i class="fa fa-trash" style="font-size: 18px;"></i></a></td>\
                         </tr >';
                     }
 
                     $('#search-results').html(html);
                 }
-              }, "json");
+            }, "json");
         }
     });
 
@@ -106,7 +106,7 @@ $(document).ready(function () {
             beforeSend: function () { },
             success: function (data, el) {
                 var parent = el.find(".jFiler-jProgressBar").parent();
-                data = JSON.parse(data)
+                data = JSON.parse(data);
                 if (data.status == 'success') {
                     el.find(".jFiler-jProgressBar").fadeOut("slow", function () {
                         $("<div class=\"jFiler-item-others text-success\"><i class=\"icon-jfi-check-circle\"></i> Success</div>").hide().appendTo(parent).fadeIn("slow");
@@ -118,7 +118,7 @@ $(document).ready(function () {
                 }
             },
             error: function (el, i, g, h, e, d, jqxhr, c, f) {
-                data = JSON.parse(jqxhr.responseText)
+                data = JSON.parse(jqxhr.responseText);
                 var parent = el.find(".jFiler-jProgressBar").parent();
                 el.find(".jFiler-jProgressBar").fadeOut("slow", function () {
                     $("<div class=\"jFiler-item-others text-error\"><i class=\"icon-jfi-minus-circle\"></i> Error: " + data.msg + "</div>").hide().appendTo(parent).fadeIn("slow");
@@ -144,7 +144,7 @@ $(document).ready(function () {
         }
     });
     $('#close-uploader').click(function () {
-        $('#filer_input').prop("jFiler").reset()
+        $('#filer_input').prop("jFiler").reset();
     });
 
     $('#viewer-modal').on('show.bs.modal', function (event) {
@@ -154,11 +154,15 @@ $(document).ready(function () {
     $('#viewer-modal').on('shown.bs.modal', function (e) {
         var data_type = $('#viewer-modal').data('bs.modal')._config.type;
         invokeViewerShown(e);
-    })
+    });
 
     $("#viewer-modal").on('hidden.bs.modal', function (e) {
         $(this).data('bs.modal', null);
         invokeViewerClose(e);
+    });
+
+    $('#newfile-modal').on('show.bs.modal', function (event) {
+        newFileViewer();
     });
 
     $('#player-modal').on('show.bs.modal', function (event) {
@@ -167,7 +171,7 @@ $(document).ready(function () {
 
     $('#player-modal').on('shown.bs.modal', function (e) {
         playerViewerShown(e);
-    })
+    });
 
     $("#player-modal").on('hidden.bs.modal', function (e) {
         $(this).data('bs.modal', null);
@@ -175,20 +179,20 @@ $(document).ready(function () {
     });
 
     $('#delete-modal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget)
-        var name = button.data('name') // Extract info from data-* attributes
-        var type = button.data('type') // Extract info from data-* attributes
-        var modal = $(this)
+        var button = $(event.relatedTarget);
+        var name = button.data('name'); // Extract info from data-* attributes
+        var type = button.data('type'); // Extract info from data-* attributes
+        var modal = $(this);
         modal.find('.modal-title').text('Delete ' + name + ' ' + type);
         modal.find('#del_name').val(name);
         modal.find('#del_type').val(type);
     });
 
     $('#send-delete').on('click', function (event) {
-        var name = $('#del_name').val() // Extract info from data-* attributes
-        var type = $('#del_type').val()
+        var name = $('#del_name').val(); // Extract info from data-* attributes
+        var type = $('#del_type').val();
         if (type == 'dir') {
-            name = name + '/'
+            name = name + '/';
         }
         $.ajax({
             url: $(location).attr("href") + name,
@@ -202,10 +206,10 @@ $(document).ready(function () {
     });
 
     $('#movepath-modal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget)
-        var name = button.data('name') // Extract info from data-* attributes
+        var button = $(event.relatedTarget);
+        var name = button.data('name'); // Extract info from data-* attributes
         var path = location.pathname;
-        var modal = $(this)
+        var modal = $(this);
         modal.find('.modal-title').text('Move ' + name + ' to');
 
         document.getElementById('movepath_source').value = (path + name).replace('/', '');
@@ -232,10 +236,10 @@ $(document).ready(function () {
     });
 
     $('#renamepath-modal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget)
-        var name = button.data('name') // Extract info from data-* attributes
+        var button = $(event.relatedTarget);
+        var name = button.data('name'); // Extract info from data-* attributes
         var path = location.pathname;
-        var modal = $(this)
+        var modal = $(this);
         modal.find('.modal-title').text('Rename ' + name + ' to');
 
         document.getElementById('renamepath_source').value = (path + name).replace('/', '');
@@ -332,6 +336,18 @@ $(document).ready(function () {
 
     $('#download-file').click(function () {
         this.href += '?download=true';
+    });
+
+    $('#select-all').click(function () {
+        if (this.checked) {
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                cb.checked = true;
+            });
+        } else {
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                cb.checked = false;
+            });
+        }
     });
 });
 

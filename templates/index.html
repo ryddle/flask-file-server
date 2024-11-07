@@ -61,6 +61,7 @@
       <table id="listr-table" class="table table-hover">
         <thead>
           <tr>
+            <th class="text-xs-left "><input type="checkbox" id="select-all" class="checkbox" style="margin-left: 10px;"></input></th>
             <th class="text-xs-left " data-sort="string">Name</th>
             <th class="text-xs-right " data-sort="int">Size</th>
             <th class="text-xs-right " data-sort="int">Modified</th>
@@ -71,6 +72,7 @@
         <tbody id="content-results">
           {% for entry in contents if entry.type == 'dir' %}
           <tr>
+            <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><input type="checkbox" class="checkbox" id="checkbox-{{entry.name | lower}}"></td>
             <td class="text-xs-left " data-sort-value="dir-{{entry.name | lower}}"><i class="fa fa-fw fa-folder " aria-hidden="true"></i>&nbsp;<a href="{{entry.name}}/"><strong>{{entry.name}}</strong></a></td>
             <td class="text-xs-right " data-sort-value="-1">&mdash;</td>
             <td class="text-xs-right " data-sort-value="{{entry.mtime}}" title="{{entry.mtime | time_fmt}}">{{entry.mtime | humanize}}</td>
@@ -81,6 +83,7 @@
           {% endfor %}
           {% for entry in contents if entry.type == 'file' %}
           <tr>
+            <td class="text-xs-left " data-sort-value="file-{{entry.name | lower}}"><input type="checkbox" class="checkbox"></td>
             <td class="text-xs-left " data-sort-value="file-{{entry.name | lower}}"><i class="fa fa-fw {{entry.name | icon_fmt}} " aria-hidden="true"></i>&nbsp;
               <a {% if entry.name | data_fmt not in ['unknown', 'archive' ] %} data-toggle="modal" data-target="#viewer-modal" data-url="{{entry.name}}" data-type="{{entry.name | data_fmt}}" {% endif %} href="{{entry.name}}" data-size="{{entry.size | size_fmt}}">{{entry.name}}</a>
             </td>
@@ -117,13 +120,14 @@
           {% endfor %}
         </tbody>
         <tfoot id="content-footer">
-          {% if has_audio %}
           <tr>
-            <td colspan="3">
+            <td colspan="6">
+              <a data-toggle="modal" data-target="#newfile-modal" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i>New File</a>
+            {% if has_audio %}
               <a data-toggle="modal" data-target="#player-modal" id="play-all" class="btn btn-primary"><i class="fa fa-fw fa-play"></i>Play All</a>
+            {% endif %}
             </td>
           </tr>
-          {% endif %}
           <tr>
             <td colspan="3">
               <input id="dir_path" type="hidden" value="{{dir_path}}">
@@ -159,6 +163,23 @@
               <div class="btn-group">
                 <a href="#" class="btn btn-primary fullview" id="download-File" download>Download</a>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="newfile-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-xxl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close pull-xs-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <div class="pull-xs-right">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" id="save-newfile" class="btn btn-primary">Save</button>
             </div>
           </div>
         </div>

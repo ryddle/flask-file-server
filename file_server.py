@@ -24,7 +24,7 @@ CORS(app)
 key = ""
 
 ignored = ['.lyr','.sbo','.bzr', '$RECYCLE.BIN', '.DAV', '.DS_Store', '.git', '.hg', '.htaccess', '.htpasswd', '.Spotlight-V100', '.svn', '__MACOSX', 'ehthumbs.db', 'robots.txt', 'Thumbs.db', 'thumbs.tps']
-datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt', 'video': 'mp4,m4v,ogv,webm,mkv,avi', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
+datatypes = {'audio': 'm4a,mp3,oga,ogg,webma,wav', 'archive': '7z,zip,rar,gz,tar', 'image': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'pdf': 'pdf', 'quicktime': '3g2,3gp,3gp2,3gpp,mov,qt', 'source': 'atom,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml,plist', 'text': 'txt,m3u', 'video': 'mp4,m4v,ogv,webm,mkv,avi', 'website': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'doc': 'odt, ods, odp, docx, xlsx, pptx'}
 icontypes = {'fa-music': 'm4a,mp3,oga,ogg,webma,wav', 'fa-archive': '7z,zip,rar,gz,tar', 'fa-picture-o': 'gif,ico,jpe,jpeg,jpg,png,svg,webp', 'fa-file-text': 'pdf', 'fa-film': '3g2,3gp,3gp2,3gpp,mov,qt', 'fa-code': 'atom,plist,bat,bash,c,cmd,coffee,css,hml,js,json,java,less,markdown,md,php,pl,py,rb,rss,sass,scpt,swift,scss,sh,xml,yml', 'fa-file-text-o': 'txt', 'fa-film': 'mp4,m4v,ogv,webm,mkv,avi', 'fa-globe': 'htm,html,mhtm,mhtml,xhtm,xhtml', 'fa-file-text': 'doc'}
 
 lyrics_excluded_terms = ['official music video', 'video', 'vynil', 'hq', 'rip', 'lyrics', 'lyrics', 'letra', 'versos', 'versos', 'paroles', 'paroles', 'liedtexte', 'liedtexte', '歌詞', '歌詞', 'muziek', 'muziek', 'liedtext', 'liedtext', 'muziek', 'muziek', 'notas', 'notas', 'notas', 'notas', 'notas', 'notas']
@@ -75,21 +75,18 @@ def get_type(mode):
         type = 'file'
     return type
 
-def partial_response(path, start, end=None):
+
+"""def partial_response(path, start, end=None):
     file_size = os.path.getsize(path)
     
     if end is not None:
         if start>end:
-            #start, end = 0, file_size-1
-            start, end = 0, min(file_size - 1, start + int(file_size/10) - 1)
-
+            start, end = 0, file_size-1
     if end is None:
-        #end = file_size - start - 1
-        end = min(file_size - 1, start + int(file_size/10) - 1)
+        end = file_size - start - 1
     end = min(end, file_size - 1)
     if end < start:
-        #end = file_size - 1
-        end = min(file_size - 1, start + int(file_size/10) - 1)
+        end = file_size - 1
     length = int(end - start + 1)
     if length < 0:
         print('invalid range')
@@ -127,7 +124,61 @@ def get_range(request):
         return start, end
     else:
         return 0, None
-    
+"""
+
+
+def partial_response(path, start, end=None):
+    file_size = os.path.getsize(path)
+
+    if end is not None:
+        if start > end:
+            start, end = 0, file_size - 1
+    if end is None:
+        end = file_size - 1
+    end = min(end, file_size - 1)
+    if end < start:
+        end = file_size - 1
+    length = int(end - start + 1)
+    if length < 0:
+        print('invalid range')
+
+    def generate():
+        with open(path, 'rb') as fd:
+            fd.seek(start)
+            while True:
+                chunk = fd.read(1024 * 1024 * 10)  # read 10MB chunks
+                if not chunk:
+                    break
+                yield chunk
+
+    response = Response(
+        generate(),
+        206,
+        mimetype=mimetypes.guess_type(path)[0],
+        direct_passthrough=True,
+    )
+    response.headers.add(
+        'Content-Range', 'bytes {0}-{1}/{2}'.format(
+            start, end, file_size,
+        ),
+    )
+    response.headers.add(
+        'Accept-Ranges', 'bytes'
+    )
+    return response
+
+def get_range(request):
+    range = request.headers.get('Range')
+    m = re.match(r'bytes=(?P<start>\d+)-(?P<end>\d+)?', range)
+    if m:
+        start = m.group('start')
+        end = m.group('end')
+        start = int(start)
+        if end is not None:
+            end = int(end)
+        return start, end
+    else:
+        return 0, None
 
 def downloadUrls(yturls, dir_path = "download"):
     filesObj = {}

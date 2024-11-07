@@ -208,7 +208,8 @@ let audioMotionConfig = {
   source: filters[filters.length - 1],
   gradient: 'chocolate',
   overlay: false,
-  showBgColor: true
+  showBgColor: true,
+  showScaleX: false
 };
 
 const audioMotion = new AudioMotionAnalyzer(

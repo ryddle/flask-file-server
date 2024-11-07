@@ -80,8 +80,8 @@
       bars: { mode: 6, barSpace: .4, frequencyScale: 'bark', gradient: 'rainbow', lumiBars: false, ledBars: true, linearAmplitude: true, linearBoost: 1.6, maxFreq: 20000, minFreq: 30, reflexRatio: .1, reflexAlpha: .25, weightingFilter: 'D' },
       dual: { mode: 10, channelLayout: 'dual-combined', fillAlpha: .3, gradientLeft: 'steelblue', gradientRight: 'orangered', linearAmplitude: true, linearBoost: 1.2, lineWidth: 0, maxFreq: 16000, minFreq: 30, peakLine: true, showScaleX: false, showPeaks: true, weightingFilter: 'D' },
       wall: { mode: 2, barSpace: .1, gradient: 'prism', lumiBars: true, minDecibels: -60, maxDecibels: -30, maxFreq: 16000, minFreq: 30, showBgColor: false, showPeaks: false, showScaleX: false, weightingFilter: 'D' },
-      mirror: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, outlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 1, reflexBright: 1, reflexFit: true, reflexRatio: 0.5, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: true, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" }
-    }
+      mirror: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, outlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 1, reflexBright: 1, reflexFit: true, reflexRatio: 0.5, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: false, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" }
+    };
 
     var audio_motion_preset = "default";
     /* if (localStorage.getItem('audio_motion_preset')) {
@@ -222,8 +222,9 @@
         <!--         <div id="analyzer"></div> -->
         <div id="media-container"></div>
         <div id="audio-panel" class="audioPanel">
-          <div style="width: 245px;position: absolute;left: calc(50% - 135px);top: 15px;display: block;">
+          <div style="width: 245px;position: absolute;left: 10px;top: 15px;display: block;">
             <button id="video-mode-btn_audiopanel" style="left: 30px;top: calc(-50% + 10px);color: var(--primary-color);float: left;margin: 0px;" class="controls"><i class="fa fa-solid fa-film"></i></button>
+            <button id="show-as-videos-btn_audiopanel" style="left: 30px;top: calc(-50% + 10px);color: var(--primary-color);float: left;margin: 0px;" class="controls"><i class="fa fa-solid fa-tv"></i></button>
           </div>
         </div>
         <div id="video-panel" class="videoPanel">
@@ -239,7 +240,7 @@
         <div id="eq_container" class="eq_container">
           <div style="float: left;position: fixed;margin-left: -75px;margin-top: -15px;">
             <button id="eq-preset-btn" class="btn btn-secondary controls" style="padding: 4px;">
-              <i class="fa fa-solid" style="rotate: 90deg;color: var(--primary-color);"></i>
+              <i class="fa fa-solid fa-sliders" style="rotate: 90deg;color: var(--primary-color);"></i>
             </button>
           </div>
         </div>
@@ -555,7 +556,7 @@
         li.appendChild(btn);
 
       } else {
-        children.push(JSON.stringify({'name':item.name, 'mimetype':item.mimetype, 'type':item.type}));
+        children.push(JSON.stringify({ 'name': item.name, 'mimetype': item.mimetype, 'type': item.type }));
         const btn = document.createElement('input');
         btn.type = 'checkbox';
         btn.folderChecked = false;
@@ -595,7 +596,7 @@
       } else {
         if (checkbox.folderChecked == false) {
           let data = checkbox.dataset;
-          selected.push({path: data.path.replace('/', ''), name: data.name, mimetype: data.mimetype, type: data.type });
+          selected.push({ path: data.path.replace('/', ''), name: data.name, mimetype: data.mimetype, type: data.type });
         }
       }
     });
@@ -654,7 +655,7 @@
 
       if (file.name.endsWith('.m3u')) {
         await $.get('/api/getPlaylistM3u', { path: file.path }, function (data) {
-          playlistFiles = data.playlist
+          playlistFiles = data.playlist;
 
           for (let plindex = 0; plindex < playlistFiles.length; plindex++) {
             const item = playlistFiles[plindex];
@@ -688,7 +689,7 @@
     document.getElementById('full_path').value = full_path.substring(location.origin.length + 1);
     panel.style.display = 'block';
     window['focusSearchInput'] = true;
-  }
+  };
 
   function searchSong(event) {
     var title = document.getElementById('song-title').value;
@@ -707,15 +708,15 @@
   function toggleVideoMode(event) {
     if (window['videoMode']) {
       window['videoMode'] = false;
-      document.getElementById('content').parentNode.insertBefore(document.getElementById('content'),document.getElementById('playlist_column'));
-      document.getElementById('playlist_column').className='column middle-column';
+      document.getElementById('content').parentNode.insertBefore(document.getElementById('content'), document.getElementById('playlist_column'));
+      document.getElementById('playlist_column').className = 'column middle-column';
       document.getElementById('lyrics').style.display = 'block';
       document.getElementById('video-mode-btn_audiopanel').firstElementChild.className = 'fa fa-solid fa-film';
       document.getElementById('video-mode-btn_videopanel').firstElementChild.className = 'fa fa-solid fa-film';
     } else {
       window['videoMode'] = true;
-      document.getElementById('playlist_column').parentNode.insertBefore(document.getElementById('playlist_column'),document.getElementById('content'));
-      document.getElementById('playlist_column').className='column left-column';
+      document.getElementById('playlist_column').parentNode.insertBefore(document.getElementById('playlist_column'), document.getElementById('content'));
+      document.getElementById('playlist_column').className = 'column left-column';
       document.getElementById('lyrics').style.display = 'none';
       document.getElementById('video-mode-btn_audiopanel').firstElementChild.className = 'fa fa-solid fa-music';
       document.getElementById('video-mode-btn_videopanel').firstElementChild.className = 'fa fa-solid fa-music';
@@ -800,6 +801,50 @@
 
     document.getElementById('video-mode-btn_videopanel').addEventListener('click', function (event) {
       toggleVideoMode(event);
+    });
+
+    document.getElementById('show-as-videos-btn_audiopanel').addEventListener('click', function (event) {
+      const canvas = document.getElementsByTagName('canvas')[0];
+
+
+      var shadow = document.createElement("div");
+      shadow.style.position = "absolute";
+      shadow.style.left = "0px";
+      shadow.style.top = "0px";
+      shadow.style.width = window.innerWidth + "px";
+      shadow.style.height = window.innerHeight + "px";
+      shadow.style.backgroundColor = "black";
+      shadow.style.opacity = "1";
+      shadow.style.zIndex = "100000";
+      shadow.addEventListener('click', function () {
+        shadow.style.display = 'none';
+
+        this.remove();
+      });
+      document.body.appendChild(shadow);
+
+      var canvasvideo = document.createElement("div");
+      canvasvideo.style.position = "absolute";
+      canvasvideo.style.left = (window.innerWidth - canvas.width) / 2 + "px";
+      canvasvideo.style.top = (window.innerHeight - canvas.height) / 2 + "px";
+      canvasvideo.style.width = canvas.width + "px";
+      canvasvideo.style.height = canvas.height + "px";
+      canvasvideo.style.backgroundColor = "black";
+
+      shadow.appendChild(canvasvideo);
+
+      var video = document.createElement("video");
+      video.style.position = "absolute";
+      video.style.left = "0px";
+      video.style.top = "0px";
+      video.style.width = canvas.width + "px";
+      video.style.height = canvas.height + "px";
+      video.autoplay = true;
+
+      canvasvideo.appendChild(video);
+
+      const stream = canvas.captureStream();
+      video.srcObject = stream;
     });
 
   });
