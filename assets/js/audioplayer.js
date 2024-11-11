@@ -70,7 +70,7 @@ const filters = [];
     max: 12,
     step: 1,
     width: 10,
-    height: 100,
+    height: 150,
     invert: false,
     showLabel: false,
     list: 'tickmarks',
@@ -114,6 +114,7 @@ for (let i = 0; i < filters.length - 1; i++) {
 let audioMotionConfig = {
   source: filters[filters.length - 1],
   gradient: 'chocolate',
+  showScaleX: false
 };
 
 const audioMotion = new AudioMotionAnalyzer(

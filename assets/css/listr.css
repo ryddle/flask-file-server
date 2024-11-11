@@ -3262,14 +3262,14 @@ pre {
     clear: both
 }
 
-pre code {
+/* pre code {
     padding: 0;
     font-size: inherit;
     color: inherit;
     background-color: transparent;
     border-radius: 0;
     word-break: normal
-}
+} */
 
 .container,.container-fluid {
     margin-left: auto;
@@ -6420,7 +6420,7 @@ a.text-danger:focus,a.text-danger:hover {
     }
 }
 
-.hljs {
+/* .hljs {
     display: block;
     overflow-x: auto;
     padding: .5em;
@@ -6495,7 +6495,7 @@ a.text-danger:focus,a.text-danger:hover {
 
 .hljs-emphasis {
     font-style: italic
-}
+} */
 
 body {
     overflow-y: scroll

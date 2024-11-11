@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Notepad App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        #sidebar {
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: block;
+            /*position: fixed;*/
+            width: 260px;
+            min-width: 260px;
+        }
+
+        #notepad-title {
+            margin-left: 10px;
+        }
+
+        #editor {
+            /*margin-left: 260px;*/
+            width: 100%;
+            display: none;
+        }
+
+        #note-content {
+            height: calc(100vh - 180px);
+        }
+
+        h4[contenteditable="true"] {
+            white-space: nowrap;
+        }
+
+        li a.btn {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button id="sidebar-toggle" class="btn btn-outline-secondary" onclick="toggleSidebar()"><i class="fa fa-list"></i></button>
+        <a id="notepad-title" class="navbar-brand" href="#">Notepad</a>
+        <span id="userlogin" class="ml-auto">Login</span> <i class="fa fa-user-circle" style="margin-left: 5px; color: #6c757d;"></i>
+    </nav>
+    <div style="display: flex;">
+        <div id="sidebar" style="display: block;">
+            <h4 class="p-3">My Notes</h4>
+            <button id="newnote-btn" class="btn btn-outline-secondary" style="margin-left: 20px; margin-bottom: 10px;">New Note <i class="fa fa-plus"></i></button>
+            <ul id="note-list" class="list-group list-group-flush">
+                <!-- List of notes will go here -->
+            </ul>
+        </div>
+        <div id="editor" class="p-3">
+            <button id="savenote-btn" class="btn btn-outline-secondary">Save <i class="fa fa-save"></i></button>
+            <div class="form-group">
+                <h4 id="note-name" class="note-name" contenteditable="false" data-disable-return="true" style="line-height: 1.5;" onclick="this.setAttribute('contenteditable', 'true')">New Note</h4>
+            </div>
+            <textarea class="form-control" rows="20" placeholder="Start writing..." id="note-content"></textarea>
+        </div>
+    </div>
+
+    <!-- Login/Register Modal -->
+    <div class="modal fade" id="auth-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="auth-modal-label">Login/Register</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="auth-form" action="/notepad/login" method="post">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="button" id="auth-submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.base64/1.0.0/jquery.base64.min.js"></script>
+    <script>
+        var currentNote = null;
+        $(document).ready(function () {
+            const editableH4 = document.querySelector('#note-name');
+
+            editableH4.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+
+            $("#savenote-btn").on("click", function () {
+                saveNote();
+            });
+
+            $("#newnote-btn").on("click", function () {
+                newNote();
+            });
+
+            $("#note-name").on("blur", function () {
+                if (event.relatedTarget && event.relatedTarget.id && event.relatedTarget.id == "removenote-btn") return;
+                saveNote();
+            });
+
+            $("#note-content").on("blur", function () {
+                if (event.relatedTarget && event.relatedTarget.id && event.relatedTarget.id == "removenote-btn") return;
+                saveNote();
+            });
+
+
+            var username = getCookie("username");
+            if (!username) {
+                $('#auth-modal').modal('show');
+            } else {
+                $("#userlogin").text(username);
+            }
+
+            $("#auth-submit").on("click", function (event) {
+                var hash = btoa($("#username").val() + ":" + $("#password").val());
+                $.ajax({
+                    url: "/notepad/login",
+                    method: "POST",
+                    data: {
+                        username: $("#username").val(),
+                        password: $("#password").val()
+                    },
+                    success: function (data) {
+                        var userId = data.user.userId;
+                        /* document.cookie = "userId=" + userId + ";path=/;max-age=" + 6 * 30 * 24 * 60 * 60;
+                        document.cookie = "username=" + $("#username").val() + ";path=/;max-age=" + 6 * 30 * 24 * 60 * 60;
+                        document.cookie = "auth_cookie=" + hash + ";path=/;max-age=" + 6 * 30 * 24 * 60 * 60; */
+                        localStorage.setItem("notepad", JSON.stringify({ "userId": userId, "username": $("#username").val() }));
+                        $("#userlogin").text($("#username").val());
+                        $('#auth-modal').modal('hide');
+                    }
+                });
+            });
+
+            loadNotes();
+
+            $("#sidebar").on("click", "a", function () {
+                currentNote = this;
+                $("#note-list li a").removeClass("active");
+                $(this).addClass("active");
+                loadNote(getCookie("userId"), $(this).parent().attr("id"));
+                $("#editor").show();
+            });
+        });
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.style.display = sidebar.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function loadNotes() {
+            $.ajax({
+                url: "/notepad/notes/?userId=" + getCookie("userId"),
+                method: "GET",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        $("#sidebar ul").append("<li id='" + data[i].id + "' class='list-group-item'><a href='#' class='btn btn-outline-secondary' style='width: calc(100% - 50px);' title='" + data[i].noteName + "'>" + data[i].noteName + "</a><button id='removenote-btn' class='btn btn-outline-secondary' style='float: right;' onclick='removeNote(this.parentNode.id)'><i class='fa fa-close'></i></button></li>");
+                    }
+                }
+            });
+        }
+
+        function loadNote(userId, noteId) {
+            $.ajax({
+                url: "/notepad/note/?userId=" + userId + "&noteId=" + noteId,
+                method: "GET",
+                success: function (data) {
+                    $("#note-content").val(data.noteContent);
+                    $("#note-name").text(data.noteName);
+                }
+            });
+        }
+
+
+        function saveNote() {
+            var activeNote = $("#sidebar li a.active")[0].parentElement;
+            var noteName = $("#note-name").text().trim().replace(/[\n\r\t]/g, "");
+            var noteId = (activeNote && activeNote.id !== '') ? activeNote.id : undefined;
+            var noteContent = $("#note-content").val();
+            var note = {
+                noteName: noteName,
+                noteContent: noteContent,
+                userId: getCookie("userId"),
+                noteId: noteId
+            };
+            $.ajax({
+                url: "/notepad/note/",
+                method: "POST",
+                data: note,
+                success: function (data) {
+                    activeNote.id = data.noteId;
+                    activeNote.firstChild.textContent = noteName;
+                    console.log("Note saved!");
+                }
+            });
+        }
+
+        function newNote() {
+            var note = {
+                noteName: "New Note",
+                noteContent: "",
+                userId: getCookie("userId")
+            };
+            $.ajax({
+                url: "/notepad/note/",
+                method: "POST",
+                data: note,
+                success: function (data) {
+                    $("#note-name").text("New Note");
+                    $("#note-content").val("");
+                    $("#note-list li a.active").removeClass("active");
+                    $("#note-list").append("<li id='" + data.noteId + "' class='list-group-item'><a href='#' class='btn btn-outline-secondary active' style='width: calc(100% - 50px);' title='New Note'>New Note</a><button id='removenote-btn' class='btn btn-outline-secondary' style='float: right;' onclick='removeNote(this.parentNode.id)'><i class='fa fa-close'></i></button></li>");
+                    currentNote = $("#note-list li a.active")[0];
+                    $("#editor").show();
+                }
+            });
+        }
+
+        function removeNote(noteId) {
+            if (noteId === '') {
+                event.target.parentElement.remove();
+                return;
+            }
+            $.ajax({
+                url: "/notepad/note/?userId=" + getCookie("userId") + "&noteId=" + noteId,
+                method: "DELETE",
+                success: function (data) {
+                    $("#sidebar li#" + noteId).remove();
+                    if (noteId === currentNote.parentElement.id) {
+                        $("#note-name").text("New Note");
+                        $("#note-content").val("");
+                        $("#editor").hide();
+                    }
+                }
+            });
+        }
+
+        function getCookie(name) {
+            /* var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift(); */
+            return (localStorage.getItem("notepad")) ? JSON.parse(localStorage.getItem("notepad"))[name] : undefined;
+        }
+    </script>
+</body>
+
+</html>

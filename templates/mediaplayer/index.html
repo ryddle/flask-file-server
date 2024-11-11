@@ -35,6 +35,8 @@
     }
 
     //////////////////////////
+    
+    window['route_path'] = "{{ path }}";
 
     window['focusSearchInput'] = false;
 
@@ -76,7 +78,7 @@
     ///// Settings panel /////
 
     const audioMotionConfigs = {
-      default: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, utlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 0.15, reflexBright: 1, reflexFit: true, reflexRatio: 0, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: true, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" },
+      default: { alphaBars: false, ansiBands: false, barSpace: 0.1, bgAlpha: 0.7, channelLayout: "single", colorMode: "gradient", fftSize: 8192, fillAlpha: 1, frequencyScale: "log", gradient: primary_color, ledBars: false, linearAmplitude: false, linearBoost: 1, lineWidth: 0, loRes: false, lumiBars: false, maxDecibels: -25, maxFPS: 0, maxFreq: 22000, minDecibels: -85, minFreq: 20, mirror: 0, mode: 0, noteLabels: false, utlineBars: false, overlay: false, peakLine: false, radial: false, radialInvert: false, radius: 0.3, reflexAlpha: 0.15, reflexBright: 1, reflexFit: true, reflexRatio: 0, roundBars: false, showBgColor: true, showFPS: false, showPeaks: true, showScaleX: false, showScaleY: false, smoothing: 0.5, spinSpeed: 0, splitGradient: false, trueLeds: false, useCanvas: true, volume: 1, weightingFilter: "" },
       bars: { mode: 6, barSpace: .4, frequencyScale: 'bark', gradient: 'rainbow', lumiBars: false, ledBars: true, linearAmplitude: true, linearBoost: 1.6, maxFreq: 20000, minFreq: 30, reflexRatio: .1, reflexAlpha: .25, weightingFilter: 'D' },
       dual: { mode: 10, channelLayout: 'dual-combined', fillAlpha: .3, gradientLeft: 'steelblue', gradientRight: 'orangered', linearAmplitude: true, linearBoost: 1.2, lineWidth: 0, maxFreq: 16000, minFreq: 30, peakLine: true, showScaleX: false, showPeaks: true, weightingFilter: 'D' },
       wall: { mode: 2, barSpace: .1, gradient: 'prism', lumiBars: true, minDecibels: -60, maxDecibels: -30, maxFreq: 16000, minFreq: 30, showBgColor: false, showPeaks: false, showScaleX: false, weightingFilter: 'D' },
@@ -669,7 +671,8 @@
         });
       } else {
         var track = {};
-        var sources = [{ src: location.origin + "/" + file.path, type: file.mimetype, filename: file.name }];
+        //var sources = [{ src: location.origin + "/" + file.path, type: file.mimetype, filename: file.name }];
+        var sources = [{ src: location.origin + (window["route_path"]!=='' ?"/" + window["route_path"] :"") + "/" + file.path, type: file.mimetype, filename: file.name }];
         var poster = location.origin + '/assets/images/default_poster.png';
         track.sources = sources;
         track.poster = poster;

@@ -80,6 +80,7 @@ function invokeViewerClose(e) {
                 video_element.pause();
             } catch (error) {
                 //do nothing
+                console.log(error);
             }
             video_element = null;
         }
@@ -148,10 +149,10 @@ function sourceViewer(modal) {
     var file_size = modal.data('bs.modal')._config.size;
     var url = URLJoin(location.href, file_name);
 
-    if (file_name.indexOf(".js") != -1) {
+   /*  if (file_name.indexOf(".js") != -1) {
         defaultViewer(modal);
         return;
-    }
+    } */
 
     setModalHeader(modal, file_name, file_size);
 
@@ -428,7 +429,7 @@ function newFileViewer(modal) {
         var input = document.createElement("input");
         input.type = "text";
         input.className = "form-control";
-        input.style.width = '90rem';
+        input.style.width = 'calc(100% - 50px)';
         input.value = label.innerText;
         input.onblur = function () {
             label.innerText = input.value;
@@ -514,7 +515,7 @@ function playerViewer() {
     modal_body.innerHTML = htmlBody;
 
     var htmlFooter = '<div class="pull-xs-left">\
-            <a type="button" class="btn btn-primary" style="background-color: chocolate; border-color: chocolate;" href="' + URLJoin(location.origin, '/audioplayer/index.html?path=', location.pathname) + '" target="_blank"><i class="fa fa-external-link"></i> Open audio player</a>\
+            <a type="button" class="btn btn-primary" style="background-color: chocolate; border-color: chocolate;" href="' + URLJoin(location.origin, '/audioplayer/index.html?path=', window.path) + '" target="_blank"><i class="fa fa-external-link"></i> Open audio player</a>\
         </div>\
         <div class="pull-xs-right">\
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\

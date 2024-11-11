@@ -6,13 +6,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <meta name="generator" content="Bootstrap Listr">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>File System</title>
   <link rel="stylesheet" href="{{url_for('static', filename='css/custom.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='css/listr.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='css/jquery.filer.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='css/viewer.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='css/video-js.min.css')}}">
-  <link rel="stylesheet" href="{{url_for('static', filename='css/highlight.default.min.css')}}">
+<!--   <link rel="stylesheet" href="{{url_for('static', filename='css/highlight.default.min.css')}}"> -->
+  <link rel="stylesheet" href="{{url_for('static', filename='css/tomorrow-night-bright.css')}}">
   <script>
     var ytad_url = "{{ ytad_url }}";
 
@@ -23,6 +27,8 @@
     // @ts-ignore
     var image_files_string = {{ image_files | tojson }};
     var image_files = eval(image_files_string);
+
+    var path = "{{ path }}";
   </script>
 
 </head>
@@ -46,14 +52,16 @@
       </div>
       <div class="pull-sm-left" style="padding-left: 15px;">
         <div class="btn-group">
-          <a href="/audioplayer/index.html" target="_blank" class="btn btn-secondary text-muted" style="background-color: #0275d8;color: white !important;"><i class="fa fa-fw fa-play"></i><strong id="audio_player_btn">Audio Player</strong></a>
+          <a href="/audioplayer/index.html" target="_blank" class="btn btn-secondary text-muted" style="background-color: #0275d8;color: white !important;"><i class="fa fa-fw fa-play"></i><strong id="audio_player_btn">AudioPlayer</strong></a>
+          <a href="/notepad/index.html" target="_blank" class="btn btn-secondary text-muted" style="background-color: #0275d8;color: white !important;"><i class="fa fa-fw fa-edit"></i><strong id="notepad_btn">Notepad</strong></a>
+          <a data-toggle="modal" data-target="#ytad-modal" class="btn btn-secondary text-muted" style="background-color: #fb0032; color: white !important;"><i class="fa fa-fw fa-play"></i><strong id="ytad">YTAD</strong></a>
         </div>
       </div>
       <div class="pull-sm-right">
         <div class="btn-group">
-          <a data-toggle="modal" data-target="#newfolder-modal" class="btn btn-secondary text-muted">New Folder</a>
-          <a data-toggle="modal" data-target="#uploader-modal" class="btn btn-secondary text-muted">Upload</a>
-          <a data-toggle="modal" data-target="#ytad-modal" class="btn btn-secondary text-muted" style="background-color: red; color: white !important;"><i class="fa fa-fw fa-play"></i><strong id="ytad">YTAD</strong></a>
+          <a data-toggle="modal" data-target="#newfolder-modal" class="btn btn-secondary text-muted" title="New File"><i class="fa fa-fw fa-file"></i></a>
+          <a data-toggle="modal" data-target="#newfolder-modal" class="btn btn-secondary text-muted" title="New Folder"><i class="fa fa-fw fa-folder"></i></a>
+          <a data-toggle="modal" data-target="#uploader-modal" class="btn btn-secondary text-muted" title="Upload File"><i class="fa fa-fw fa-upload"></i></a>
         </div>
       </div>
     </div>
@@ -122,7 +130,7 @@
         <tfoot id="content-footer">
           <tr>
             <td colspan="6">
-              <a data-toggle="modal" data-target="#newfile-modal" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i>New File</a>
+              <!-- <a data-toggle="modal" data-target="#newfile-modal" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i>New File</a> -->
             {% if has_audio %}
               <a data-toggle="modal" data-target="#player-modal" id="play-all" class="btn btn-primary"><i class="fa fa-fw fa-play"></i>Play All</a>
             {% endif %}
@@ -225,7 +233,7 @@
     <div class="modal fade" id="newfolder-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <form id="newfolder" method="post" action="/newfolder">
+          <form id="newfolder" method="post" action="/api/newfolder">
             <div class="modal-body">
               <div class="md-form">
                 <i class="fa fa-folder prefix grey-text"> </i> <label>Folder Name</label>
@@ -247,7 +255,7 @@
     <div class="modal fade" id="movepath-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <form id="movepath_form" method="post" action="/movepath">
+          <form id="movepath_form" method="post" action="/api/movepath">
             <div class="modal-body">
               <div class="md-form">
                 <i class="fa fa-share prefix grey-text"> </i> <label>Select Folder</label>
@@ -271,7 +279,7 @@
     <div class="modal fade" id="renamepath-modal" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <form id="renamepath_form" method="post" action="/renamepath">
+          <form id="renamepath_form" method="post" action="/api/renamepath">
             <div class="modal-body">
               <div class="md-form">
                 <i class="fa fa-edit prefix grey-text"> </i> <label>Enter New Name</label>

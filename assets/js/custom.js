@@ -208,11 +208,11 @@ $(document).ready(function () {
     $('#movepath-modal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var name = button.data('name'); // Extract info from data-* attributes
-        var path = location.pathname;
+        var path = window.path;
         var modal = $(this);
         modal.find('.modal-title').text('Move ' + name + ' to');
 
-        document.getElementById('movepath_source').value = (path + name).replace('/', '');
+        document.getElementById('movepath_source').value = (path + name).replace(/^\/+/g, '');
         document.getElementById('movepath_filename').value = name;
 
         $.ajax({
@@ -228,7 +228,7 @@ $(document).ready(function () {
     $('#send-movepath').on('click', function (event) {
         const checkbox = document.getElementById('movepath_tree').querySelectorAll('input[type="checkbox"]:checked')[0];
         var newpath = checkbox.parentElement.path;
-        newpath = newpath.replace('/', '');
+        newpath = newpath.replace(/^\/+/g, '');
         const name = document.getElementById('movepath_filename').value;
         const form = document.getElementById('movepath-form');
         document.getElementById('movepath_target').value = newpath + name;
@@ -238,20 +238,20 @@ $(document).ready(function () {
     $('#renamepath-modal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var name = button.data('name'); // Extract info from data-* attributes
-        var path = location.pathname;
+        var path = window.path;
         var modal = $(this);
         modal.find('.modal-title').text('Rename ' + name + ' to');
 
-        document.getElementById('renamepath_source').value = (path + name).replace('/', '');
+        document.getElementById('renamepath_source').value = (path + name).replace(/^\/+/g, '');
         document.getElementById('renamepath_newname').value = name;
         document.getElementById('renamepath_filename').value = name;
     });
 
     $('#send-renamepath').on('click', function (event) {
-        var path = location.pathname;
+        var path = window.path;
         const newname = document.getElementById('renamepath_newname').value;
         const form = document.getElementById('renamepath-form');
-        document.getElementById('renamepath_target').value = (path + newname).replace('/', '');
+        document.getElementById('renamepath_target').value = (path + newname).replace(/^\/+/g, '');
         form.submit();
     });
 
