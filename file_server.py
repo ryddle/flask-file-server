@@ -312,7 +312,7 @@ def mediaplayer():
                 has_audio = True
         return render_template(
             "/mediaplayer/index.html",
-            path=p,
+            path="store",
             dir_path=path,
             media_files=json.dumps(media_files),
         )
