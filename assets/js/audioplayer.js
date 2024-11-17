@@ -407,7 +407,7 @@ playlist.addEventListener('playlistitemload', () => {
     }
   }
 
-  document.getElementsByTagName("title")[0].innerText="Audio Plater - " + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1);
+  document.getElementsByTagName("title")[0].innerText="Audio Player - " + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1);
 
   // Show the loader
   pl_lyrics_loader.style.display = 'block';

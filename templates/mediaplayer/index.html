@@ -173,7 +173,7 @@
       var eq = eq_presets[preset];
       current_eq_preset = preset;
       for (var i = 0; i < 10; i++) {
-        document.querySelector("#controls > div:nth-child(" + (i + 2) + ") > div").self.setValue(eq[i]);
+        document.querySelector("#eq_container:nth-child(" + (i + 2) + ") > div").self.setValue(eq[i]);
       }
     }
     ////////////////////////////////////////////////

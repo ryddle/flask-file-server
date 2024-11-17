@@ -404,33 +404,33 @@ matrix.id = "matrix";
 matrix.className = "matrix";
 matrix.style.display = "none";
 playlist_cont.parentElement.appendChild(matrix);
-var vledDiplay = new XVirtualLedDisplay(matrix, { callback: chageTimeMode });
+var vledDisplay = new XVirtualLedDisplay(matrix, { callback: chageTimeMode });
 // Update LED display 2
-vledDiplay.clearM();
-vledDiplay.drawText("00:00", 0, -1);
-vledDiplay.drawText(source_title, 30, -1);
+vledDisplay.clearM();
+vledDisplay.drawText("00:00", 0, -1);
+vledDisplay.drawText(source_title, 30, -1);
 
 var vledDisplayTimer = 0;
 function updateLedDisplay2() {
   clearInterval(vledDisplayTimer);
   vledDisplayTimer = 0;
 
-  vledDiplay.drawText(source_title, 30, -1);
+  vledDisplay.drawText(source_title, 30, -1);
 
   vledDisplayTimer = setInterval(vledDisplayClockTimer, 1000);
 }
 
 if (currentDisplay == "led") {
   matrix.style.display = 'block';
-  vledDiplay.rotate('left', 30);
+  vledDisplay.rotate('left', 30);
   updateLedDisplay2();
 }
 
 function vledDisplayClockTimer() {
   if (time_mode == "playing") {
-    vledDiplay.drawText(secondsToHHMMSS(currentMediaElement.currentTime), 0, 30);
+    vledDisplay.drawText(secondsToHHMMSS(currentMediaElement.currentTime), 0, 30);
   } else if (time_mode == "remaining") {
-    vledDiplay.drawText(secondsToHHMMSS(currentMediaElement.duration - currentMediaElement.currentTime), 0, 30);
+    vledDisplay.drawText(secondsToHHMMSS(currentMediaElement.duration - currentMediaElement.currentTime), 0, 30);
   }
 }
 
@@ -458,12 +458,12 @@ document.addEventListener("displayPresetChange", function (event) {
     lcdDisplayBack.style.display = 'none';
 
     matrix.style.display = 'block';
-    vledDiplay.rotate('left', 30);
+    vledDisplay.rotate('left', 30);
     updateLedDisplay2();
   } else if (currentDisplay == "lcd") {
     clearInterval(vledDisplayTimer);
     vledDisplayTimer = 0;
-    vledDiplay.stop();
+    vledDisplay.stop();
     matrix.style.display = 'none';
 
     lcdDisplayBack.style.display = 'block';
