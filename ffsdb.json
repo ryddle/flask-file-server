@@ -1,22 +1,11 @@
 {
     "users": {
-        "179967bf-0ade-4f90-ad06-a138567703ff": {
-            "userId": "179967bf-0ade-4f90-ad06-a138567703ff",
+        "75cd71bc-2582-4b29-84c2-25a965dfee68": {
+            "userId": "75cd71bc-2582-4b29-84c2-25a965dfee68",
             "username": "josemi",
-            "password": "$2b$12$/HlOihc7F/DS9at6aJyHe.Im6jAr1XotcKdvGuNml0e6P4girQHhi",
-            "lastNoteId": "41",
-            "notes": {
-                "18": {
-                    "id": "18",
-                    "noteName": "Prueba1 Note",
-                    "noteContent": "dfgfdgfdgdfgdf\n\nlalalalalalalalala"
-                },
-                "21": {
-                    "id": "21",
-                    "noteName": "Prueba0002",
-                    "noteContent": "fdgdfgdfgfdgdfg"
-                }
-            }
+            "password": "$2b$12$x1Fjo4LqDhBz63YTgNdVqOJ7MxTL81gQ2OlA16zLUiXBlJjR3PFZq",
+            "lastNoteId": 0,
+            "notes": {}
         }
     }
 }

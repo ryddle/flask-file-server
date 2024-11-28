@@ -26,12 +26,13 @@ def register_user(request):
     try:
         for userId, user in notepaddb["users"].items():
             if user["username"] == username:
-                if bcrypt.check_password_hash(user["password"], password):
+                if  bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
                     return jsonify({"message": "Logged sucessfully", "user": user}), 200
                 else:
                     return jsonify({"message": "Forbidden"}), 403
 
-        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         notepaddb["users"][userId]={"userId": userId, "username": username, "password": hashed_password, "lastNoteId": 0, "notes": {}}
         with open("ffsdb.json", "w") as f:
             json.dump(notepaddb, f, indent=4)
