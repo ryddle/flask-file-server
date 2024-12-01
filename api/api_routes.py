@@ -139,6 +139,7 @@ def playlist():
     res_obj = {}
     playlist_url = request.form.get("playlist_url")
     dir_path = os.path.join(root, request.form.get("path"))
+    format = request.form.get("format")
     print(playlist_url)
     if not playlist_url:
         res_obj["status"] = "error"
@@ -149,7 +150,7 @@ def playlist():
             json.JSONEncoder().encode(res_obj),
         )
     try:
-        playlist = Playlist(playlist_url)
+        """ playlist = Playlist(playlist_url)
         videos = []
         for url in playlist.video_urls:
             print(url)
@@ -164,7 +165,8 @@ def playlist():
             )
         yturls = ",".join(videos)
         print(yturls)
-        filesObj, errors = downloadUrls(videos, dir_path)
+        filesObj, errors = downloadUrls(videos, dir_path) """
+        filesObj, errors = downloadPlaylist(playlist_url, dir_path, format if format else "audio")
         print(filesObj)
         print(errors)
         res_obj["status"] = "success"
@@ -267,7 +269,8 @@ def ytdown():
     res_obj = {}
     yturls = list(map(str.strip, request.form["videos_urls"].split(",")))
     dir_path = os.path.join(root, request.form.get("path"))
-    filesObj, errors = downloadUrls(yturls, dir_path)
+    format = request.form.get("format")
+    filesObj, errors = downloadUrls(yturls, dir_path, format if format else "audio")
     res_obj["status"] = "success"
     res_obj["data"] = filesObj
     res_obj["errors"] = errors

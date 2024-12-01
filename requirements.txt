@@ -6,3 +6,4 @@ pathlib2
 lyricsgenius
 pathlib2
 pytube
+yt-dlp

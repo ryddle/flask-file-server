@@ -255,6 +255,82 @@ $(document).ready(function () {
         form.submit();
     });
 
+    $('#send-ytad-videos').on('click', function (event) {
+        var loaderFrame = null;
+        if($("#ytad-modal").find("#loaderFrame").length == 0) {
+            loaderFrame = document.createElement('div');
+            loaderFrame.id = 'loaderFrame';
+            Object.assign(loaderFrame.style, {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 9999,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            });
+
+            var loader = document.createElement('div');
+            loader.id = 'loader';
+            Object.assign(loader.style, {
+                border: '16px solid #f3f3f3',
+                borderTop: '16px solid #3498db',
+                borderRadius: '50%',
+                width: '120px',
+                height: '120px',
+                animation: 'spin 2s linear infinite'
+            });
+            loaderFrame.appendChild(loader);
+
+            $("#ytad-modal").append(loaderFrame);
+        }else{
+            loaderFrame = document.getElementById("loaderFrame");
+        }
+
+        loaderFrame.style.display = 'flex';
+    });
+
+    $('#send-ytad-playlist').on('click', function (event) {
+        var loaderFrame = null;
+        if($("#ytad-modal").find("#loaderFrame").length == 0) {
+            loaderFrame = document.createElement('div');
+            loaderFrame.id = 'loaderFrame';
+            Object.assign(loaderFrame.style, {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 9999,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            });
+
+            var loader = document.createElement('div');
+            loader.id = 'loader';
+            Object.assign(loader.style, {
+                border: '6px solid #f3f3f3',
+                borderTop: '6px solid #3498db',
+                borderRadius: '50%',
+                width: '50px',
+                height: '50px',
+                animation: 'spin 2s linear infinite'
+            });
+            loaderFrame.appendChild(loader);
+
+            $("#ytad-modal").append(loaderFrame);
+        }else{
+            loaderFrame = document.getElementById("loaderFrame");
+        }
+
+        loaderFrame.style.display = 'flex';
+    });
+
     /* $('#send-ytad-videos').on('click', function (event) {
         var parent = event.target.parentElement;
         var videos_urls = $('#video_urls').val()
@@ -327,9 +403,11 @@ $(document).ready(function () {
 
 
     $("#close-ytad-videos").on("click", function () {
+        document.getElementById("loaderFrame").style.display = 'none';
         location.reload();
     });
     $("#close-ytad-playlist").on("click", function () {
+        document.getElementById("loaderFrame").style.display = 'none';
         location.reload();
     });
 

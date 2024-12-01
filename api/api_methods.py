@@ -8,6 +8,7 @@ from pytube import YouTube
 from cosntants import *
 from filters import *
 from config import root
+from ytd.YtdlpYtd import YtdlpYtd
 
 def get_type(mode):
     if stat.S_ISDIR(mode) or stat.S_ISLNK(mode):
@@ -73,13 +74,18 @@ def get_range(request):
         return 0, None
 
 
-def downloadUrls(yturls, dir_path="download"):
+def downloadUrls(yturls, dir_path="download", format="audio"):
     filesObj = {}
     errors = []
     for yturl in yturls:
         if yturl == "":
             continue
-        try:
+        ytd = YtdlpYtd(yturl)
+        if format == "audio":
+            filesObj, errors = ytd.downloadAudioFiles([yturl], dir_path)
+        else:
+            filesObj, errors = ytd.downloadVideoFiles([yturl], dir_path)
+        """ try:
             yt = YouTube(yturl)
             audio = yt.streams.filter(only_audio=True).first()
             file_name = secure_filename(yt._title) + ".mp3"
@@ -92,6 +98,16 @@ def downloadUrls(yturls, dir_path="download"):
         except Exception as e:
             errors.append(yturl)
             continue
+         """
+    return filesObj, errors
+
+def downloadPlaylist(playlist_url, dir_path="download", format="audio"):
+    
+    ytd = YtdlpYtd(playlist_url)
+    if format == "audio":
+        filesObj, errors = ytd.downloadAudioPlaylist(playlist_url, dir_path)
+    else:
+        filesObj, errors = ytd.downloadVideoPlaylist(playlist_url, dir_path)
     return filesObj, errors
 
 
