@@ -42,6 +42,52 @@ const build_play_list = function (file, index, callback_) {
     aObj.addEventListener('click', function () { callback_(this) });
     liObj.appendChild(aObj);
 
+    let upBtn = document.createElement("button");
+    upBtn.className = "btn btn-sm btn-secondary controls";
+    upBtn.innerHTML = '<i class="fa fa-arrow-up"></i>';
+    Object.assign(upBtn.style, {
+        width: '20px',
+        height: '20px',
+        padding: '0px',
+        color: 'var(--primary-color)',
+        display: 'inline',
+        margin: '0px',
+        marginTop: '-1px',
+        float: 'right'
+    });
+    upBtn.index = index;
+    upBtn.addEventListener('click', function () { 
+        let prev = this.parentElement.previousSibling;
+        if (prev != null) {
+            this.parentElement.parentNode.insertBefore(this.parentElement, prev);
+            playlist.downIndex(this.index);
+        }
+    }); 
+    liObj.appendChild(upBtn);
+
+    let downBtn = document.createElement("button");
+    downBtn.className = "btn btn-sm btn-secondary controls";
+    downBtn.innerHTML = '<i class="fa fa-arrow-down"></i>';
+    Object.assign(downBtn.style, {
+        width: '20px',
+        height: '20px',
+        padding: '0px',
+        color: 'var(--primary-color)',
+        display: 'inline',
+        margin: '2px',
+        marginTop: '-1px',
+        float: 'right'
+    });
+    downBtn.index = index;
+    downBtn.addEventListener('click', function () { 
+        let next = this.parentElement.nextSibling;
+        if (next != null) {
+            this.parentElement.parentNode.insertBefore(this.parentElement, next.nextSibling);
+            playlist.upIndex(this.index);
+        }
+    }); 
+    liObj.appendChild(downBtn);
+
     return liObj;
 }
 

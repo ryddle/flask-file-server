@@ -121,7 +121,7 @@ function setModalFooter(modal, file_name, file_size) {
         <div class="pull-xs-right">\
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\
             <div class="btn-group">\
-            <a href="' + file_name + '" class="btn btn-primary fullview" id="download-File" download="">Download</a>\
+            <a href="' + file_name + '" class="btn btn-primary fullview" id="download-file" download="">Download</a>\
             </div>\
         </div>';
     var modal_footer = modal[0].getElementsByClassName('modal-footer')[0];

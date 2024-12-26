@@ -440,6 +440,46 @@ export default class Playlist extends PlaylistEventTarget {
         this.trigger('playlistsorted');
     }
     /**
+     * Moves the item at the given index up one position in the playlist.
+     *
+     * @param {number} index - The index of the item to move up.
+     * @fires playlistsorted - Triggered after the playlist is sorted internally.
+     */
+    upIndex(index) {
+        if (index < this.items_.length - 1) {
+            const temp = this.items_[index];
+            this.items_[index] = this.items_[index + 1];
+            this.items_[index + 1] = temp;
+
+            // Adjust currentIndex if needed
+            if (this.currentIndex_ === index) {
+                this.currentIndex_++;
+            } else if (this.currentIndex_ === index + 1) {
+                this.currentIndex_--;
+            }
+        }
+    }
+    /**
+     * Moves the item at the given index down one position in the playlist.
+     *
+     * @param {number} index - The index of the item to move down.
+     * @fires playlistsorted - Triggered after the playlist is sorted internally.
+     */
+    downIndex(index) {
+        if (index > 0) {
+            const temp = this.items_[index];
+            this.items_[index] = this.items_[index - 1];
+            this.items_[index - 1] = temp;
+
+            // Adjust currentIndex if needed
+            if (this.currentIndex_ === index) {
+                this.currentIndex_--;
+            } else if (this.currentIndex_ === index - 1) {
+                this.currentIndex_++;
+            }
+        }
+    }
+    /**
      * Adjusts the current index after items have been removed from the playlist.
      * This method accounts for the removal position relative to the current index.
      *

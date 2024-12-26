@@ -502,6 +502,7 @@
       });
     }
 
+    var selPlayList = [];
     function renderTree(data, parentElement, path, options) {
       options = options || { folderOnly: false };
       const ul = document.createElement('ul');
@@ -532,11 +533,13 @@
                 this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
                   cb.checked = true;
                   cb.folderChecked = true;
+                  selPlayList.push(cb);
                 });
               } else {
                 this.nextElementSibling.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
                   cb.checked = false;
                   cb.folderChecked = false;
+                  selPlayList.splice(selPlayList.indexOf(cb), 1);
                 });
               }
             };
@@ -549,6 +552,13 @@
           btn.type = 'checkbox';
           btn.folderChecked = false;
           btn.dataset.path = path + item.name;
+          btn.onchange = function () {
+            if (this.checked) {
+              selPlayList.push(this);
+            } else {
+              selPlayList.splice(selPlayList.indexOf(this), 1);
+            }
+          }
           li.appendChild(btn);
 
           if (parentElement.tagName == 'LI') {
@@ -572,7 +582,7 @@
 
     function getSelections() {
       const selected = [];
-      const checkboxes = treeContainer.querySelectorAll('input[type="checkbox"]:checked');
+      /*const checkboxes = treeContainer.querySelectorAll('input[type="checkbox"]:checked');
       checkboxes.forEach((checkbox) => {
         if (checkbox.dataset.children !== undefined) {
 
@@ -584,10 +594,24 @@
             selected.push(checkbox.dataset.path.replace('/', ''));
           }
         }
+      }); */
+
+      selPlayList.forEach((checkbox) => {
+        if (checkbox.dataset.children !== undefined) {
+
+          checkbox.dataset.children.split(',').forEach(child => {
+            selected.push(checkbox.dataset.path.replace('/', '') + child);
+          });
+        } else {
+          if (checkbox.folderChecked == false) {
+            selected.push(checkbox.dataset.path.replace('/', ''));
+          }
+        }
       });
-      //alert(selected.join('\n'));
+
       treedialog.style.visibility = 'hidden';
       genPlaylist(selected);
+      selPlayList = [];
     }
 
     function savePlaylist(event) {
