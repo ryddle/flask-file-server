@@ -83,8 +83,9 @@ def loadNotes(request):
     global notepaddb
     userId = request.values.get("userId")
     notes = []
-    for noteId, note in notepaddb["users"][userId]["notes"].items():
-        notes.append({"id": noteId, "noteName": note["noteName"]})
+    if "notes" in notepaddb["users"][userId] and notepaddb["users"][userId]["notes"]:
+        for noteId, note in notepaddb["users"][userId]["notes"].items():
+            notes.append({"id": noteId, "noteName": note["noteName"]})
     return notes
 
 
