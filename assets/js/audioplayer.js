@@ -362,7 +362,6 @@ function updateInfoPanel(data) {
 
     pl_lyriscontainer.innerText = lyrics;
     song_title = body['artist_names'] + ' - ' + body['title'];
-    updateLedDisplay2();
 
     pl_infocont_image.src = body.header_image_thumbnail_url;
     pl_info_song_link.innerText = body.title;
@@ -371,6 +370,8 @@ function updateInfoPanel(data) {
     pl_info_artist_link.href = body.primary_artist.url;
     pl_info_release_value.innerText = body.release_date_for_display;
   }
+
+  updateLedDisplay2();
 }
 
 // Add a loader element to your HTML
@@ -411,7 +412,9 @@ playlist.addEventListener('playlistitemload', () => {
 
   // Show the loader
   pl_lyrics_loader.style.display = 'block';
-  $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
+  song_title = playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1);
+  document.title = "Audio Player - " + song_title;
+  $.get(URLJoin(location.origin, '/api/getLyrics?title=') + song_title + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
     pl_lyrics_loader.style.display = 'none';
     data = JSON.parse(data);
     updateInfoPanel(data);

@@ -515,7 +515,9 @@ playlist.addEventListener('playlistitemload', () => {
   if (audioMimeTypes.includes(playlist.getCurrentItem().sources[0].type)) {
     // Show the loader
     pl_lyrics_loader.style.display = 'block';
-    $.get(URLJoin(location.origin, '/api/getLyrics?title=') + playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1) + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
+    song_title = playlist.items_[playlist.getCurrentIndex()].sources[0].filename.substr(playlist.items_[playlist.getCurrentIndex()].sources[0].filename.lastIndexOf("/") + 1);
+    document.title = "Media Player - " + song_title;
+    $.get(URLJoin(location.origin, '/api/getLyrics?title=') + song_title + '&path=' + playlist.items_[playlist.getCurrentIndex()].sources[0].src, function (data) {
       pl_lyrics_loader.style.display = 'none';
       data = JSON.parse(data);
       updateInfoPanel(data);
@@ -636,7 +638,6 @@ function updateInfoPanel(data) {
     updateParagraph();
 
     source_title = body['artist_names'] + ' - ' + body['title'];
-    updateLedDisplay2();
 
     pl_infocont_image.src = body.header_image_thumbnail_url;
     pl_info_song_link.innerText = body.title;
@@ -650,6 +651,8 @@ function updateInfoPanel(data) {
       window.lyrics_ts_index = 0;
     }
   }
+
+  updateLedDisplay2();
 }
 
 function updateParagraph() {
