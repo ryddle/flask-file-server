@@ -44,7 +44,7 @@ const build_play_list = function (file, index, callback_) {
 
     let upBtn = document.createElement("button");
     upBtn.className = "btn btn-sm btn-secondary controls";
-    upBtn.innerHTML = '<i class="fa fa-arrow-up"></i>';
+    upBtn.innerHTML = '<i class="fa fa-chevron-up"></i>';
     Object.assign(upBtn.style, {
         width: '20px',
         height: '20px',
@@ -53,7 +53,9 @@ const build_play_list = function (file, index, callback_) {
         display: 'inline',
         margin: '0px',
         marginTop: '-1px',
-        float: 'right'
+        borderRadius: '50%',
+        float: 'right',
+        border: '0px'
     });
     upBtn.index = index;
     upBtn.addEventListener('click', function () { 
@@ -67,7 +69,7 @@ const build_play_list = function (file, index, callback_) {
 
     let downBtn = document.createElement("button");
     downBtn.className = "btn btn-sm btn-secondary controls";
-    downBtn.innerHTML = '<i class="fa fa-arrow-down"></i>';
+    downBtn.innerHTML = '<i class="fa fa-chevron-down"></i>';
     Object.assign(downBtn.style, {
         width: '20px',
         height: '20px',
@@ -76,7 +78,9 @@ const build_play_list = function (file, index, callback_) {
         display: 'inline',
         margin: '2px',
         marginTop: '-1px',
-        float: 'right'
+        borderRadius: '50%',
+        float: 'right',
+        border: '0px'
     });
     downBtn.index = index;
     downBtn.addEventListener('click', function () { 
@@ -159,7 +163,7 @@ const build_pl_info = function () {
     Object.assign(pl_info_controlBtn.style, {
         width: "20px",
         height: "20px",
-        padding: "0px",
+        padding: "3px 0px 0px 0px",
         margin: "4px",
         float: "right",
         color: "var(--primary-color)"
