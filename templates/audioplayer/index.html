@@ -110,10 +110,15 @@
 
       // Show settings button
       document.getElementById('show-settings-btn').addEventListener('click', function () {
-        document.getElementById('primary-color-input').value = primary_color;
-        document.getElementById('bg-color-input').value = bg_color;
-        document.getElementById('bgcomp-color-input').value = bg_comp_color;
-        document.getElementById('settings-panel').style.display = 'block';
+        let settingspanel = document.getElementById('settings-panel');
+        if(settingspanel.style.display == 'block') {
+          settingspanel.style.display = 'none';
+        } else {
+          document.getElementById('primary-color-input').value = primary_color;
+          document.getElementById('bg-color-input').value = bg_color;
+          document.getElementById('bgcomp-color-input').value = bg_comp_color;
+          settingspanel.style.display = 'block';
+        }
       });
 
       document.getElementById('primary-color-input').addEventListener('input', function (event) {
@@ -709,8 +714,12 @@
     window['showSearchSongDialog'] = function (event) {
       var full_path = window['playlist'].items_[window['playlist'].currentIndex_].sources[0].src;
       var panel = document.getElementById('search-song-panel');
-      panel.style.left = (event.clientX - 360) + 'px';
-      panel.style.top = '15px';
+      if(panel.style.display == 'block') {
+        panel.style.display = 'none';
+        return;
+      }
+      panel.style.left = (event.clientX - 370) + 'px';
+      panel.style.top = '10px';
       document.getElementById('full_path').value = full_path.substring(location.origin.length + 1);
       panel.style.display = 'block';
       window['focusSearchInput'] = true;

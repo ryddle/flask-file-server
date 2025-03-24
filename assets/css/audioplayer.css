@@ -304,8 +304,8 @@ select.sized::-webkit-scrollbar {
   padding: 1em;
   display: none;
   position: absolute;
-  top: 50px;
-  left: 50px;
+  top: 10px;
+  left: 40px;
   background-color: var(--bg-comp-color);
   border: 2px solid var(--primary-color);
 
