@@ -418,7 +418,7 @@ select.sized::-webkit-scrollbar {
   border-right: 2px solid var(--primary-color);
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  color: var(--bg-color);
+  color: var(--bg-comp-color);
   background-color: var(--primary-color);
   font-weight: 700;
   font-size: 14px;

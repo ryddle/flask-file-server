@@ -116,6 +116,18 @@
         document.getElementById('settings-panel').style.display = 'block';
       });
 
+      document.getElementById('primary-color-input').addEventListener('input', function (event) {
+        checkColors();
+      });
+
+      document.getElementById('bg-color-input').addEventListener('input', function (event) {
+        checkColors();
+      });
+
+      document.getElementById('bgcomp-color-input').addEventListener('input', function (event) {
+        checkColors();
+      });
+
       // Settings Panel close button
       document.getElementById('settings-panel-open-btn').addEventListener('click', function () {
         document.getElementById('settings-panel').style.display = 'none';
@@ -183,6 +195,15 @@
     function applySettings() {
       document.getElementById('settings-panel').style.display = 'none';
 
+      checkColors();
+
+      var audioMotionPreset = document.getElementById('audio-motion-preset').value;
+      if (audioMotionPreset != audio_motion_preset) {
+        applyAudioMotionPreset(audioMotionPreset);
+      }
+    }
+
+    function checkColors() {
       var colors = {
         'primary_color': document.getElementById('primary-color-input').value,
         'bg-color': document.getElementById('bg-color-input').value,
@@ -190,11 +211,6 @@
       };
       if (colors['primary_color'] != primary_color || colors['bg-color'] != bg_color || colors['bg-comp-color'] != bg_comp_color) {
         applyColors(colors);
-      }
-
-      var audioMotionPreset = document.getElementById('audio-motion-preset').value;
-      if (audioMotionPreset != audio_motion_preset) {
-        applyAudioMotionPreset(audioMotionPreset);
       }
     }
 
