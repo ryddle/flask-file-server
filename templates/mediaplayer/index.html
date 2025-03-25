@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Media Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg" href="{{url_for('static', filename='images/favicon.svg')}}">
+  <link id="favicon" rel="icon" type="image/svg" href="{{url_for('static', filename='images/favicon.svg')}}">
   <link rel="stylesheet" href="../../assets/css/fontawesome.css">
   <link rel="stylesheet" href="../../assets/css/xvirtualleddisplay.css">
   <link rel="stylesheet" href="../../assets/css/mediaplayer.css">
@@ -61,6 +61,11 @@
         document.getElementById('primary-color-input').value = primary_color;
         document.getElementById('bg-color-input').value = bg_color;
         document.getElementById('bgcomp-color-input').value = bg_comp_color;
+
+        // set favicon
+        document.getElementById('path11').style.fill = primary_color;
+        document.getElementById('path12').style.fill = primary_color;
+        setFavIcon();
 
         var colorSettingsChangeEvent = new CustomEvent('colorSettingsChange');
         document.dispatchEvent(colorSettingsChangeEvent);
@@ -122,6 +127,21 @@
       }
     }
 
+    function setFavIcon(){
+        const svgElement = document.getElementById('svg1');
+        const svgString = new XMLSerializer().serializeToString(svgElement);
+        const svgDataUrl = 'data:image/svg+xml,' + encodeURIComponent(svgString);
+
+        const link = document.createElement('link');
+        link.id = 'favicon';
+        link.rel = 'icon';
+        link.href = svgDataUrl;
+
+        document.getElementById('favicon')?.remove();
+
+        document.head.appendChild(link);
+    }
+
     function applyColors(colors) {
       var new_primary_color = xcolor.getXcolor(colors['primary_color']);
       primary_color = new_primary_color.getHexString();
@@ -146,6 +166,11 @@
       localStorage.setItem("secondary_color", secondary_color);
       localStorage.setItem("bg_color", bg_color);
       localStorage.setItem("bg_comp_color", bg_comp_color);
+      
+      // set favicon
+       document.getElementById('path11').style.fill = primary_color;
+      document.getElementById('path12').style.fill = primary_color;
+      setFavIcon();
 
       // Trigger a colorSettingsChangeEvent event
       var colorSettingsChangeEvent = new CustomEvent('colorSettingsChange');
@@ -486,6 +511,46 @@
 
   <script src="../../assets/js/mediaplayer_layout.js"></script>
 
+  <svg
+  style="display: none;"
+  width="512"
+  height="512"
+  viewBox="0 0 512 512"
+  version="1.1"
+  id="svg1"
+  sodipodi:docname="ryddlesoftlogo_02.svg"
+  inkscape:export-filename="ryddlesoftlogo_02.png"
+  inkscape:export-xdpi="96"
+  inkscape:export-ydpi="96"
+  inkscape:version="1.4-beta (62f545ba5e, 2024-04-22)"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg">
+ <path
+    d="M 482.67734,232.81851 H 347.37763 c -15.62006,0 -29.76255,-2.52481 -42.42746,-7.57443 -12.45383,-5.04961 -22.37468,-12.79236 -29.76255,-23.22823 -7.17678,-10.43587 -10.76517,-23.56487 -10.76517,-39.387 0,-22.55494 7.59894,-39.63948 22.79684,-51.25359 15.40898,-11.614117 35.67284,-17.421174 60.79158,-17.421174 h 134.87154 a 10.774959,10.774959 0 0 1 10.77496,10.774954 v 117.10944 a 10.980028,10.980028 0 0 1 -10.98003,10.98003 z"
+    id="path11"
+    style="font-size:180px;white-space:pre;fill:#0275D8;stroke:#ffffff;stroke-width:0;stroke-linecap:round;paint-order:stroke fill markers"
+    aria-label="U" />
+ <path
+    d="m 275.67668,397.42437 h 135.08513 c 15.62006,0 29.76255,-2.5248 42.42746,-7.57442 12.45383,-5.04962 22.37468,-12.79236 29.76255,-23.22823 7.17678,-10.43587 10.76517,-23.56487 10.76517,-39.387 0,-22.55495 -7.59895,-39.63948 -22.79684,-51.25359 -15.40898,-11.61412 -35.67284,-17.42118 -60.79158,-17.42118 H 276.00808 a 11.526006,11.526006 0 0 0 -11.52601,11.52601 v 116.1438 a 11.194613,11.194613 0 0 0 11.19461,11.19461 z"
+    id="path12"
+    style="font-size:180px;white-space:pre;fill:#0275D8;stroke:#ffffff;stroke-width:0;stroke-linecap:round;paint-order:stroke fill markers"
+    aria-label="U" />
+ <path
+    d="M 27.350536,232.59424 H 162.22108 c 15.62006,0 29.76255,-2.52481 42.42746,-7.57443 12.45383,-5.04961 22.37468,-12.79236 29.76255,-23.22823 7.17678,-10.43587 10.76517,-23.56487 10.76517,-39.387 0,-22.55494 -7.59894,-39.63948 -22.79684,-51.25359 C 206.97044,99.536873 186.70658,93.729816 161.58784,93.729816 H 27.896515 A 11.955177,11.955177 0 0 0 15.941338,105.68499 v 115.50005 a 11.409198,11.409198 0 0 0 11.409198,11.4092 z"
+    id="path13"
+    style="font-size:180px;white-space:pre;fill:#ffffff;stroke:#ffffff;stroke-width:0;stroke-linecap:round;paint-order:stroke fill markers"
+    aria-label="U" />
+ <path
+    style="fill:#ffffff;fill-rule:evenodd;stroke-width:0.936929"
+    id="rect13"
+    width="125.02079"
+    height="173.81479"
+    x="-178.62506"
+    y="323.49731"
+    d="M 27.399156,258.59685 H 140.76183 l 98.51682,126.49252 a 12.373733,6.0442686 25.218733 0 1 -3.93034,7.59581 H 120.17375 L 22.745556,267.59043 a 14.650722,7.1565227 25.218733 0 1 4.6536,-8.99358 z" />
+</svg>
 </body>
 
 </html>

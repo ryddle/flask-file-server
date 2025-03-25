@@ -13,3 +13,4 @@ snake_game.py
 .foldermapperignore
 api.log
 ffsdb.json
+ffs_update_script.py
