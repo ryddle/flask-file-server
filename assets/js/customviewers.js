@@ -243,11 +243,12 @@ function docViewer(modal) {
     var file_name = modal.data('bs.modal')._config.url;
     var file_size = modal.data('bs.modal')._config.size;
     var url = URLJoin(location.href, file_name);
+    var baseUrl = location.href.substring(0,location.href.indexOf(path));
 
     setModalHeader(modal, file_name, file_size);
 
     window['iframe'] = document.createElement('iframe');
-    window['iframe'].src = "./viewerJSODF/index.html#" + url;
+    window['iframe'].src = baseUrl + "viewerJSODF/index.html#" + url;
     window['iframe'].style.width = "100%";
     window['iframe'].style.height = "100%";
     window['iframe'].style.minHeight = "800px";
