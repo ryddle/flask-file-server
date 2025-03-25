@@ -161,7 +161,7 @@ function sourceViewer(modal) {
         /* if (file_name.indexOf(".js") != -1) {
             html = "<div id=\"js-code-viewer\" style=\"height: " + (window.innerHeight - 250) + "px ; width: 100%; overflow: scroll;\"></div>";
         } else { */
-        html = "<pre style=\"margin: 0px; padding: 0px; overflow: none;\"><code id=\"hlcode\" style=\"height: " + (window.innerHeight - 250) + "px ;overflow: scroll;\">" + data + "</code></pre>";
+        html = "<pre style=\"margin: 0px; padding: 0px; overflow: none;\"><code id=\"hlcode\" contenteditable style=\"height: " + (window.innerHeight - 250) + "px ;overflow: scroll;\">" + data + "</code></pre>";
         //}
 
         var modal_body = modal[0].getElementsByClassName('modal-body')[0];
@@ -172,9 +172,57 @@ function sourceViewer(modal) {
         modal_body.innerHTML = html;
 
         hljs.highlightAll();
+
+        /*$("hlcode").on("keyup", function () {
+            hljs.highlightAll();
+        });*/
+
+        document.getElementById("hlcode").addEventListener("mousedown", function(){
+            delete this.dataset["highlighted"];
+            hljs.highlightAll();
+        });
+
+        document.getElementById("hlcode").addEventListener("lostfocus", function(){
+            delete this.dataset["highlighted"];
+            hljs.highlightAll();
+        }
+        );
     });
 
     setModalFooter(modal, file_name, file_size);
+
+    var saveBtn = document.createElement('button');
+    saveBtn.setAttribute('type', 'button');
+    saveBtn.setAttribute('class', 'btn btn-primary');
+    saveBtn.setAttribute('id', 'save-newfile');
+    saveBtn.setAttribute('style', 'margin-right: 5px;');
+    saveBtn.innerHTML = 'Save';
+    saveBtn.addEventListener('click', function () {
+        var text = document.getElementById('hlcode').innerText;
+        var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        var formData = new FormData();
+        formData.append("files[]", blob, file_name);
+        $.ajax({
+            url: location.origin + '/',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                console.log('File posted successfully:', response);
+                var modal_footer = modal[0].getElementsByClassName('modal-footer')[0];
+                modal_footer.firstChild.innerHTML = "File saved successfully";
+                setTimeout(function () {
+                    modal_footer.firstChild.innerHTML = "";
+                }, 2000);
+            },
+            error: function (error) {
+                console.error('Error posting file:', error);
+            }
+        });
+    });
+
+    $("#download-file").parent().before(saveBtn);
 }
 
 function sourceViewerShown(e, modal) {
@@ -270,7 +318,7 @@ function textViewer(modal) {
         });
     });
 
-    $("#download-File").parent().before(saveBtn);
+    $("#download-file").parent().before(saveBtn);
 }
 
 function audioViewer(modal) {
